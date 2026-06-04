@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
 
-const allowedRoutes = [ "/login", "/register", "/contact"];
-
 export function middleware(request) {
   const { pathname } = request.nextUrl;
 
   if (
+    pathname === "/" ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/assets") ||
@@ -15,15 +14,7 @@ export function middleware(request) {
     return NextResponse.next();
   }
 
-  const isAllowed = allowedRoutes.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  );
-
-  if (isAllowed) {
-    return NextResponse.next();
-  }
-
-  return NextResponse.redirect(new URL("/login", request.url));
+  return NextResponse.redirect(new URL("/", request.url));
 }
 
 export const config = {
