@@ -24,17 +24,17 @@ const HeaderMainRight = ({ setIsCanvasOpen }) => {
               {(userInfo?.imageURL || userInfo?.image) ? (
                 <Link href="/profile">
                   <Image
-  src={userInfo.imageURL || userInfo.image}
-  alt="user img"
-  width={35}
-  height={35}
-  style={{
-    width: "35px",
-    height: "35px",
-    objectFit: "cover",
-    borderRadius: "50%",
-  }}
-/>
+                    src={userInfo.imageURL || userInfo.image}
+                    alt="user img"
+                    width={35}
+                    height={35}
+                    style={{
+                      width: "35px",
+                      height: "35px",
+                      objectFit: "cover",
+                      borderRadius: "50%",
+                    }}
+                  />
                 </Link>
               ) : userInfo?.name ? (
                 <Link href="/profile">
