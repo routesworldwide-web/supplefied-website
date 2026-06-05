@@ -1,0 +1,295 @@
+@import url("https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500&display=swap");
+
+.root {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  background: #f8f9f6;
+  font-family: "Inter", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 24px 88px;
+}
+
+.dotGrid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    rgba(0, 0, 0, 0.055) 1px,
+    transparent 1px
+  );
+  background-size: 30px 30px;
+  mask-image: radial-gradient(
+    ellipse 75% 75% at 50% 50%,
+    black 30%,
+    transparent 100%
+  );
+  -webkit-mask-image: radial-gradient(
+    ellipse 75% 75% at 50% 50%,
+    black 30%,
+    transparent 100%
+  );
+}
+
+/* MAIN CENTERED STACK */
+.centerWrap {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 760px;
+  min-height: calc(100vh - 130px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* LOGO ABOVE JAR */
+.logoContainer {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: -18px;
+  opacity: 0.94;
+}
+
+.logo {
+  width: clamp(150px, 16vw, 220px);
+  height: 150px;
+  display: block;
+  object-fit: contain;
+}
+
+/* JAR + TEXT STAGE */
+.jarStage {
+  position: relative;
+  width: min(520px, 92vw);
+  height: min(570px, 68vh);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* BACKGROUND JAR */
+.jarBg {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  user-select: none;
+}
+
+.jarSvg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  opacity: 0.2;
+}
+
+/* TEXT CONTENT OVER JAR */
+.content {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 22px;
+  padding: 7px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #718171;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 30px rgba(31, 59, 45, 0.04);
+}
+
+.eyebrowDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #6dbf8a;
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: scale(0.8);
+  }
+}
+
+.headline {
+  margin: 0 0 18px;
+  color: #161a14;
+  font-family: "Instrument Serif", Georgia, serif;
+  font-size: clamp(46px, 6.2vw, 78px);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
+
+.headline em {
+  color: #5a7a5a;
+  font-style: italic;
+}
+
+.subtext {
+  max-width: 340px;
+  margin: 0;
+  color: #7f8c7d;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: 1.65;
+}
+
+/* FOOTER */
+.footerNote {
+  position: fixed;
+  bottom: 26px;
+  left: 50%;
+  z-index: 20;
+  width: max-content;
+  max-width: calc(100% - 40px);
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+.footerNote p {
+  margin: 0 0 4px;
+  color: #aeb9ab;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.footerNote a {
+  color: #161a14;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  transition: color 0.25s ease;
+}
+
+.footerNote a:hover {
+  color: #6dbf8a;
+}
+
+/* TABLET */
+@media (max-width: 1024px) {
+  .root {
+    padding-top: 24px;
+    padding-bottom: 86px;
+  }
+
+  .centerWrap {
+    min-height: calc(100vh - 120px);
+  }
+
+  .logo {
+    width: 180px;
+  }
+
+  .jarStage {
+    width: min(500px, 94vw);
+    height: min(560px, 68vh);
+  }
+
+  .headline {
+    font-size: clamp(46px, 9vw, 70px);
+  }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  .root {
+    padding: 22px 18px 82px;
+  }
+
+  .centerWrap {
+    min-height: calc(100vh - 104px);
+  }
+
+  .logoContainer {
+    margin-bottom: -10px;
+  }
+
+  .logo {
+    width: 155px;
+  }
+
+  .jarStage {
+    width: min(430px, 96vw);
+    height: 520px;
+  }
+
+  .jarSvg {
+    opacity: 0.17;
+  }
+
+  .eyebrow {
+    margin-bottom: 20px;
+    font-size: 9px;
+  }
+
+  .headline {
+    font-size: clamp(42px, 14vw, 58px);
+  }
+
+  .subtext {
+    max-width: 300px;
+    font-size: 13px;
+  }
+
+  .footerNote {
+    bottom: 16px;
+  }
+}
+
+/* SMALL MOBILE */
+@media (max-width: 420px) {
+  .logo {
+    width: 140px;
+  }
+
+  .jarStage {
+    height: 500px;
+  }
+
+  .headline {
+    font-size: clamp(40px, 15vw, 54px);
+  }
+
+  .subtext {
+    max-width: 280px;
+  }
+
+  .footerNote a,
+  .footerNote p {
+    font-size: 10px;
+  }
+}

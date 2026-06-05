@@ -1,0 +1,17 @@
+<svg viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
+  <!-- Black Arrow Top -->
+  <path d="M 200 50 L 280 120 L 240 150 L 320 180 L 240 220 L 250 280 L 150 200 L 220 150 Z" fill="#1a1a1a"/>
+  
+  <!-- Yellow/Lime Arrow Bottom -->
+  <path d="M 200 250 L 280 320 L 240 350 L 320 380 L 200 420 L 100 350 L 160 320 Z" fill="#d4d86f"/>
+  
+  <!-- Text: Supplefied -->
+  <text x="200" y="450" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="#1a1a1a">
+    Supplefied
+  </text>
+  
+  <!-- Text: Supplements. Simplified. -->
+  <text x="200" y="480" font-family="Arial, sans-serif" font-size="18" text-anchor="middle" fill="#666666">
+    Supplements. Simplified.
+  </text>
+</svg>
