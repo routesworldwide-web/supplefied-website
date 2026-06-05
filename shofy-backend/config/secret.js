@@ -13,6 +13,7 @@ module.exports.secret = {
   email_service: process.env.SERVICE,
   email_user: process.env.EMAIL_USER,
   email_pass: process.env.EMAIL_PASS,
+  admin_email: process.env.ADMIN_EMAIL,
   email_host: process.env.HOST,
   email_port: process.env.EMAIL_PORT, 
 

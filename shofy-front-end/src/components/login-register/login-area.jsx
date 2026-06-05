@@ -23,8 +23,13 @@ const LoginArea = () => {
                     <span>
                       <Link href="/register">Create a free account</Link>
                     </span>
-                  </p>
-                </div>
+                  </p>                  {/* DEVELOPMENT MODE: Contact Link */}
+                  <p style={{ marginTop: "10px" }}>
+                    Questions?{" "}
+                    <span>
+                      <Link href="/contact">Contact Us</Link>
+                    </span>
+                  </p>                </div>
                 <div className="tp-login-option">
                   <div className="tp-login-social mb-10 d-flex flex-wrap align-items-center justify-content-center">
                     <div className="tp-login-option-item has-google">

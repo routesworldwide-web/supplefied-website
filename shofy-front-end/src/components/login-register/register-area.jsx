@@ -24,6 +24,13 @@ const RegisterArea = () => {
                       <Link href="/login">Sign In</Link>
                     </span>
                   </p>
+                  {/* DEVELOPMENT MODE: Contact Link */}
+                  <p style={{ marginTop: "10px" }}>
+                    Questions?{" "}
+                    <span>
+                      <Link href="/contact">Contact Us</Link>
+                    </span>
+                  </p>
                 </div>
                 <div className="tp-login-option">
                   <div className="tp-login-social mb-10 d-flex flex-wrap align-items-center justify-content-center">

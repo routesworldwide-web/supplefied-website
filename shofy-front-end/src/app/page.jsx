@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import ComingSoon from "@/components/coming-soon/coming-soon";
 
 // OLD HOME PAGE IMPORTS - keep for later
@@ -21,9 +22,13 @@ import ProductSmArea from "@/components/products/electronics/product-sm-area";
 */
 
 export default function HomePage() {
+  // DEVELOPMENT MODE: Redirect to authenticate page by default
+  redirect("/authenticate");
+
+  // OLD HOME PAGE - Commented for development phase
+  /*
   return <ComingSoon />;
 
-  /*
   return (
     <Wrapper>
       <HomeHeroSlider />
