@@ -947,7 +947,7 @@ const AuthVerifyArea = () => {
             .auth-badge {
               padding: 10px 16px;
               font-size: 12px;
-              margin-bottom: 0;
+              margin-bottom: 24px;
             }
 
             .auth-title {
