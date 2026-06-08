@@ -74,15 +74,15 @@ const ContactArea = () => {
                         </h4>
 
                         <div className="tp-contact-social-icon">
-                          <a href="#">
-                            <i className="fa-brands fa-facebook-f"></i>
+                          <a href="https://www.instagram.com/supplefied360?igsh=MTh2ajlmNThwbXo4Mg==">
+                            <i className="fa-brands fa-instagram"></i>
                           </a>
-                          <a href="#">
+                          {/* <a href="#">
                             <i className="fa-brands fa-twitter"></i>
                           </a>
                           <a href="#">
                             <i className="fa-brands fa-linkedin-in"></i>
-                          </a>
+                          </a> */}
                         </div>
                       </div>
                     </div>
