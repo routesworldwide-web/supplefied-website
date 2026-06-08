@@ -156,8 +156,8 @@ export default function ComingSoon() {
       {/* Footer */}
       <footer className={styles.footerNote}>
         <p>© 2026 · Launching soon</p>
-        <a href="mailto:info@routesworldwideexpress.com">
-          info@routesworldwideexpress.com
+        <a href="mailto:Supplefied@gmail.com">
+         Supplefied@gmail.com
         </a>
       </footer>
     </main>

@@ -16,7 +16,7 @@ const ContactMap = () => {
                   </span>
                 </div>
                 <div className="tp-map-iframe">
-                  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3504.7137569043525!2d77.13049647549771!3d28.548322275710806!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d1d2b913124f9%3A0xdd0a795105f06165!2sBeeGreen%20Plaza!5e0!3m2!1sen!2sin!4v1779965935781!5m2!1sen!2sin"></iframe>
+                  <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7008.789373476795!2d77.20214519999999!3d28.557908599999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce3fe676052af%3A0xb31e5b63202a2df2!2sIofficespace%20Green%20park!5e0!3m2!1sen!2sin!4v1780920936302!5m2!1sen!2sin"></iframe>
                 </div>
               </div>
             </div>

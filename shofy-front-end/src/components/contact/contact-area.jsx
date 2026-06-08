@@ -36,10 +36,10 @@ const ContactArea = () => {
                     </div>
                     <div className="tp-contact-info-content">
                       <p data-info="mail">
-                        <a href="mailto:info@routesworldwideexpress.com">info@routesworldwideexpress.com</a>
+                        <a href="mailto:Supplefied@gmail.com">Supplefied@gmail.com</a>
                       </p>
                       <p data-info="phone">
-                        <a href="tel:+918796200495">+91 8796200495</a>
+                        <a href="tel:+919891238727">+91 9891238727</a>
                       </p>
                     </div>
                   </div>
@@ -52,11 +52,12 @@ const ContactArea = () => {
                     <div className="tp-contact-info-content">
                       <p>
                         <a
-                          href="https://www.google.com/maps/place/BeeGreen+Plaza,+Mahipalpur,+New+Delhi"
+                          href="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d7008.789373476795!2d77.20214519999999!3d28.557908599999998!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390ce3fe676052af%3A0xb31e5b63202a2df2!2sIofficespace%20Green%20park!5e0!3m2!1sen!2sin!4v1780920936302!5m2!1sen!2sin"
                           target="_blank"
                         >
-                          Office 1016/2 Beegreen Plaza, <br /> Mahipalpur, New Delhi - 110037
+                          400-A AJIT SINGH HOUSE, YUSUF SARAI COMMERCIAL COMPLEX, GREEN PARK METRO STATION-110016
                         </a>
+                       
                       </p>
                     </div>
                   </div>

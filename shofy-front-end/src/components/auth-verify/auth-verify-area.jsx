@@ -38,19 +38,19 @@ const AuthVerifyArea = () => {
           </div>
           <div className="auth-contact-links d-flex flex-column flex-md-row gap-3 gap-md-5 align-items-start align-items-md-center">
   <a
-    href="mailto:info@routesworldwideexpress.com"
+    href="mailto:Supplefied@gmail.com"
     className="d-flex align-items-center gap-2 text-decoration-none"
   >
     <Mail size={18} strokeWidth={2} />
-    info@routesworldwideexpress.com
+   Supplefied@gmail.com
   </a>
 
   <a
-    href="tel:+918796200495"
+    href="tel:+919891238727"
     className="d-flex align-items-center gap-2 text-decoration-none"
   >
     <Phone size={18} strokeWidth={2} />
-    +91 8796200495
+    +91 9891238727
   </a>
 </div>
 
@@ -117,7 +117,7 @@ const AuthVerifyArea = () => {
 
                   <div>
                     <h4>Join the Waitlist</h4>
-                    <p>info@routesworldwideexpress.com</p>
+                    <p>Supplefied@gmail.com</p>
                   </div>
 
                   <Link href="/contact" className="waitlist-btn">
