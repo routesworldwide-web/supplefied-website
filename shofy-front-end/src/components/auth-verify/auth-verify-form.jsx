@@ -217,7 +217,7 @@ const AuthVerifyForm = () => {
               Verifying...
             </span>
           ) : (
-            "Verify Account"
+            "Verify Product"
           )}
         </button>
       </form>

@@ -36,7 +36,7 @@ const AuthVerifyArea = () => {
               <p>Supplements. Simplified.</p>
             </div>
           </div>
-  <div className="d-flex flex-column flex-md-row gap-3 gap-md-5 align-items-start align-items-md-center">
+          <div className="auth-contact-links d-flex flex-column flex-md-row gap-3 gap-md-5 align-items-start align-items-md-center">
   <a
     href="mailto:info@routesworldwideexpress.com"
     className="d-flex align-items-center gap-2 text-decoration-none"
@@ -61,7 +61,7 @@ const AuthVerifyArea = () => {
           <div className="row align-items-center justify-content-between gy-4 auth-hero-row">
             
             <div className="col-xl-4 col-lg-5">
-             <div>
+             <div className="auth-badge-wrap">
                 <span className="auth-badge">
             <span />
             Coming Soon
@@ -882,8 +882,35 @@ const AuthVerifyArea = () => {
           @media (max-width: 767px) {
             .auth-header {
               flex-direction: column;
-              align-items: flex-start;
-              gap: 22px;
+              align-items: center;
+              justify-content: center;
+              gap: 16px;
+              text-align: center;
+            }
+
+            .brand-box {
+              justify-content: center;
+            }
+
+            .auth-contact-links {
+              width: 100%;
+              align-items: center !important;
+            }
+
+            .auth-contact-links a {
+              justify-content: center;
+              text-align: center;
+            }
+
+            .auth-badge-wrap {
+              width: 100%;
+              display: flex;
+              justify-content: center;
+            }
+
+            .auth-badge {
+              margin-left: auto;
+              margin-right: auto;
             }
 
             .auth-title {
@@ -891,42 +918,12 @@ const AuthVerifyArea = () => {
             }
 
             .auth-stats-section {
-              grid-template-columns: 1fr;
+              grid-template-columns: repeat(2, 1fr);
             }
 
             .stat-card {
               justify-content: flex-start;
             }
-
-            @media (max-width: 767px) {
-  .auth-header {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    text-align: center;
-  }
-
-  .brand-box {
-    justify-content: center;
-  }
-
-  .auth-badge {
-    align-self: center;
-  }
-
-  .auth-title {
-    letter-spacing: -1.4px;
-  }
-
-  .auth-stats-section {
-    grid-template-columns: 1fr;
-  }
-
-  .stat-card {
-    justify-content: flex-start;
-  }
-}
           }
 
           @media (max-width: 575px) {
