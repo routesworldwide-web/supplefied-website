@@ -4,13 +4,13 @@ import React from "react";
 import Link from "next/link";
 // internal
 import AuthVerifyForm from "./auth-verify-form";
-import LoginShapes from "../login-register/login-shapes";
+// import LoginShapes from "../login-register/login-shapes";
 
 const AuthVerifyArea = () => {
   return (
     <>
       <section className="auth-verify-area py-5">
-        <LoginShapes />
+        {/* <LoginShapes /> */}
 
         <div className="container">
           {/* Top Landing Section */}
@@ -129,11 +129,7 @@ const AuthVerifyArea = () => {
             overflow-y: visible;
             min-height: 100vh;
             font-family: "Poppins", sans-serif;
-            background:
-              radial-gradient(circle at 12% 12%, rgba(34, 197, 94, 0.22), transparent 32%),
-              radial-gradient(circle at 88% 18%, rgba(20, 184, 166, 0.16), transparent 30%),
-              radial-gradient(circle at 50% 100%, rgba(6, 95, 70, 0.28), transparent 38%),
-              linear-gradient(135deg, #022c22 0%, #064e3b 45%, #0f766e 100%);
+            background-image: url("https://images.unsplash.com/flagged/photo-1593005510509-d05b264f1c9c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");  
           }
 
           .auth-landing-content {
@@ -148,8 +144,8 @@ const AuthVerifyArea = () => {
             align-items: center;
             padding: 8px 16px;
             border-radius: 999px;
-            background: rgba(255, 255, 255, 0.12);
-            color: white;
+            background: white;
+            color: #010f1c;
             font-size: 14px;
             font-weight: 600;
             margin-bottom: 22px;
