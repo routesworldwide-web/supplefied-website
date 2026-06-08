@@ -225,7 +225,7 @@ const AuthVerifyForm = () => {
       <style jsx>{`
         .auth-verify-form {
           width: 100%;
-          font-family: "Poppins", sans-serif;
+          font-family: poppins, sans-serif;
         }
 
         .auth-form-group {
@@ -235,7 +235,7 @@ const AuthVerifyForm = () => {
         .auth-form-label {
           display: block;
           margin-bottom: 8px;
-          color: #101828;
+          color: white;
           font-size: 14px;
           font-weight: 600;
           line-height: 1.4;
@@ -338,8 +338,8 @@ const AuthVerifyForm = () => {
           height: 56px;
           border: none;
           border-radius: 6px;
-          background: linear-gradient(135deg, #0989ff 0%, #0067c8 100%);
-          color: #ffffff;
+          // background: linear-gradient(135deg, #0989ff 0%, #0067c8 100%);
+          color: black;
           font-size: 15px;
           font-weight: 700;
           font-family: "Poppins", sans-serif;
@@ -350,7 +350,7 @@ const AuthVerifyForm = () => {
 
         .auth-submit-btn:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 18px 34px rgba(9, 137, 255, 0.3);
+          // box-shadow: 0 18px 34px rgba(9, 137, 255, 0.3);
         }
 
         .auth-submit-btn:active:not(:disabled) {

@@ -3,3 +3,17 @@
 @import "swiper/css/bundle";
 @import 'node_modules/react-modal-video/scss/modal-video.scss';
 @import '../../public/assets/scss/main.scss';
+
+:root {
+  --tp-ff-body: var(--tp-ff-poppins);
+  --tp-ff-heading: var(--tp-ff-poppins);
+  --tp-ff-p: var(--tp-ff-poppins);
+  --tp-ff-jost: var(--tp-ff-poppins);
+  --tp-ff-roboto: var(--tp-ff-poppins);
+  --tp-ff-oregano: var(--tp-ff-poppins);
+  --tp-ff-charm: var(--tp-ff-poppins);
+}
+
+body {
+  font-family: var(--tp-ff-poppins), sans-serif;
+}
