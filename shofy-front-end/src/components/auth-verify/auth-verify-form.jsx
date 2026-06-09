@@ -247,7 +247,7 @@ const AuthVerifyForm = () => {
           border: 1px solid #d9e1ec;
           border-radius: 6px;
           background: #ffffff;
-          color: #101828;
+          color: #000000;
           font-size: 14px;
           font-weight: 400;
           font-family: "Poppins", sans-serif;
@@ -261,12 +261,14 @@ const AuthVerifyForm = () => {
         }
 
         .auth-form-control:hover {
-          border-color: #b8c4d5;
+          border-color: #d9e1ec;
         }
 
         .auth-form-control:focus {
-          border-color: #0989ff;
-          box-shadow: 0 0 0 4px rgba(9, 137, 255, 0.12);
+          background: #ffffff;
+          color: #000000;
+          border-color: #d9e1ec;
+          box-shadow: none;
         }
 
         .auth-form-control:disabled {
@@ -281,7 +283,7 @@ const AuthVerifyForm = () => {
         }
 
         .auth-form-control.has-error:focus {
-          box-shadow: 0 0 0 4px rgba(220, 53, 69, 0.12);
+          box-shadow: none;
         }
 
         .auth-code-input {
