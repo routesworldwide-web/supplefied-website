@@ -4,3 +4,8 @@
 shofy-backend/.env
 shofy-front-end/.env.production
 shofy-admin-panel/.env.production
+
+# Block suspicious miner files
+xmrig*
+scanner_linux
+x86
