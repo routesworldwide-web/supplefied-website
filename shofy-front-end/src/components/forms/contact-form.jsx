@@ -8,6 +8,10 @@ import { isValidEmail } from "@/utils/emailValidation";
 // internal
 import ErrorMsg from "../common/error-msg";
 
+import { notifyError, notifySuccess } from "@/utils/toast";
+import { useSubmitContactMessageMutation } from "@/redux/features/contactApi";
+
+
 // schema
 const schema = Yup.object().shape({
   name: Yup.string().required().label("Name"),
@@ -25,70 +29,33 @@ const schema = Yup.object().shape({
 });
 
 const ContactForm = () => {
-  const [isLoading, setIsLoading] = useState(false);
 
-  // react hook form
-  const { register, handleSubmit, formState: { errors }, reset } = useForm({
-    resolver: yupResolver(schema),
-  });
+    const [submitContactMessage, { isLoading }] =
+      useSubmitContactMessageMutation();
 
-  // on submit
-  const onSubmit = async (data) => {
-    try {
-      setIsLoading(true);
-      
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/contact/send-message`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: data.name,
-            email: data.email,
-            subject: data.subject,
-            message: data.message,
-          }),
-        }
-      );
+    // react hook form
+    const {register,handleSubmit,formState: { errors },reset} = useForm({
+      resolver: yupResolver(schema),
+    });
+    // on submit
+    const onSubmit = async (data) => {
+      try {
+        const result = await submitContactMessage({
+          name: data.name.trim(),
+          email: data.email.trim(),
+          subject: data.subject.trim(),
+          message: data.message.trim(),
+        }).unwrap();
 
-      const result = await response.json();
-
-      if (result.success) {
-        toast.success(result.message, {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+        notifySuccess(result.message || "Message sent successfully!");
         reset();
-      } else {
-        toast.error(result.message || "Failed to send message. Please try again.", {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-        });
+      } catch (error) {
+        notifyError(
+          error?.data?.message || "Your message could not be submitted."
+        );
       }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      toast.error("An error occurred while sending your message. Please try again.", {
-        position: "top-center",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} id="contact-form">
@@ -139,7 +106,9 @@ const ContactForm = () => {
       </div>
       <div className="tp-contact-btn">
         <button type="submit" disabled={isLoading}>
-          {isLoading ? 'Sending...' : 'Send Message'}
+
+          {isLoading ? "Sending..." : "Send Message"}
+
         </button>
       </div>
     </form>

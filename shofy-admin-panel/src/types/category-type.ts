@@ -6,6 +6,7 @@ export interface ICategoryItem {
   children: string[];
   productType: string;
   products?: string[];
+  featured?: boolean;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -22,6 +23,8 @@ export interface IAddCategory {
   children?: string[];
   productType: string;
   description?: string;
+  featured?: boolean;
+  status?: string;
 }
 
 export interface IAddCategoryResponse {
@@ -32,6 +35,8 @@ export interface IAddCategoryResponse {
     children?: string[];
     productType: string;
     products?: any[];
+    featured?: boolean;
+    status?: string;
     _id: string;
     createdAt: string;
     updatedAt: string;

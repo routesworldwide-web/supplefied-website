@@ -5,7 +5,7 @@ import DescriptionTextarea from "./description-textarea";
 import OfferDatePicker from "./offer-date-picker";
 import ProductTypeBrand from "./product-type-brand";
 import AdditionalInformation from "./additional-information";
-import ProductVariants from "./product-variants";
+import ProductImages from "./product-variants";
 import ProductImgUpload from "./product-img-upload";
 import ProductCategory from "../../category/product-category";
 import Tags from "./tags";
@@ -32,11 +32,7 @@ const ProductSubmit = () => {
     offerDate,
     setOfferDate,
     isSubmitted,
-    additionalInformation,
-    imageURLs,
   } = useProductSubmit();
-
-  console.log('additionalInformation--->',additionalInformation,'imageURLs--->',imageURLs)
 
   return (
     <form onSubmit={handleSubmit(handleSubmitProduct)}>
@@ -138,12 +134,10 @@ const ProductSubmit = () => {
           />
           {/* additional information page end */}
 
-          {/* product variations start */}
-          <ProductVariants
+          <ProductImages
             isSubmitted={isSubmitted}
             setImageURLs={setImageURLs}
           />
-          {/* product variations end */}
         </div>
 
         {/* right side */}

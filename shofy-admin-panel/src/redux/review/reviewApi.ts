@@ -1,5 +1,5 @@
 import { apiSlice } from "../api/apiSlice";
-import { IDelReviewsRes } from "@/types/product-type";
+import { IDelReviewsRes, IUpdateReviewRes } from "@/types/product-type";
 
 export const authApi = apiSlice.injectEndpoints({
   overrideExisting: true,
@@ -14,9 +14,21 @@ export const authApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["ReviewProducts"],
     }),
+    // update review visibility
+    updateReview: builder.mutation<IUpdateReviewRes, { id: string; status: "Show" | "Hide" }>({
+      query({ id, status }) {
+        return {
+          url: `/api/review/update/${id}`,
+          method: "PATCH",
+          body: { status },
+        };
+      },
+      invalidatesTags: ["ReviewProducts"],
+    }),
   }),
 });
 
 export const {
-  useDeleteReviewsMutation
+  useDeleteReviewsMutation,
+  useUpdateReviewMutation,
 } = authApi;

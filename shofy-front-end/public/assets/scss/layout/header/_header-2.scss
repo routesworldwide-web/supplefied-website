@@ -48,7 +48,8 @@
         #{$self}{
             &-action{
                 &-badge{
-                    background-color: var(--tp-theme-secondary);
+                    background-color: var(--tp-theme-action-bg);
+                    color: var(--tp-theme-action-text);
                 }
                 &-item{
                     &:last-child{
@@ -59,7 +60,7 @@
                 }
                 &-btn{
                     &:hover{
-                        color: var(--tp-theme-secondary);
+                        color: var(--tp-theme-action-hover-text);
                     }
                 }
             }
@@ -91,12 +92,13 @@
         #{$self}{
             &-action{
                 &-badge{
-                    background-color: var(--tp-theme-primary);
+                    background-color: var(--tp-theme-action-bg);
+                    color: var(--tp-theme-action-text);
                 }
                 &-item{
                     & button{
                         &:hover{
-                            color: var(--tp-theme-primary);
+                            color: var(--tp-theme-action-hover-text);
                         }
                     }
                     &:last-child{
@@ -250,9 +252,27 @@
     }
     &-bottom{
         &-2{
+            & .logo{
+                max-width: 72px;
+
+                & img{
+                    width: auto;
+                    max-height: 76px;
+                    object-fit: contain;
+                }
+            }
+
             @media #{$lg, $md, $sm, $xs}{
-                padding-top: 15px;
-                padding-bottom: 15px;
+                padding-top: 8px;
+                padding-bottom: 8px;
+
+                & .logo{
+                    max-width: 64px;
+
+                    & img{
+                        max-height: 66px;
+                    }
+                }
             }
         }
     }
@@ -260,7 +280,7 @@
 
 /* Logo sizing */
 .logo {
-    max-width: 80px;
+    max-width: 120px;
     width: 100%;
     
     & img,
@@ -268,5 +288,10 @@
         max-width: 100%;
         height: auto;
         display: block;
+        object-fit: contain;
+    }
+
+    @media #{$sm, $xs} {
+        max-width: 100px;
     }
 }

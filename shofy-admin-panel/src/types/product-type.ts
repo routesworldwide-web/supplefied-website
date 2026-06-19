@@ -34,6 +34,7 @@ type TReview = {
   productId: string;
   rating: number;
   comment: string;
+  status?: "Show" | "Hide";
   updatedAt: string;
   createdAt: string;
 }
@@ -58,6 +59,7 @@ export interface IProduct {
   reviews?: TReview[];
   productType: string;
   description: string;
+  videoId?: string;
   additionalInformation?: AdditionalInformation[];
   offerDate?: {
     startDate: string,
@@ -85,7 +87,7 @@ export interface IAddProduct {
   slug?: string;
   unit: string;
   imageURLs: {
-    color: {
+    color?: {
       name?: string;
       clrCode?: string;
     };
@@ -113,6 +115,7 @@ export interface IAddProduct {
     startDate: string | null,
     endDate: string | null
   },
+  featured?: boolean;
 }
 
 // review product response 
@@ -124,4 +127,9 @@ export interface IReviewProductRes {
 export interface IDelReviewsRes {
   success:boolean;
   message:string;
+}
+
+export interface IUpdateReviewRes {
+  message: string;
+  review: TReview;
 }

@@ -9,6 +9,7 @@ type IUser = {
   role?: string | undefined;
   image?: string | undefined;
   phone?: string | undefined;
+  status?: "Pending" | "Active" | "Inactive";
 };
 type IAuth = {
   accessToken: string;

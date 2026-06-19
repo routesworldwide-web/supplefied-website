@@ -9,14 +9,19 @@ import { ArrowRight } from '@/svg';
 import ProductItem from './product-item';
 import PrdCategoryList from './prd-category-list';
 import ErrorMsg from '@/components/common/error-msg';
-import b_bg_1 from '@assets/img/product/gadget/gadget-banner-1.jpg';
-import b_bg_2 from '@assets/img/product/gadget/gadget-banner-2.jpg';
+import b_bg_1 from '@assets/img/product/gadget/gadget-banner-1.png';
+import b_bg_2 from '@assets/img/product/gadget/gadget-banner-2.png';
 import { useGetProductTypeQuery } from '@/redux/features/productApi';
 import gadget_girl from '@assets/img/product/gadget/gadget-girl.png';
 import HomeGadgetPrdLoader from '@/components/loader/home/home-gadget-prd-loader';
+import { useGetBannersQuery } from '@/redux/features/bannerApi';
 
 const ProductGadgetArea = () => {
   const { data: products, isError, isLoading } = useGetProductTypeQuery({type:'electronics'});
+  const { data: gadgetBannerData } = useGetBannersQuery("product-gadget-banner");
+  const { data: gadgetSidebarData } = useGetBannersQuery("product-gadget-sidebar");
+  const gadgetBanners = gadgetBannerData?.data || [];
+  const gadgetSidebarBanner = gadgetSidebarData?.data?.[0];
 
   // decide what to render
   let content = null;
@@ -42,6 +47,20 @@ const ProductGadgetArea = () => {
   }
 
   // gadget banner 
+  function UploadedSidebarBanner({ banner }) {
+    return (
+      <Link href={banner.redirectLink || "/shop"} aria-label={banner.title || "Shop banner"}>
+        <Image
+          src={banner.image}
+          alt={banner.title || "Shop banner"}
+          width={420}
+          height={500}
+          className="w-100 h-auto"
+        />
+      </Link>
+    );
+  }
+
   function GadgetBanner() {
 
     const settings = {
@@ -53,17 +72,36 @@ const ProductGadgetArea = () => {
       },
     }
 
-    const banner_data = [
+    const fallbackBannerData = [
       { bg: b_bg_1, title: <>Selected novelty <br /> Products</>, price: 99 },
       { bg: b_bg_2, title: <>Top Rated <br /> Products</>, price: 55 },
     ]
+
+    if (gadgetBanners.length > 0) {
+      return (
+        <Swiper {...settings} effect='fade' modules={[Pagination, EffectFade]} className="tp-product-gadget-banner-slider-active swiper-container">
+          {gadgetBanners.map((banner) => (
+            <SwiperSlide key={banner._id} className="tp-product-gadget-banner-item tp-product-gadget-banner-uploaded include-bg"
+            style={{ backgroundImage: `url(${banner.image})`}}>
+              <Link
+                href={banner.redirectLink || "/shop"}
+                aria-label={banner.title || "Shop banner"}
+                className="position-absolute top-0 start-0 w-100 h-100"
+              />
+            </SwiperSlide>
+          ))}
+          <div className="tp-product-gadget-banner-slider-dot tp-swiper-dot"></div>
+        </Swiper>
+      )
+    }
+
     return (
       <Swiper {...settings} effect='fade' modules={[Pagination, EffectFade]} className="tp-product-gadget-banner-slider-active swiper-container">
-        {banner_data.map((b, i) => (
+        {fallbackBannerData.map((b, i) => (
           <SwiperSlide key={i} className="tp-product-gadget-banner-item include-bg" 
           style={{ backgroundImage: `url(${b.bg.src})`}}>
             <div className="tp-product-gadget-banner-content">
-              <span className="tp-product-gadget-banner-price">Only ${b.price.toFixed(2)}</span>
+              <span className="tp-product-gadget-banner-price">Only ₹{b.price.toFixed(2)}</span>
               <h3 className="tp-product-gadget-banner-title">
                 <Link href="/shop">{b.title}</Link>
               </h3>
@@ -81,21 +119,29 @@ const ProductGadgetArea = () => {
           <div className="row">
             <div className="col-xl-4 col-lg-5">
               <div className="tp-product-gadget-sidebar mb-40">
-                <div className="tp-product-gadget-categories p-relative fix mb-10">
+                <div className={`tp-product-gadget-categories p-relative fix mb-10 ${gadgetSidebarBanner ? "has-uploaded-banner" : ""}`}>
                   <div className="tp-product-gadget-thumb">
-                    <Image src={gadget_girl} alt="gadget_girl img" priority />
+                    {gadgetSidebarBanner ? (
+                      <UploadedSidebarBanner banner={gadgetSidebarBanner} />
+                    ) : (
+                      <Image src={gadget_girl} alt="Fitness essentials" priority />
+                    )}
                   </div>
-                  <h3 className="tp-product-gadget-categories-title">Electronics <br /> Gadgets</h3>
+                  {!gadgetSidebarBanner && <h3 className="tp-product-gadget-categories-title">Fitness<br /> Essentials </h3>}
 
-                  <div className="tp-product-gadget-categories-list">
-                    <PrdCategoryList />
-                  </div>
+                  {!gadgetSidebarBanner && (
+                    <div className="tp-product-gadget-categories-list">
+                      <PrdCategoryList />
+                    </div>
+                  )}
 
-                  <div className="tp-product-gadget-btn">
-                    <Link href="/shop" className="tp-link-btn">More Products
-                      <ArrowRight />
-                    </Link>
-                  </div>
+                  {!gadgetSidebarBanner && (
+                    <div className="tp-product-gadget-btn">
+                      <Link href="/shop" className="tp-link-btn">More Products
+                        <ArrowRight />
+                      </Link>
+                    </div>
+                  )}
                 </div>
                 <div className="tp-product-gadget-banner">
                   <GadgetBanner />

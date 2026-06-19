@@ -4,14 +4,25 @@ import { useDispatch, useSelector } from "react-redux";
 // internal
 import { Box, DeliveryTwo, Processing, Truck } from "@/svg";
 import { userLoggedOut } from "@/redux/features/auth/authSlice";
+import { apiSlice } from "@/redux/api/apiSlice";
+import { clearCartState } from "@/redux/features/cartSlice";
+import { clearWishlistState } from "@/redux/features/wishlist-slice";
+import { clearCompareState } from "@/redux/features/compareSlice";
+import { clear_shipping } from "@/redux/features/order/orderSlice";
 
 const NavProfileTab = ({ orderData }) => {
   const {user} = useSelector(state => state.auth)
+  const mobileNumber = user?.contactNumber || user?.phone;
   const dispatch = useDispatch();
   const router = useRouter();
   // handle logout
   const handleLogout = () => {
     dispatch(userLoggedOut());
+    dispatch(clearCartState());
+    dispatch(clearWishlistState());
+    dispatch(clearCompareState());
+    dispatch(clear_shipping());
+    dispatch(apiSlice.util.resetApiState());
     router.push('/')
   }
   return (
@@ -22,6 +33,8 @@ const NavProfileTab = ({ orderData }) => {
             <div className="profile__main-inner d-flex flex-wrap align-items-center">
               <div className="profile__main-content">
                 <h4 className="profile__main-title">Welcome Mr. {user?.name}</h4>
+                <p>{user?.email}</p>
+                {mobileNumber && <p>{mobileNumber}</p>}
               </div>
             </div>
           </div>
@@ -49,7 +62,7 @@ const NavProfileTab = ({ orderData }) => {
           </div>
           <div className="col-md-3 col-sm-6">
             <div className="profile__main-info-item">
-              <div className="profile__main-info-icon">
+              <div className="profile__main-info-icon ">
                 <span>
                   <span className="profile-icon-count profile-order">{orderData?.pending}</span>
                   <Processing />

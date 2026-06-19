@@ -91,7 +91,7 @@
             margin-left: 20px;
             font-weight: 400;
             font-size: 16px;
-            color: var(--tp-common-black);
+            color: var(--tp-theme-text);
 
             &:hover{
                 color: var(--tp-theme-primary);
@@ -102,7 +102,7 @@
         width: 126px;
         & span{
             font-size: 16px;
-            color: var(--tp-common-black);
+            color: var(--tp-theme-text);
         }
     }
     &-quantity{
@@ -135,13 +135,14 @@
             & button{
                 font-weight: 500;
                 font-size: 16px;
-                color: var(--tp-common-white);
-                background-color: var(--tp-common-black);
+                color: var(--tp-theme-action-text);
+                background-color: var(--tp-theme-action-bg);
+                border: 1px solid var(--tp-theme-action-border);
                 padding: 10px 30px;
 
                 &:hover{
-                    color: var(--tp-common-white);
-                    background-color: var(--tp-theme-primary);
+                    color: var(--tp-theme-action-hover-text);
+                    background-color: var(--tp-theme-action-hover-bg);
                 }
             }
         }
@@ -151,15 +152,15 @@
         &-btn{
             font-weight: 500;
             font-size: 16px;
-            color: var(--tp-common-black);
-            background-color: var(--tp-common-white);
+            color: var(--tp-theme-action-text);
+            background-color: var(--tp-theme-action-bg);
             padding: 9px 29px;
-            border: 1px solid rgba($color: $black, $alpha: .1);
+            border: 1px solid var(--tp-theme-action-border);
 
             &:hover{
-                background-color: var(--tp-theme-primary);
-                border-color: var(--tp-theme-primary);
-                color: var(--tp-common-white);
+                background-color: var(--tp-theme-action-hover-bg);
+                border-color: var(--tp-theme-action-border);
+                color: var(--tp-theme-action-hover-text);
             }
         }
     }
@@ -198,6 +199,9 @@
                 &:not(:last-child){
                     margin-bottom: 4px;
                 }
+                & > span:last-child{
+                    color: var(--tp-theme-text);
+                }
                 & input{
                     display: none;
 
@@ -224,7 +228,7 @@
                         cursor: pointer;
                     }
                     & span{
-                        color: var(--tp-theme-primary);
+                        color: var(--tp-theme-text);
                     }
 
                     &::after{
@@ -260,19 +264,23 @@
                 font-weight: 500;
                 font-size: 18px;
                 color: var(--tp-common-black);
+                &:last-child{
+                    color: var(--tp-theme-text);
+                }
             }
         }
         &-btn{
             font-size: 16px;
             font-weight: 500;
-            color: var(--tp-common-white);
-            background-color: var(--tp-common-black);
+            color: var(--tp-theme-action-text);
+            background-color: var(--tp-theme-action-bg);
+            border: 1px solid var(--tp-theme-action-border);
             display: inline-block;
             padding: 10px 30px;
             text-align: center;
             &:hover{
-                background-color: var(--tp-theme-primary);
-                color: var(--tp-common-white);
+                background-color: var(--tp-theme-action-hover-bg);
+                color: var(--tp-theme-action-hover-text);
             }
         }
     }

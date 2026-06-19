@@ -45,6 +45,7 @@ export const authApi = apiSlice.injectEndpoints({
     // get recent orders
     getSingleOrder: builder.query<Order, string>({
       query: (id) => `/api/order/${id}`,
+      providesTags: (result, error, id) => [{ type: "AllOrders", id }],
       keepUnusedDataFor: 600,
     }),
     // get recent orders
@@ -56,7 +57,13 @@ export const authApi = apiSlice.injectEndpoints({
           body: status,
         };
       },
-      invalidatesTags: ["AllOrders","DashboardRecentOrders"],
+      invalidatesTags: [
+        "AllOrders",
+        "DashboardRecentOrders",
+        "DashboardAmount",
+        "DashboardSalesReport",
+        "DashboardMostSellingCategory",
+      ],
     }),
   }),
 });

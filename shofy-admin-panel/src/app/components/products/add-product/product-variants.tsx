@@ -1,183 +1,169 @@
-import React, { useState, useEffect } from "react";
-import Sizes from "./sizes";
+import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import { Drug, SmClose } from "@/svg";
+import Loading from "../../common/loading";
 import { ImageURL } from "@/hooks/useProductSubmit";
-import { notifyError, notifySuccess } from "@/utils/toast";
-import VariantImgUpload from "./variant-img-upload";
-import { SmClose } from "@/svg";
+import { useUploadImageMutation } from "@/redux/cloudinary/cloudinaryApi";
+import { notifyError } from "@/utils/toast";
 
-// prop type
+const MAX_GALLERY_IMAGES = 5;
+const MAX_IMAGE_SIZE = 3 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 type IPropType = {
   isSubmitted: boolean;
   setImageURLs: React.Dispatch<React.SetStateAction<ImageURL[]>>;
   default_value?: ImageURL[];
 };
 
-const ProductVariants = ({
+const ProductImages = ({
   isSubmitted,
   setImageURLs,
   default_value,
 }: IPropType) => {
-  const [uploadImg, setUploadImg] = useState<string>("");
-  const [formData, setFormData] = useState<ImageURL[]>(
-    default_value
-      ? default_value
-      : [{ color: { clrCode: "", name: "" }, img: "", sizes: [] }]
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const hasLoadedDefault = useRef(false);
+  const [uploadImage, { isLoading }] = useUploadImageMutation();
+  const [galleryImages, setGalleryImages] = useState<ImageURL[]>(
+    default_value?.filter((item) => item?.img).slice(0, MAX_GALLERY_IMAGES) || []
   );
-  const [isSubmitField, setIsSubmitField] = useState<boolean>(false);
-  // set default value
-  const [hasDefaultValues, setHasDefaultValues] = useState<boolean>(false);
-  // default value set
+
   useEffect(() => {
-    if (default_value && !hasDefaultValues) {
-      setImageURLs(default_value);
-      setHasDefaultValues(true);
+    if (default_value && !hasLoadedDefault.current) {
+      const defaultImages = default_value
+        .filter((item) => item?.img)
+        .slice(0, MAX_GALLERY_IMAGES);
+      setGalleryImages(defaultImages);
+      setImageURLs(defaultImages);
+      hasLoadedDefault.current = true;
     }
-  }, [default_value, hasDefaultValues, setImageURLs, formData]);
-  // handle add field
-  const handleAddField = () => {
-    const allFieldsNotEmpty = formData.every((field) => field.img);
-    if (allFieldsNotEmpty) {
-      setFormData((prevFormData) => [
-        ...prevFormData,
-        { color: { clrCode: "", name: "" }, img: "", sizes: [] },
-      ]);
-      setImageURLs(formData);
+  }, [default_value, setImageURLs]);
+
+  useEffect(() => {
+    if (isSubmitted) {
+      setGalleryImages([]);
+      setImageURLs([]);
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
+    }
+  }, [isSubmitted, setImageURLs]);
+
+  const validateImage = (file: File) => {
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      notifyError("Only JPG, PNG, or WEBP images are allowed");
+      return false;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      notifyError("Image size must be 3MB or less");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!validateImage(file)) {
+      e.target.value = "";
+      return;
+    }
+
+    if (galleryImages.length >= MAX_GALLERY_IMAGES) {
+      notifyError(`You can upload maximum ${MAX_GALLERY_IMAGES} product images`);
+      e.target.value = "";
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", file);
+
+    const result = await uploadImage(formData);
+
+    if ("data" in result && result.data?.data?.url) {
+      const updatedImages = [
+        ...galleryImages,
+        { img: result.data.data.url },
+      ].slice(0, MAX_GALLERY_IMAGES);
+      setGalleryImages(updatedImages);
+      setImageURLs(updatedImages);
     } else {
-      notifyError("Image required");
+      notifyError("Image upload failed");
     }
+
+    e.target.value = "";
   };
-  // handle size change
-  const handleSizeChange = (sizes: string[], index: number) => {
-    const updatedFormData = [...formData];
-    updatedFormData[index].sizes = sizes;
-    setFormData(updatedFormData);
-    setImageURLs(updatedFormData);
+
+  const handleRemoveImage = (index: number) => {
+    const updatedImages = galleryImages.filter((_, i) => i !== index);
+    setGalleryImages(updatedImages);
+    setImageURLs(updatedImages);
   };
-  // handle remove product
-  const handleRemoveProduct = (index: number) => {
-    const updatedFormData = [...formData];
-    updatedFormData.splice(index, 1);
-    setFormData(updatedFormData);
-    setImageURLs(updatedFormData);
-  };
-  // handle submit field
-  // const handleSubmitField = () => {
-  //   const allFieldsValid = formData.every((field) => field.img?.trim() !== "");
-  //   if (allFieldsValid) {
-  //     setImageURLs(formData);
-  //     notifySuccess("variant field added");
-  //     setIsSubmitField(true);
-  //     setFormData([{ color: { clrCode: "", name: "" }, img: "", sizes: [] }]);
-  //   } else {
-  //     notifyError("Image required");
-  //   }
-  // };
-  // col
-  const col = formData.length > 1 ? 3 : 2;
 
   return (
     <div className="bg-white px-8 py-8 rounded-md mb-6">
-      <h4 className="text-[22px]">Product Variations</h4>
-      {formData.map((field, i) => (
-        <div key={i} className="mt-10 pt-10 border-t border-gray relative">
-           {i !== 0 && (
-              <div className="text-end">
-                <button
-                  className="h-[44px] w-[44px] rounded-md border border-gray6 hover:border-red "
-                  type="button"
-                  onClick={() => handleRemoveProduct(i)}
-                >
-                  <SmClose />
-                </button>
-              </div>
-            )}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2 gap-x-6">
-            <div className="mb-5">
-              <p className="mb-0 text-base text-black">Color Name</p>
-              <input
-                id="clrName"
-                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base"
-                type="text"
-                placeholder="Color Name"
-                value={field?.color?.name}
-                onChange={(e) => {
-                  const updatedFormData = [...formData];
-                  updatedFormData[i] = {
-                    ...updatedFormData[i],
-                    color: {
-                      ...updatedFormData[i].color,
-                      name: e.target.value,
-                    },
-                  };
-                  setFormData(updatedFormData);
-                  setImageURLs(updatedFormData);
-                }}
-              />
-              <span className="text-tiny leading-4">
-                Set the Color name of product.
-              </span>
-            </div>
-
-            <div className="mb-5">
-              <p className="mb-0 text-base text-black">Color Code</p>
-              <input
-                id="clrCode"
-                className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base"
-                type="text"
-                placeholder="Color Code"
-                value={field?.color?.clrCode}
-                onChange={(e) => {
-                  const updatedFormData = [...formData];
-                  updatedFormData[i].color.clrCode = e.target.value;
-                  setFormData(updatedFormData);
-                  setImageURLs(updatedFormData);
-                }}
-              />
-              <span className="text-tiny leading-4">
-                Hex code here ex:#3C3C3D
-              </span>
-            </div>
-          </div>
-
-          <div
-            className={`grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-3 gap-x-6`}
-          >
-            <Sizes
-              handleSizeChange={handleSizeChange}
-              field={field}
-              index={i}
-            />
-            <VariantImgUpload
-              setFormData={setFormData}
-              setImageURLs={setImageURLs}
-              index={i}
-              formData={formData}
-              isSubmitField={isSubmitField}
-              isSubmitted={isSubmitted}
-              setIsSubmitField={setIsSubmitField}
-            />
-          </div>
+      <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+        <div>
+          <h4 className="text-[22px] mb-0">Product Images</h4>
+          <span className="text-tiny leading-4">
+            Add up to {MAX_GALLERY_IMAGES} extra product images. Maximum size 3MB each.
+          </span>
         </div>
-      ))}
+        <div>
+          <input
+            ref={inputRef}
+            onChange={handleImageUpload}
+            type="file"
+            name="product_gallery_image"
+            id="product_gallery_image"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            disabled={isLoading}
+          />
+          <label
+            htmlFor="product_gallery_image"
+            className="border-2 border-gray6 dark:border-gray-600 border-dashed rounded-md cursor-pointer flex items-center justify-center h-[44px] w-[120px] hover:bg-slate-100 transition-all linear ease"
+          >
+            {isLoading ? (
+              <Loading loading={isLoading} spinner="scale" />
+            ) : (
+              <span className="mx-auto flex justify-center">
+                <Drug />
+              </span>
+            )}
+          </label>
+        </div>
+      </div>
 
-      <div className="flex justify-between flex-wrap">
-        <button
-          className="tp-btn px-5 py-2 mt-5"
-          type="button"
-          onClick={handleAddField}
-        >
-          Add Field
-        </button>
-        {/* <button
-          className="tp-btn px-5 py-2 mt-5"
-          type="button"
-          onClick={handleSubmitField}
-        >
-          Submit Field
-        </button> */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {galleryImages.map((item, index) => (
+          <div key={`${item.img}-${index}`} className="relative">
+            <Image
+              className="w-full h-[120px] object-contain border rounded-md border-gray6 p-2"
+              src={item.img}
+              alt={`product gallery ${index + 1}`}
+              width={160}
+              height={120}
+            />
+            <button
+              onClick={() => handleRemoveImage(index)}
+              type="button"
+              className="absolute -top-3 -right-3 text-red-500 focus:outline-none"
+              aria-label="Remove product image"
+            >
+              <SmClose />
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );
 };
 
-export default ProductVariants;
+export default ProductImages;

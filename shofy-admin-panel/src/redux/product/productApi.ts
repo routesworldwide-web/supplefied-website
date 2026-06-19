@@ -1,5 +1,5 @@
 import { apiSlice } from "../api/apiSlice";
-import { IAddProduct,IReviewProductRes, ProductResponse } from "@/types/product-type";
+import { IAddProduct, IProduct, IReviewProductRes, ProductResponse } from "@/types/product-type";
 
 interface IProductResponse {
   success: boolean;
@@ -45,11 +45,12 @@ export const authApi = apiSlice.injectEndpoints({
           body: data,
         };
       },
-      invalidatesTags: ["AllProducts"],
+      invalidatesTags: (_result, _error, { id }) => ["AllProducts", { type: "Product", id }],
     }),
     // get single product
-    getProduct: builder.query<IAddProduct, string>({
+    getProduct: builder.query<IProduct, string>({
       query: (id) => `/api/product/single-product/${id}`,
+      providesTags: (_result, _error, id) => [{ type: "Product", id }],
     }),
     // get single product
     getReviewProducts: builder.query<IReviewProductRes, void>({

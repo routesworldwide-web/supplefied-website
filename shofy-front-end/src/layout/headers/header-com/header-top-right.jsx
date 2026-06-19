@@ -4,61 +4,12 @@ import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { userLoggedOut } from "@/redux/features/auth/authSlice";
+import { apiSlice } from "@/redux/api/apiSlice";
+import { clearCartState } from "@/redux/features/cartSlice";
+import { clearWishlistState } from "@/redux/features/wishlist-slice";
+import { clearCompareState } from "@/redux/features/compareSlice";
+import { clear_shipping } from "@/redux/features/order/orderSlice";
 
-// language
-// function Language({active,handleActive}) {
-//   return (
-//     <div className="tp-header-top-menu-item tp-header-lang">
-//       <span
-//         onClick={() => handleActive('lang')}
-//         className="tp-header-lang-toggle"
-//         id="tp-header-lang-toggle"
-//       >
-//         English
-//       </span>
-//       <ul className={active === 'lang' ? "tp-lang-list-open" : ""}>
-//         <li>
-//           <a href="#">Spanish</a>
-//         </li>
-//         <li>
-//           <a href="#">Russian</a>
-//         </li>
-//         <li>
-//           <a href="#">Portuguese</a>
-//         </li>
-//       </ul>
-//     </div>
-//   );
-// }
-
-// currency
-// function Currency({active,handleActive}) {
-//   return (
-//     <div className="tp-header-top-menu-item tp-header-currency">
-//       <span
-//         onClick={() => handleActive('currency')}
-//         className="tp-header-currency-toggle"
-//         id="tp-header-currency-toggle"
-//       >
-//         USD
-//       </span>
-//       <ul className={active === 'currency' ? "tp-currency-list-open" : ""}>
-//         <li>
-//           <a href="#">EUR</a>
-//         </li>
-//         <li>
-//           <a href="#">CHF</a>
-//         </li>
-//         <li>
-//           <a href="#">GBP</a>
-//         </li>
-//         <li>
-//           <a href="#">KWD</a>
-//         </li>
-//       </ul>
-//     </div>
-//   );
-// }
 
 // setting
 function ProfileSetting({active,handleActive}) {
@@ -68,10 +19,16 @@ function ProfileSetting({active,handleActive}) {
   // handle logout
   const handleLogout = () => {
     dispatch(userLoggedOut());
+    dispatch(clearCartState());
+    dispatch(clearWishlistState());
+    dispatch(clearCompareState());
+    dispatch(clear_shipping());
+    dispatch(apiSlice.util.resetApiState());
     router.push('/')
   }
   return (
     <div className="tp-header-top-menu-item tp-header-setting">
+      <i className="fal fa-cog me-2 tp-header-setting-icon"></i>
       <span
         onClick={() => handleActive('setting')}
         className="tp-header-setting-toggle"
@@ -81,17 +38,17 @@ function ProfileSetting({active,handleActive}) {
       </span>
       <ul className={active === 'setting' ? "tp-setting-list-open" : ""}>
         <li>
-          <Link href="/profile">My Profile</Link>
+          <Link href="/profile"><i className="fal fa-user me-3"></i>My Profile</Link>
         </li>
         <li>
-          <Link href="/wishlist">Wishlist</Link>
+          <Link href="/wishlist"><i className="fal fa-heart me-3"></i>Wishlist</Link>
         </li>
         <li>
-          <Link href="/cart">Cart</Link>
+          <Link href="/cart"><i className="fal fa-shopping-cart me-3"></i>Cart</Link>
         </li>
         <li>
-          {!user?.name &&<Link href="/login" className="cursor-pointer">Login</Link>}
-          {user?.name &&<a onClick={handleLogout} className="cursor-pointer">Logout</a>}
+          {!user?.name &&<Link href="/login" className="cursor-pointer"><i className="fal fa-sign-in-alt me-3"></i>Login</Link>}
+          {user?.name &&<a onClick={handleLogout} className="cursor-pointer"><i className="fal fa-sign-out-alt me-3"></i>Logout</a>}
         </li>
       </ul>
     </div>

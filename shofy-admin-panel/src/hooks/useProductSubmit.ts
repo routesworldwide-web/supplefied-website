@@ -8,7 +8,7 @@ import { notifyError, notifySuccess } from "@/utils/toast";
 
 // ImageURL type
 export interface ImageURL {
-  color: {
+  color?: {
     name?: string;
     clrCode?: string;
   };
@@ -45,8 +45,8 @@ const useProductSubmit = () => {
   const [description, setDescription] = useState<string>("");
   const [videoId, setVideoId] = useState<string>("");
   const [offerDate, setOfferDate] = useState<{
-    startDate: null;
-    endDate: null;
+    startDate: string | null;
+    endDate: string | null;
   }>({
     startDate: null,
     endDate: null,
@@ -111,6 +111,15 @@ const useProductSubmit = () => {
   // handle submit product
   const handleSubmitProduct = async (data: any) => {
     // console.log("product data--->", data);
+    const priceValue = Number(data.price);
+    const discountValue =
+      data.discount_percentage === "" || data.discount_percentage == null
+        ? 0
+        : Number(data.discount_percentage);
+    const productImages = [
+      { img },
+      ...imageURLs.filter((item) => item?.img && item.img !== img).slice(0, 5),
+    ];
 
     // product data
     const productData = {
@@ -119,11 +128,11 @@ const useProductSubmit = () => {
       title: data.title,
       slug: slugify(data.title, { replacement: "-", lower: true }),
       unit: data.unit,
-      imageURLs: imageURLs,
+      imageURLs: productImages,
       parent: parent,
       children: children,
-      price: data.price,
-      discount: data.discount_percentage,
+      price: priceValue,
+      discount: discountValue,
       quantity: data.quantity,
       brand: brand,
       category: category,
@@ -148,7 +157,7 @@ const useProductSubmit = () => {
     if (!category.name) {
       return notifyError("Category is required");
     }
-    if (Number(data.discount) > Number(data.price)) {
+    if (discountValue > priceValue) {
       return notifyError("Product price must be gether than discount");
     } else {
       const res = await addProduct(productData);
@@ -163,12 +172,22 @@ const useProductSubmit = () => {
         notifySuccess("Product created successFully");
         setIsSubmitted(true);
         resetForm();
-        router.push('/product-grid')
+        router.push('/product-list')
       }
     }
   };
   // handle edit product
   const handleEditProduct = async (data: any, id: string) => {
+    const priceValue = Number(data.price);
+    const discountValue =
+      data.discount_percentage === "" || data.discount_percentage == null
+        ? 0
+        : Number(data.discount_percentage);
+    const productImages = [
+      { img },
+      ...imageURLs.filter((item) => item?.img && item.img !== img).slice(0, 5),
+    ];
+
     // product data
     const productData = {
       sku: data.SKU,
@@ -176,11 +195,11 @@ const useProductSubmit = () => {
       title: data.title,
       slug: slugify(data.title, { replacement: "-", lower: true }),
       unit: data.unit,
-      imageURLs: imageURLs,
+      imageURLs: productImages,
       parent: parent,
       children: children,
-      price: data.price,
-      discount: data.discount_percentage,
+      price: priceValue,
+      discount: discountValue,
       quantity: data.quantity,
       brand: brand,
       category: category,
@@ -207,7 +226,7 @@ const useProductSubmit = () => {
     } else {
       notifySuccess("Product edit successFully");
       setIsSubmitted(true);
-      router.push('/product-grid')
+      router.push('/product-list')
       resetForm();
     }
   };

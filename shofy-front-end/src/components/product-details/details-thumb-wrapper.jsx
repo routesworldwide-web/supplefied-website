@@ -13,12 +13,14 @@ const DetailsThumbWrapper = ({
   status
 }) => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const galleryImages = imageURLs?.filter((item) => item?.img) || [];
+
   return (
     <>
       <div className="tp-product-details-thumb-wrapper tp-tab d-sm-flex">
         <nav>
           <div className="nav nav-tabs flex-sm-column">
-            {imageURLs?.map((item, i) => (
+            {galleryImages.map((item, i) => (
               <button
                 key={i}
                 className={`nav-link ${item.img === activeImg ? "active" : ""}`}

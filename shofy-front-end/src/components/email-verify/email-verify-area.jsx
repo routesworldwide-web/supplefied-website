@@ -12,8 +12,8 @@ export default function EmailVerifyArea({ token }) {
 
   useEffect(() => {
     if (isSuccess) {
-      router.push("/");
-      notifySuccess("Register Success!");
+      router.push("/login");
+      notifySuccess("Email verified. Please log in.");
     }
   }, [router, isSuccess]);
 

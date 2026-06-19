@@ -31,19 +31,25 @@ export default function HomePage() {
 
   return (
     <Wrapper>
-      <HomeHeroSlider />
-      <ElectronicCategory />
-      <FeatureArea />
-      <ProductArea />
-      <BannerArea />
-      <OfferProducts />
-      <ProductGadgetArea />
-      <ProductBanner />
-      <NewArrivals />
-      <ProductSmArea />
-      <BlogArea />
-      <InstagramArea />
-      <CtaArea />
+
+      <Header/>
+      <HomeHeroSlider/>
+      <div className="tp-home-watermark">
+        <ElectronicCategory/>
+        <FeatureArea/>
+        <ProductArea/>
+        <BannerArea/>
+        <OfferProducts/>
+        <ProductGadgetArea/>
+        <ProductBanner/>
+        <NewArrivals/>
+        <ProductSmArea/>
+        <BlogArea/>
+        <InstagramArea/>
+      </div>
+      <CtaArea/>
+      <Footer/>
+
     </Wrapper>
   );
   */

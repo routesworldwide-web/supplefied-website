@@ -28,12 +28,27 @@ export interface Order {
   subTotal: number;
   shippingCost: number;
   discount?: number;
+  coupon?: {
+    title?: string;
+    couponCode?: string;
+    discountPercentage?: number;
+    productType?: string;
+    discountAmount?: number;
+  };
   totalAmount: number;
   shippingOption: string;
   paymentMethod: string;
   orderNote?: string;
   invoice: number;
   status: string;
+  cancellation?: {
+    reasonCode?: string;
+    reason?: string;
+    cancelledBy?: "customer" | "admin";
+    cancelledAt?: string;
+    previousStatus?: "pending" | "processing";
+    refundStatus?: "not_required" | "pending" | "processed" | "failed";
+  };
   createdAt?: string;
   updatedAt?: string;
 }
@@ -48,6 +63,10 @@ export interface IOrderAmounts {
   todayCashPaymentAmount: number;
   yesterDayCardPaymentAmount: number;
   yesterDayCashPaymentAmount: number;
+  todayOrderCount: number;
+  yesterdayOrderCount: number;
+  monthlyOrderCount: number;
+  totalOrderCount: number;
 }
 
 
@@ -65,8 +84,9 @@ export interface ISalesReport {
 
 export interface IMostSellingCategory {
   categoryData: {
-    _id: string;
-    count: number;
+    category: string;
+    unitsSold: number;
+    revenue: number;
   }[];
 }
 
@@ -97,4 +117,5 @@ export interface IGetAllOrdersRes {
 export interface IUpdateStatusOrderRes {
   success: boolean;
   message: string;
+  order?: Order;
 }

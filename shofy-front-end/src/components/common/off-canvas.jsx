@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 // internal
 import { CloseTwo } from '@/svg';
-import logo from '@assets/img/logo/Supplified_logo.png';
+import logo from '@assets/img/logo/supplefied_logo2.png';
 import contact_img from '@assets/img/icon/contact.png';
 import language_img from '@assets/img/icon/language-flag.png';
 import MobileCategory from '@/layout/headers/header-com/mobile-category';
@@ -74,17 +74,17 @@ const OffCanvas = ({ isOffCanvasOpen, setIsCanvasOpen,categoryType = "electronic
           </div>
           <div className="offcanvas__bottom">
             <div className="offcanvas__footer d-flex align-items-center justify-content-between">
-              <div className="offcanvas__currency-wrapper currency">
-                <span onClick={handleCurrencyActive} className="offcanvas__currency-selected-currency tp-currency-toggle" id="tp-offcanvas-currency-toggle">Currency : USD</span>
+              {/* <div className="offcanvas__currency-wrapper currency">
+                <span onClick={handleCurrencyActive} className="offcanvas__currency-selected-currency tp-currency-toggle" id="tp-offcanvas-currency-toggle">Currency : INR</span>
                 <ul className={`offcanvas__currency-list tp-currency-list ${isCurrencyActive ? 'tp-currency-list-open' : ''}`}>
-                  <li>USD</li>
+                  <li>INR</li>
                   <li>ERU</li>
                   <li>BDT </li>
                   <li>INR</li>
                 </ul>
-              </div>
-              <div className="offcanvas__select language">
-                <div className="offcanvas__lang d-flex align-items-center justify-content-md-end">
+              </div> */}
+              <div className="offcanvas__select language d-flex align-items-center justify-content-md-end gap-3">
+                {/* <div className="offcanvas__lang d-flex align-items-center justify-content-md-end">
                   <div className="offcanvas__lang-img mr-15">
                     <Image src={language_img} alt="language-flag" />
                   </div>
@@ -97,7 +97,15 @@ const OffCanvas = ({ isOffCanvasOpen, setIsCanvasOpen,categoryType = "electronic
                       <li>Canada</li>
                     </ul>
                   </div>
+                </div> */}
+                {/* add login link here */}
+                <div className="offcanvas__login">
+                  <Link href="/login" className="tp-btn-2 tp-btn-border-2">Login</Link>
                 </div>
+                {/* settings */}
+                  <div className="offcanvas__settings">
+                    <Link href="/profile" className="tp-btn-2 tp-btn-border-2">Settings</Link>
+                  </div>
               </div>
             </div>
           </div>

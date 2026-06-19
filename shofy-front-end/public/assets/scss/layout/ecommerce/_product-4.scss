@@ -90,7 +90,7 @@
         &-4{
             font-weight: 500;
             font-size: 16px;
-            color: var(--tp-common-black);
+            color: var(--tp-theme-text);
             display: inline-block;
             @extend %tp-transition;
             &.old-price{

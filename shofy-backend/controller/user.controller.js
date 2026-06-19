@@ -1,29 +1,100 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const validator = require("validator");
 const User = require("../model/User");
 const { sendEmail } = require("../config/email");
 const { generateToken, tokenForVerify } = require("../utils/token");
 const { secret } = require("../config/secret");
 
+const CHECKOUT_ADDRESS_FIELDS = [
+  "firstName",
+  "lastName",
+  "country",
+  "address",
+  "city",
+  "zipCode",
+  "contactNo",
+  "email",
+  "orderNote",
+];
+
+const REQUIRED_ADDRESS_FIELDS = CHECKOUT_ADDRESS_FIELDS.filter(
+  (field) => field !== "orderNote"
+);
+
+const normalizeShippingAddress = (data = {}) => {
+  return CHECKOUT_ADDRESS_FIELDS.reduce((address, field) => {
+    const value = data[field];
+    address[field] = typeof value === "string" ? value.trim() : value;
+    return address;
+  }, {});
+};
+
+const normalizeEmail = (email = "") => email.trim().toLowerCase();
+const normalizeText = (value = "") => (typeof value === "string" ? value.trim() : "");
+const normalizeMobileNumber = (value = "") => {
+  const trimmedValue = normalizeText(value);
+  const hasCountryPrefix = trimmedValue.startsWith("+");
+  const digits = trimmedValue.replace(/[^\d]/g, "");
+
+  return `${hasCountryPrefix ? "+" : ""}${digits}`;
+};
+
+const addAuthProvider = (user, provider) => {
+  const providers = new Set(user.authProviders || []);
+  providers.add(provider);
+  user.authProviders = Array.from(providers);
+};
+
+const toSafeUser = (user) => {
+  const { password: pwd, ...safeUser } = user.toObject();
+  return safeUser;
+};
+
 // register user
 // sign up
 exports.signup = async (req, res, next) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
+    const email = normalizeEmail(req.body.email);
+    const name = normalizeText(req.body.name);
+    const password = req.body.password;
+    const contactNumber = normalizeMobileNumber(req.body.contactNumber);
+
+    if (!name || !email || !password || !contactNumber) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Name, email, password, and mobile number are required",
+      });
+    }
+
+    if (!validator.isMobilePhone(contactNumber, "any")) {
+      return res.status(400).json({
+        status: "fail",
+        message: "Please provide a valid mobile number",
+      });
+    }
+
+    const user = await User.findOne({ email });
+
     if (user) {
-      res.send({ status: "failed", message: "Email already exists" });
+      return res.status(409).json({ status: "fail", message: "Email already exists" });
     } else {
-      const saved_user = await User.create(req.body);
+      const saved_user = await User.create({
+        name,
+        email,
+        password,
+        contactNumber,
+        authProviders: ["password"],
+      });
       const token = saved_user.generateConfirmationToken();
 
       await saved_user.save({ validateBeforeSave: false });
 
       const mailData = {
         from: secret.email_user,
-        to: `${req.body.email}`,
-        subject: "Email Activation",
+        to: `${email}`,
         subject: "Verify Your Email",
-        html: `<h2>Hello ${req.body.name}</h2>
+        html: `<h2>Hello ${name}</h2>
         <p>Verify your email address to complete the signup and login into your <strong>Supplefied</strong> account.</p>
   
           <p>This link will expire in <strong> 10 minute</strong>.</p>
@@ -63,7 +134,8 @@ exports.signup = async (req, res, next) => {
  */
 module.exports.login = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { password } = req.body;
+    const email = normalizeEmail(req.body.email);
 
     if (!email || !password) {
       return res.status(401).json({
@@ -78,6 +150,13 @@ module.exports.login = async (req, res, next) => {
       return res.status(401).json({
         status: "fail",
         error: "No user found. Please create an account",
+      });
+    }
+
+    if (!user.password) {
+      return res.status(403).json({
+        status: "fail",
+        error: "This account does not have a password. Please sign in with Google or reset your password.",
       });
     }
 
@@ -99,13 +178,11 @@ module.exports.login = async (req, res, next) => {
 
     const token = generateToken(user);
 
-    const { password: pwd, ...others } = user.toObject();
-
     res.status(200).json({
       status: "success",
       message: "Successfully logged in",
       data: {
-        user: others,
+        user: toSafeUser(user),
         token,
       },
     });
@@ -137,22 +214,15 @@ exports.confirmEmail = async (req, res, next) => {
     }
 
     user.status = "active";
+    user.emailVerified = true;
     user.confirmationToken = undefined;
     user.confirmationTokenExpires = undefined;
 
     await user.save({ validateBeforeSave: false });
 
-    const accessToken = generateToken(user);
-
-    const { password: pwd, ...others } = user.toObject();
-
     res.status(200).json({
       status: "success",
       message: "Successfully activated your account.",
-      data: {
-        user: others,
-        token: accessToken,
-      },
     });
   } catch (error) {
     next(error)
@@ -162,7 +232,7 @@ exports.confirmEmail = async (req, res, next) => {
 // forgetPassword
 exports.forgetPassword = async (req, res, next) => {
   try {
-    const { verifyEmail } = req.body;
+    const verifyEmail = normalizeEmail(req.body.verifyEmail);
     const user = await User.findOne({ email: verifyEmail });
     if (!user) {
       return res.status(404).send({
@@ -227,16 +297,12 @@ exports.confirmForgetPassword = async (req, res, next) => {
         error: "Token expired",
       });
     } else {
-      const newPassword = bcrypt.hashSync(password);
-      await User.updateOne(
-        { confirmationToken: token },
-        { $set: { password: newPassword } }
-      );
-
+      user.password = password;
+      addAuthProvider(user, "password");
       user.confirmationToken = undefined;
       user.confirmationTokenExpires = undefined;
 
-      await user.save({ validateBeforeSave: false });
+      await user.save();
 
       res.status(200).json({
         status: "success",
@@ -251,25 +317,28 @@ exports.confirmForgetPassword = async (req, res, next) => {
 // change password
 exports.changePassword = async (req, res, next) => {
   try {
-    const { email, password, googleSignIn, newPassword } = req.body || {};
-    const user = await User.findOne({ email: email });
-    // Check if the user exists
+    const { password, newPassword } = req.body || {};
+    const user = await User.findById(req.user._id).select("+password authProviders");
+
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-    if (googleSignIn) {
-      const hashedPassword = bcrypt.hashSync(newPassword);
-      await User.updateOne({ email: email }, { password: hashedPassword })
-      return res.status(200).json({ message: "Password changed successfully" });
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: "New password must be at least 6 characters" });
     }
-    if (!bcrypt.compareSync(password, user?.password)) {
+
+    const hasPasswordProvider = (user.authProviders || []).includes("password") && user.password;
+
+    if (hasPasswordProvider && !bcrypt.compareSync(password || "", user.password || "")) {
       return res.status(401).json({ message: "Incorrect current password" });
     }
-    else {
-      const hashedPassword = bcrypt.hashSync(newPassword);
-      await User.updateOne({ email: email }, { password: hashedPassword })
-      res.status(200).json({ message: "Password changed successfully" });
-    }
+
+    user.password = newPassword;
+    addAuthProvider(user, "password");
+    await user.save();
+
+    res.status(200).json({ message: "Password changed successfully" });
   } catch (error) {
     next(error)
   }
@@ -278,58 +347,233 @@ exports.changePassword = async (req, res, next) => {
 // update a profile
 exports.updateUser = async (req, res, next) => {
   try {
-    const userId = req.params.id
-    const user = await User.findById(userId);
-    if (user) {
-      user.name = req.body.name;
-      user.email = req.body.email;
-      user.phone = req.body.phone;
-      user.address = req.body.address;
-      user.bio = req.body.bio;
-      const updatedUser = await user.save();
-      const token = generateToken(updatedUser);
-      res.status(200).json({
-        status: "success",
-        message: "Successfully updated profile",
-        data: {
-          user: updatedUser,
-          token,
-        },
-      });
+    const userId = req.params.id;
+
+    if (req.user._id !== userId) {
+      return res.status(403).json({ message: "You can only update your own profile" });
     }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (typeof req.body.email === "string") {
+      const email = normalizeEmail(req.body.email);
+      const existingUser = await User.findOne({ email, _id: { $ne: userId } });
+
+      if (existingUser) {
+        return res.status(400).json({ message: "Email is already in use" });
+      }
+
+      user.email = email;
+    }
+
+    ["name", "address", "bio"].forEach((field) => {
+      if (typeof req.body[field] === "string") {
+        user[field] = req.body[field].trim();
+      }
+    });
+
+    if (typeof req.body.contactNumber === "string") {
+      user.contactNumber = normalizeMobileNumber(req.body.contactNumber);
+    }
+
+    const updatedUser = await user.save();
+    const token = generateToken(updatedUser);
+    res.status(200).json({
+      status: "success",
+      message: "Successfully updated profile",
+      data: {
+        user: toSafeUser(updatedUser),
+        token,
+      },
+    });
   } catch (error) {
     next(error)
+  }
+};
+
+exports.getShippingAddresses = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select("shippingAddresses");
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: user.shippingAddresses || [],
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.addShippingAddress = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select("shippingAddresses");
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    if ((user.shippingAddresses || []).length >= 3) {
+      return res.status(400).json({
+        status: "fail",
+        message: "You can save up to 3 shipping addresses",
+      });
+    }
+
+    const shippingAddress = normalizeShippingAddress(req.body);
+    const missingField = REQUIRED_ADDRESS_FIELDS.find((field) => !shippingAddress[field]);
+
+    if (missingField) {
+      return res.status(400).json({
+        status: "fail",
+        message: `${missingField} is required`,
+      });
+    }
+
+    user.shippingAddresses.push(shippingAddress);
+    await user.save({ validateBeforeSave: false });
+
+    res.status(201).json({
+      status: "success",
+      message: "Shipping address saved successfully",
+      data: user.shippingAddresses,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateShippingAddress = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select("shippingAddresses");
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    const shippingAddress = user.shippingAddresses.id(req.params.addressId);
+
+    if (!shippingAddress) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Shipping address not found",
+      });
+    }
+
+    const updatedAddress = normalizeShippingAddress(req.body);
+    const missingField = REQUIRED_ADDRESS_FIELDS.find((field) => !updatedAddress[field]);
+
+    if (missingField) {
+      return res.status(400).json({
+        status: "fail",
+        message: `${missingField} is required`,
+      });
+    }
+
+    CHECKOUT_ADDRESS_FIELDS.forEach((field) => {
+      shippingAddress[field] = updatedAddress[field];
+    });
+
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      status: "success",
+      message: "Shipping address updated successfully",
+      data: user.shippingAddresses,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteShippingAddress = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).select("shippingAddresses");
+
+    if (!user) {
+      return res.status(404).json({
+        status: "fail",
+        message: "User not found",
+      });
+    }
+
+    const shippingAddress = user.shippingAddresses.id(req.params.addressId);
+
+    if (!shippingAddress) {
+      return res.status(404).json({
+        status: "fail",
+        message: "Shipping address not found",
+      });
+    }
+
+    shippingAddress.deleteOne();
+    await user.save({ validateBeforeSave: false });
+
+    res.status(200).json({
+      status: "success",
+      message: "Shipping address removed successfully",
+      data: user.shippingAddresses,
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
 // signUpWithProvider
 exports.signUpWithProvider = async (req, res, next) => {
   try {
-    const user = jwt.decode(req.params.token);
-    const isAdded = await User.findOne({ email: user.email });
-    if (isAdded) {
-      const token = generateToken(isAdded);
+    const googleUser = jwt.decode(req.params.token);
+    const email = normalizeEmail(googleUser.email);
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      addAuthProvider(existingUser, "google");
+      existingUser.googleId = googleUser.sub || existingUser.googleId;
+      existingUser.emailVerified = true;
+      existingUser.status = "active";
+
+      if (!existingUser.imageURL && googleUser.picture) {
+        existingUser.imageURL = googleUser.picture;
+      }
+
+      await existingUser.save({ validateBeforeSave: false });
+
+      const token = generateToken(existingUser);
       res.status(200).send({
         status: "success",
         data: {
           token,
           user: {
-            _id: isAdded._id,
-            name: isAdded.name,
-            email: isAdded.email,
-            address: isAdded.address,
-            phone: isAdded.phone,
-            imageURL: isAdded.imageURL,
+            ...toSafeUser(existingUser),
             googleSignIn: true,
           },
         },
       });
     } else {
       const newUser = new User({
-        name: user.name,
-        email: user.email,
-        imageURL: user.picture,
-        status: 'active'
+        name: googleUser.name,
+        email,
+        imageURL: googleUser.picture,
+        googleId: googleUser.sub,
+        authProviders: ["google"],
+        emailVerified: true,
+        status: "active",
       });
 
       const signUpUser = await newUser.save();
@@ -340,10 +584,7 @@ exports.signUpWithProvider = async (req, res, next) => {
         data: {
           token,
           user: {
-            _id: signUpUser._id,
-            name: signUpUser.name,
-            email: signUpUser.email,
-            imageURL: signUpUser.imageURL,
+            ...toSafeUser(signUpUser),
             googleSignIn: true,
           }
         },

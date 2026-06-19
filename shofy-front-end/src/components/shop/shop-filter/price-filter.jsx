@@ -27,7 +27,7 @@ const PriceFilter = ({ priceFilterValues,maxPrice }) => {
             </div>
             <div className="tp-shop-widget-filter-info d-flex align-items-center justify-content-between">
               <span className="input-range">
-                ${priceValue[0]} - ${priceValue[1]}
+                ₹{priceValue[0]} - ₹{priceValue[1]}
               </span>
               <button onClick={handlePriceFilter} className="tp-shop-widget-filter-btn" type="button">
                 Filter

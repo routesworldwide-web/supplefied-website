@@ -6,6 +6,18 @@ const isToday = require("dayjs/plugin/isToday");
 const isYesterday = require("dayjs/plugin/isYesterday");
 const isSameOrBefore = require("dayjs/plugin/isSameOrBefore");
 const isSameOrAfter = require("dayjs/plugin/isSameOrAfter");
+const {
+  createAdminNotification,
+} = require("../services/notification.service");
+
+const CANCELLATION_REASONS = {
+  ordered_by_mistake: "Ordered by mistake",
+  change_order: "Need to change the order",
+  delivery_too_long: "Delivery will take too long",
+  payment_issue: "Payment issue",
+  found_another_option: "Found another option",
+  other: "Other",
+};
 
 // Apply necessary plugins to dayjs
 dayjs.extend(customParseFormat);
@@ -105,13 +117,132 @@ module.exports.getOrderByUser = async (req, res,next) => {
 // getOrderById
 module.exports.getOrderById = async (req, res,next) => {
   try {
-    const order = await Order.findById(req.params.id);
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid order id" });
+    }
+
+    const order = await Order.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
     res.status(200).json({
       success: true,
       order,
     });
   } catch (error) {
     next(error)
+  }
+};
+
+// Customers can cancel only their own pending orders.
+module.exports.cancelOrderByUser = async (req, res, next) => {
+  try {
+    const { reasonCode, reason } = req.body || {};
+
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      return res.status(400).json({ message: "Invalid order id" });
+    }
+
+    if (!Object.prototype.hasOwnProperty.call(CANCELLATION_REASONS, reasonCode)) {
+      return res.status(400).json({
+        message: "Please select a valid cancellation reason",
+      });
+    }
+
+    const normalizedReason = String(reason || "").trim();
+    if (reasonCode === "other" && normalizedReason.length < 5) {
+      return res.status(400).json({
+        message: "Please briefly explain why you are cancelling the order",
+      });
+    }
+    if (normalizedReason.length > 500) {
+      return res.status(400).json({
+        message: "Cancellation reason cannot exceed 500 characters",
+      });
+    }
+
+    const cancellationReason =
+      reasonCode === "other"
+        ? normalizedReason
+        : normalizedReason || CANCELLATION_REASONS[reasonCode];
+    const cancelledAt = new Date();
+    const ownedOrder = await Order.findOne({
+      _id: req.params.id,
+      user: req.user._id,
+    }).select("status paymentMethod");
+
+    if (!ownedOrder) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    if (ownedOrder.status !== "pending") {
+      return res.status(409).json({
+        message:
+          ownedOrder.status === "cancel"
+            ? "This order has already been cancelled"
+            : "Only pending orders can be cancelled",
+      });
+    }
+
+    const refundStatus =
+      ownedOrder.paymentMethod === "Razorpay" ? "pending" : "not_required";
+
+    const order = await Order.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        user: req.user._id,
+        status: "pending",
+      },
+      {
+        $set: {
+          status: "cancel",
+          cancellation: {
+            reasonCode,
+            reason: cancellationReason,
+            cancelledBy: "customer",
+            cancelledAt,
+            previousStatus: "pending",
+            refundStatus,
+          },
+        },
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!order) {
+      return res.status(409).json({
+        message:
+          "The order status changed before cancellation completed. Please refresh and try again.",
+      });
+    }
+
+    await createAdminNotification({
+      type: "order",
+      category: "orders",
+      title: `Order #${order.invoice} cancelled by customer`,
+      message: `${order.name} cancelled the order. Reason: ${cancellationReason}`,
+      link: `/orders/${order._id}`,
+      entityId: order._id,
+      metadata: {
+        invoice: order.invoice,
+        customerName: order.name,
+        cancellationReason,
+        paymentMethod: order.paymentMethod,
+        refundStatus,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Your order has been cancelled",
+      order,
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -127,7 +258,9 @@ exports.getDashboardAmount = async (req, res,next) => {
     const monthStart = dayjs().startOf("month");
     const monthEnd = dayjs().endOf("month");
 
+    const validOrderFilter = { status: { $ne: "cancel" } };
     const todayOrders = await Order.find({
+      ...validOrderFilter,
       createdAt: { $gte: todayStart.toDate(), $lte: todayEnd.toDate() },
     });
 
@@ -137,12 +270,13 @@ exports.getDashboardAmount = async (req, res,next) => {
     todayOrders.forEach((order) => {
       if (order.paymentMethod === "COD") {
         todayCashPaymentAmount += order.totalAmount;
-      } else if (order.paymentMethod === "Card") {
+      } else if (order.paymentMethod === "Razorpay") {
         todayCardPaymentAmount += order.totalAmount;
       }
     });
 
     const yesterdayOrders = await Order.find({
+      ...validOrderFilter,
       createdAt: { $gte: yesterdayStart.toDate(), $lte: yesterdayEnd.toDate() },
     });
 
@@ -152,16 +286,17 @@ exports.getDashboardAmount = async (req, res,next) => {
     yesterdayOrders.forEach((order) => {
       if (order.paymentMethod === "COD") {
         yesterDayCashPaymentAmount += order.totalAmount;
-      } else if (order.paymentMethod === "Card") {
+      } else if (order.paymentMethod === "Razorpay") {
         yesterDayCardPaymentAmount += order.totalAmount;
       }
     });
 
     const monthlyOrders = await Order.find({
+      ...validOrderFilter,
       createdAt: { $gte: monthStart.toDate(), $lte: monthEnd.toDate() },
     });
 
-    const totalOrders = await Order.find();
+    const totalOrders = await Order.find(validOrderFilter);
     const todayOrderAmount = todayOrders.reduce(
       (total, order) => total + order.totalAmount,
       0
@@ -188,6 +323,10 @@ exports.getDashboardAmount = async (req, res,next) => {
       todayCashPaymentAmount,
       yesterDayCardPaymentAmount,
       yesterDayCashPaymentAmount,
+      todayOrderCount: todayOrders.length,
+      yesterdayOrderCount: yesterdayOrders.length,
+      monthlyOrderCount: monthlyOrders.length,
+      totalOrderCount: totalOrders.length,
     });
   } catch (error) {
     next(error)
@@ -196,30 +335,37 @@ exports.getDashboardAmount = async (req, res,next) => {
 // get sales report
 exports.getSalesReport = async (req, res,next) => {
   try {
-    const startOfWeek = new Date();
-    startOfWeek.setDate(startOfWeek.getDate() - 7);
+    const startOfWeek = dayjs().subtract(6, "day").startOf("day");
+    const endOfToday = dayjs().endOf("day");
 
     const salesOrderChartData = await Order.find({
-      updatedAt: {
-        $gte: startOfWeek,
-        $lte: new Date(),
+      status: { $ne: "cancel" },
+      createdAt: {
+        $gte: startOfWeek.toDate(),
+        $lte: endOfToday.toDate(),
       },
-    });
+    }).select("createdAt totalAmount");
 
-    const salesReport = salesOrderChartData.reduce((res, value) => {
-      const onlyDate = value.updatedAt.toISOString().split("T")[0];
+    const salesByDate = salesOrderChartData.reduce((result, order) => {
+      const date = dayjs(order.createdAt).format("YYYY-MM-DD");
 
-      if (!res[onlyDate]) {
-        res[onlyDate] = { date: onlyDate, total: 0, order: 0 };
+      if (!result[date]) {
+        result[date] = { total: 0, order: 0 };
       }
-      res[onlyDate].total += value.totalAmount;
-      res[onlyDate].order += 1;
-      return res;
+      result[date].total += Number(order.totalAmount || 0);
+      result[date].order += 1;
+      return result;
     }, {});
 
-    const salesReportData = Object.values(salesReport);
+    const salesReportData = Array.from({ length: 7 }, (_, index) => {
+      const date = startOfWeek.add(index, "day").format("YYYY-MM-DD");
+      return {
+        date,
+        total: Number((salesByDate[date]?.total || 0).toFixed(2)),
+        order: salesByDate[date]?.order || 0,
+      };
+    });
 
-    // Send the response to the client site
     res.status(200).json({ salesReport: salesReportData });
   } catch (error) {
     // Handle error if any
@@ -232,19 +378,86 @@ exports.mostSellingCategory = async (req, res,next) => {
   try {
     const categoryData = await Order.aggregate([
       {
-        $unwind: "$cart", // Deconstruct the cart array
-      },
-      {
-        $group: {
-          _id: "$cart.productType",
-          count: { $sum: "$cart.orderQuantity" },
+        $match: {
+          status: { $ne: "cancel" },
         },
       },
       {
-        $sort: { count: -1 },
+        $unwind: "$cart",
+      },
+      {
+        $set: {
+          categoryName: {
+            $ifNull: [
+              "$cart.category.name",
+              {
+                $ifNull: [
+                  "$cart.parent",
+                  { $ifNull: ["$cart.children", "Uncategorized"] },
+                ],
+              },
+            ],
+          },
+          itemQuantity: {
+            $convert: {
+              input: { $ifNull: ["$cart.orderQuantity", 1] },
+              to: "double",
+              onError: 1,
+              onNull: 1,
+            },
+          },
+          itemUnitPrice: {
+            $convert: {
+              input: {
+                $ifNull: [
+                  "$cart.finalPrice",
+                  {
+                    $multiply: [
+                      { $ifNull: ["$cart.price", 0] },
+                      {
+                        $subtract: [
+                          1,
+                          {
+                            $divide: [
+                              { $ifNull: ["$cart.discount", 0] },
+                              100,
+                            ],
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              to: "double",
+              onError: 0,
+              onNull: 0,
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$categoryName",
+          unitsSold: { $sum: "$itemQuantity" },
+          revenue: {
+            $sum: { $multiply: ["$itemUnitPrice", "$itemQuantity"] },
+          },
+        },
+      },
+      {
+        $sort: { revenue: -1, unitsSold: -1 },
       },
       {
         $limit: 5,
+      },
+      {
+        $project: {
+          _id: 0,
+          category: "$_id",
+          unitsSold: { $round: ["$unitsSold", 0] },
+          revenue: { $round: ["$revenue", 2] },
+        },
       },
     ]);
 
@@ -271,7 +484,7 @@ exports.getDashboardRecentOrder = async (req, res,next) => {
 
     const orders = await Order.aggregate([
       { $match: queryObject },
-      { $sort: { updatedAt: -1 } },
+      { $sort: { createdAt: -1 } },
       {
         $project: {
           invoice: 1,

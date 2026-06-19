@@ -1,17 +1,28 @@
 "use client"
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import Pagination from '../ui/Pagination';
 import ErrorMsg from '../common/error-msg';
 import CategoryEditDelete from './edit-delete-category';
-import { useDeleteCategoryMutation, useGetAllCategoriesQuery } from '@/redux/category/categoryApi';
+import { useEditCategoryMutation, useGetAllCategoriesQuery } from '@/redux/category/categoryApi';
 import usePagination from '@/hooks/use-pagination';
+import { notifyError, notifySuccess } from '@/utils/toast';
 
 const CategoryTables = () => {
   const { data: categories, isError, isLoading } = useGetAllCategoriesQuery();
-  const [deleteCategory,{data:delData,error:delErr}] = useDeleteCategoryMutation();
+  const [editCategory, { isLoading: isUpdating }] = useEditCategoryMutation();
   const paginationData = usePagination(categories?.result || [], 5);
   const { currentItems, handlePageClick, pageCount } = paginationData;
+
+  const handleFeaturedToggle = async (id: string, featured?: boolean) => {
+    try {
+      await editCategory({ id, data: { featured: !featured } }).unwrap();
+      notifySuccess("Category featured status updated");
+    } catch (error) {
+      notifyError("Category could not be updated");
+    }
+  };
+
   // decide what to render
   let content = null;
 
@@ -37,17 +48,20 @@ const CategoryTables = () => {
 
               <thead>
                 <tr className="border-b border-gray6 text-tiny">
-                  <th scope="col" className="pr-8 py-3 text-tiny text-text2 uppercase font-semibold">
+                  {/* <th scope="col" className="pr-8 py-3 text-tiny text-text2 uppercase font-semibold">
                     ID
-                  </th>
+                  </th> */}
                   <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[170px]">
                     Name
                   </th>
-                  <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[150px] text-end">
+                  {/* <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[150px] text-end">
                     Product type
-                  </th>
+                  </th> */}
                   <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[150px] text-end">
                     Items
+                  </th>
+                  <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[170px] text-end">
+                    Featured
                   </th>
                   <th scope="col" className="px-9 py-3 text-tiny text-text2 uppercase  font-semibold w-[12%] text-end">
                     Action
@@ -55,22 +69,49 @@ const CategoryTables = () => {
                 </tr>
               </thead>
               <tbody>
-                {[...currentItems.reverse()].map(item => (
+                {[...currentItems].reverse().map(item => (
                   <tr key={item._id} className="bg-white border-b border-gray6 last:border-0 text-start mx-9">
-                    <td className="px-3 py-3 pl-0 font-normal text-[#55585B]">
+                    {/* <td className="px-3 py-3 pl-0 font-normal text-[#55585B]">
                       #{item._id.slice(2, 10)}
-                    </td>
+                    </td> */}
                     <td className="pr-8 py-5 whitespace-nowrap">
                       <a href="#" className="flex items-center space-x-5">
-                        {item.img && <Image className="w-10 h-10 rounded-full shrink shrink-0 object-cover" src={item.img} alt="image" width={40} height={40} />}
+                        {item.img && <Image className="w-10 h-10 rounded-full  shrink-0 object-cover" src={item.img} alt="image" width={40} height={40} />}
                         <span className="font-medium text-heading text-hover-primary transition">{item.parent}</span>
                       </a>
                     </td>
-                    <td className="px-3 py-3 font-normal text-[#55585B] text-end">
+                    {/* <td className="px-3 py-3 font-normal text-[#55585B] text-end">
                       /{item.productType}
-                    </td>
+                    </td> */}
                     <td className="px-3 py-3 font-normal text-[#55585B] text-end">
                       {item.products?.length}
+                    </td>
+                    <td className="px-3 py-3 text-end">
+                      <button
+                        type="button"
+                        disabled={isUpdating}
+                        onClick={() => handleFeaturedToggle(item._id, item.featured)}
+                        className="inline-flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        <span
+                          className={`relative inline-flex h-6 w-11 items-center rounded-full border border-black shadow-sm transition-colors duration-200 ${
+                            item.featured ? "bg-success" : "bg-gray-300"
+                          }`}
+                        >
+                          <span
+                            className={`inline-block h-5 w-5 rounded-full border border-black bg-white shadow-md transition-transform duration-200 ${
+                              item.featured ? "translate-x-5" : "translate-x-1"
+                            }`}
+                          />
+                        </span>
+                        <span
+                          className={`text-[11px] font-medium ${
+                            item.featured ? "text-success" : "text-[#55585B]"
+                          }`}
+                        >
+                          {item.featured ? "Featured" : "Not featured"}
+                        </span>
+                      </button>
                     </td>
                     <td className="px-9 py-3 text-end">
                       <div className="flex items-center justify-end space-x-2">

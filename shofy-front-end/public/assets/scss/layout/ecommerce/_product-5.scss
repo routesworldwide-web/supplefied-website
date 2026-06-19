@@ -82,9 +82,9 @@
         &-5{
             font-weight: 500;
             font-size: 16px;
-            color: var(--tp-common-black);
+            color: var(--tp-theme-text);
             &.new-price{
-                color: var(--tp-common-black);
+                color: var(--tp-theme-text);
             }
             &.old-price{
             font-weight: 400;
@@ -199,10 +199,10 @@
             &-5{
                 font-weight: 500;
                 font-size: 15px;
-                color: var(--tp-common-black);
+                color: var(--tp-theme-text);
                 letter-spacing: -0.02em;
                 &.new-price{
-                    color: var(--tp-common-black);
+                    color: var(--tp-theme-text);
                 }
                 &.old-price{
                 font-weight: 400;

@@ -6,7 +6,7 @@ const CheckoutLogin = () => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="tp-checkout-verify-item">
-      <p className="tp-checkout-verify-reveal">
+      {/* <p className="tp-checkout-verify-reveal">
         Returning customer?{" "}
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -15,7 +15,7 @@ const CheckoutLogin = () => {
         >
           Click here to login
         </button>
-      </p>
+      </p> */}
 
       {isOpen && (
         <div id="tpReturnCustomerLoginForm" className="tp-return-customer">

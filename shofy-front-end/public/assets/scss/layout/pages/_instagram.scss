@@ -9,6 +9,19 @@
 
     &-item{
         border-radius: 8px;
+        width: 100%;
+        height: 220px;
+
+        & img{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        @media #{$xs}{
+            height: 260px;
+        }
+
         &::after{
             position: absolute;
             content: '';

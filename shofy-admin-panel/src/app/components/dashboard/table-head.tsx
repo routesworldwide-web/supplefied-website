@@ -4,7 +4,7 @@ function ThItem({ title,cls }: { title: string,cls?:string }): React.JSX.Element
   return (
     <th
       scope="col"
-      className={`px-3 py-3 text-tiny text-text2 uppercase font-semibold ${cls}`}
+      className={`px-3 py-3 text-tiny text-text3 uppercase tracking-wide font-semibold ${cls}`}
     >
       {title}
     </th>

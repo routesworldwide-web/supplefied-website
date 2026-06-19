@@ -20,6 +20,8 @@ export default function FormField({
   errors: FieldErrors<any>;
   defaultValue?:string | number;
 }) {
+  const fieldName = title.split(" ").join("_");
+
   return (
     <div className="mb-5">
       {title && (
@@ -28,18 +30,18 @@ export default function FormField({
         </p>
       )}
       <input
-        {...register(title.split(" ").join("_"), {
+        {...register(fieldName, {
           required: isRequired ? `${title} is required!` : false,
         })}
         className="input w-full h-[44px] rounded-md border border-gray6 px-6 text-base"
         type={type}
-        name={title}
-        id={title}
+        name={fieldName}
+        id={fieldName}
         placeholder={placeHolder}
         defaultValue={defaultValue}
       />
       {isRequired && (
-        <ErrorMsg msg={(errors?.[title]?.message as string) || ""} />
+        <ErrorMsg msg={(errors?.[fieldName]?.message as string) || ""} />
       )}
       {bottomTitle && (
         <span className="text-tiny leading-4">{bottomTitle}</span>

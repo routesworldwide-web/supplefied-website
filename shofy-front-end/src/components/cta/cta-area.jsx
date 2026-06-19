@@ -1,7 +1,10 @@
-import React from 'react';
+"use client";
+import React, { useState } from 'react';
 import Image from 'next/image';
 // internal
 import { AnimatedLine } from '@/svg';
+import { useSubscribeNewsletterMutation } from '@/redux/features/newsletterApi';
+import { notifyError, notifySuccess } from '@/utils/toast';
 import shape_1 from '@assets/img/subscribe/subscribe-shape-1.png';
 import shape_2 from '@assets/img/subscribe/subscribe-shape-2.png';
 import shape_3 from '@assets/img/subscribe/subscribe-shape-3.png';
@@ -15,6 +18,32 @@ function Shape({ img, num }) {
 }
 
 const CtaArea = () => {
+  const [email, setEmail] = useState("");
+  const [subscribeNewsletter, { isLoading }] = useSubscribeNewsletterMutation();
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      notifyError("Please enter your email address");
+      return;
+    }
+
+    const result = await subscribeNewsletter({
+      email: trimmedEmail,
+      source: "home-subscribe-section",
+    });
+
+    if (result.error) {
+      notifyError(result.error?.data?.message || "Subscription failed. Please try again.");
+      return;
+    }
+
+    notifySuccess(result.data?.message || "Thanks for subscribing.");
+    setEmail("");
+  };
+
   return (
     <section className="tp-subscribe-area pt-70 pb-65 theme-bg p-relative z-index-1">
       <div className="tp-subscribe-shape">
@@ -31,16 +60,24 @@ const CtaArea = () => {
         <div className="row align-items-center">
           <div className="col-xl-7 col-lg-7">
             <div className="tp-subscribe-content">
-              <span>Sale 20% off all store</span>
-              <h3 className="tp-subscribe-title">Subscribe our Newsletter</h3>
+              {/* <span>Sale 20% off all store</span> */}
+              <h3 className="tp-subscribe-title">Subscribe for supplement tips, new launches, and exclusive Supplefied offers.</h3>
             </div>
           </div>
           <div className="col-xl-5 col-lg-5">
             <div className="tp-subscribe-form">
-              <form action="#">
+              <form onSubmit={handleSubmit}>
                 <div className="tp-subscribe-input">
-                  <input type="email" placeholder="Enter Your Email" />
-                  <button type="submit">Subscribe</button>
+                  <input
+                    type="email"
+                    placeholder="Enter Your Email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    disabled={isLoading}
+                  />
+                  <button type="submit" disabled={isLoading}>
+                    {isLoading ? "Subscribing..." : "Subscribe"}
+                  </button>
                 </div>
               </form>
             </div>

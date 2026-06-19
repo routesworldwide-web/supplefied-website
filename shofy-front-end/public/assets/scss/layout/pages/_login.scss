@@ -272,15 +272,16 @@
     &-btn{
         font-weight: 500;
         font-size: 16px;
-        color: var(--tp-common-white);
-        background-color: var(--tp-common-black);
+        color: var(--tp-theme-action-text);
+        background-color: var(--tp-theme-action-bg);
+        border: 1px solid var(--tp-theme-action-border);
         padding: 14px 30px;
         text-align: center;
         display: inline-block;
 
         &:hover{
-            background-color: var(--tp-theme-primary);
-            color: var(--tp-common-white);
+            background-color: var(--tp-theme-action-hover-bg);
+            color: var(--tp-theme-action-hover-text);
         }
     }
     &-shape{

@@ -1,13 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import dayjs from "dayjs";
 // internal
 import Loading from "../common/loading";
 import ErrorMsg from "../common/error-msg";
 import CouponAction from "./coupon-action";
-import { useGetAllCouponsQuery } from "@/redux/coupon/couponApi";
+import {
+  useEditCouponMutation,
+  useGetAllCouponsQuery,
+} from "@/redux/coupon/couponApi";
 import Pagination from "../ui/Pagination";
 import usePagination from "@/hooks/use-pagination";
+import { notifyError, notifySuccess } from "@/utils/toast";
 
 // table head
 function TableHead({ title }: { title: string }) {
@@ -31,8 +35,23 @@ type IPropType = {
 
 const CouponTable = ({cls,setOpenSidebar,selectValue,searchValue}: IPropType) => {
   const { data: coupons, isError, isLoading, error } = useGetAllCouponsQuery();
+  const [editCoupon, { isLoading: isUpdatingStatus }] = useEditCouponMutation();
   const paginationData = usePagination(coupons || [], 5);
   const { currentItems, handlePageClick, pageCount } = paginationData;
+
+  const handleStatusToggle = async (
+    id: string,
+    currentStatus: "active" | "inactive"
+  ) => {
+    const status = currentStatus === "active" ? "inactive" : "active";
+
+    try {
+      await editCoupon({ id, data: { status } }).unwrap();
+      notifySuccess(`Coupon marked ${status}`);
+    } catch {
+      notifyError("Coupon status could not be updated");
+    }
+  };
   // decide to render
   let content = null;
   if (isLoading) {
@@ -52,7 +71,8 @@ const CouponTable = ({cls,setOpenSidebar,selectValue,searchValue}: IPropType) =>
     // selectValue filtering if selectValue true
     if (selectValue) {
       coupon_items = coupon_items.filter(
-        (c) => c.status.toLowerCase() === selectValue.toLowerCase()
+        (c) =>
+          (c.status || "active").toLowerCase() === selectValue.toLowerCase()
       );
     }
     content = (
@@ -109,18 +129,52 @@ const CouponTable = ({cls,setOpenSidebar,selectValue,searchValue}: IPropType) =>
                   <td className="px-3 py-3 font-normal text-[#55585B] text-end">
                     {coupon.discountPercentage}%
                   </td>
-                  <td className="px-3 py-3 font-normal text-[#55585B] text-end">
-                    <span
-                      className={`text-[11px] px-3 py-1 rounded-md leading-none font-medium text-end ${
-                        dayjs().isAfter(dayjs(coupon.endTime))
-                          ? "text-danger bg-danger/10"
-                          : "text-success bg-success/10"
+                  <td className="px-3 py-3 text-end">
+                    <button
+                      type="button"
+                      disabled={isUpdatingStatus}
+                      onClick={() =>
+                        handleStatusToggle(
+                          coupon._id,
+                          coupon.status || "active"
+                        )
+                      }
+                      className="inline-flex items-center justify-end gap-2 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60"
+                      aria-label={`Mark ${coupon.title} ${
+                        coupon.status === "inactive" ? "active" : "inactive"
                       }`}
                     >
-                      {dayjs().isAfter(dayjs(coupon.endTime))
-                        ? "Expired"
-                        : "Active"}
-                    </span>
+                      <span
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full border border-black shadow-sm transition-colors duration-200 ${
+                          coupon.status !== "inactive" &&
+                          !dayjs().isAfter(dayjs(coupon.endTime))
+                            ? "bg-success"
+                            : "bg-gray-300"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-5 w-5 rounded-full border border-black bg-white shadow-md transition-transform duration-200 ${
+                            coupon.status !== "inactive"
+                              ? "translate-x-5"
+                              : "translate-x-1"
+                          }`}
+                        />
+                      </span>
+                      <span
+                        className={`text-[11px] font-medium ${
+                          coupon.status === "inactive" ||
+                          dayjs().isAfter(dayjs(coupon.endTime))
+                            ? "text-danger"
+                            : "text-success"
+                        }`}
+                      >
+                        {dayjs().isAfter(dayjs(coupon.endTime))
+                          ? "Expired"
+                          : coupon.status === "inactive"
+                          ? "Inactive"
+                          : "Active"}
+                      </span>
+                    </button>
                   </td>
 
                   <td className="px-3 py-3 text-end">

@@ -1,24 +1,27 @@
 'use client';
-import { useState } from "react";
-import { CardElement } from "@stripe/react-stripe-js";
 import { useSelector } from "react-redux";
 // internal
 import useCartInfo from "@/hooks/use-cart-info";
 import ErrorMsg from "../common/error-msg";
+import {
+  formatDiscountPercent,
+  formatPrice,
+  getLineTotal,
+} from "@/utils/pricing";
+import { getProductTypeLabel } from "@/utils/product-type-label";
 
 const CheckoutOrderArea = ({ checkoutData }) => {
   const {
-    handleShippingCost,
     cartTotal = 0,
-    stripe,
     isCheckoutSubmit,
-    clientSecret,
     register,
     errors,
-    showCard,
-    setShowCard,
     shippingCost,
-    discountAmount
+    discountAmount,
+    shippingThreshold,
+    couponInfo,
+    discountPercentage,
+    discountProductType,
   } = checkoutData;
   const { cart_products } = useSelector((state) => state.cart);
   const { total } = useCartInfo();
@@ -40,12 +43,12 @@ const CheckoutOrderArea = ({ checkoutData }) => {
               <p>
                 {item.title} <span> x {item.orderQuantity}</span>
               </p>
-              <span>${item.price.toFixed(2)}</span>
+              <span>{formatPrice(getLineTotal(item))}</span>
             </li>
           ))}
 
           {/*  shipping */}
-          <li className="tp-order-info-list-shipping">
+          {/* <li className="tp-order-info-list-shipping">
             <span>Shipping</span>
             <div className="tp-order-info-list-shipping-item d-flex flex-column align-items-end">
               <span>
@@ -61,7 +64,7 @@ const CheckoutOrderArea = ({ checkoutData }) => {
                   onClick={() => handleShippingCost(60)}
                   htmlFor="flat_shipping"
                 >
-                  Delivery: Today Cost :<span>$60.00</span>
+                  Delivery: Today Cost :<span>₹60.00</span>
                 </label>
                 <ErrorMsg msg={errors?.shippingOption?.message} />
               </span>
@@ -78,35 +81,46 @@ const CheckoutOrderArea = ({ checkoutData }) => {
                   onClick={() => handleShippingCost(20)}
                   htmlFor="flat_rate"
                 >
-                  Delivery: 7 Days Cost: <span>$20.00</span>
+                  Delivery: 7 Days Cost: <span>₹20.00</span>
                 </label>
                 <ErrorMsg msg={errors?.shippingOption?.message} />
               </span>
             </div>
-          </li>
+          </li> */}
 
            {/*  subtotal */}
            <li className="tp-order-info-list-subtotal">
             <span>Subtotal</span>
-            <span>${total.toFixed(2)}</span>
+            <span>{formatPrice(total)}</span>
           </li>
 
            {/*  shipping cost */}
            <li className="tp-order-info-list-subtotal">
             <span>Shipping Cost</span>
-            <span>${shippingCost.toFixed(2)}</span>
+            <span>
+              {shippingCost > 0
+                ? formatPrice(shippingCost)
+                : `Free above ${formatPrice(shippingThreshold)}`}
+            </span>
           </li>
 
-           {/* discount */}
+           {/* coupon discount */}
            <li className="tp-order-info-list-subtotal">
-            <span>Discount</span>
-            <span>${discountAmount.toFixed(2)}</span>
+            <span>
+              Coupon Discount
+              {couponInfo?.couponCode && (
+                <small className="d-block">
+                  {couponInfo.couponCode} - {formatDiscountPercent(discountPercentage)} off {getProductTypeLabel(discountProductType)}
+                </small>
+              )}
+            </span>
+            <span>{formatPrice(discountAmount)}</span>
           </li>
 
           {/* total */}
           <li className="tp-order-info-list-total">
             <span>Total</span>
-            <span>${parseFloat(cartTotal).toFixed(2)}</span>
+            <span>{formatPrice(cartTotal)}</span>
           </li>
         </ul>
       </div>
@@ -117,43 +131,20 @@ const CheckoutOrderArea = ({ checkoutData }) => {
               required: `Payment Option is required!`,
             })}
             type="radio"
-            id="back_transfer"
+            id="razorpay"
             name="payment"
-            value="Card"
+            value="Razorpay"
           />
-          <label onClick={() => setShowCard(true)} htmlFor="back_transfer" data-bs-toggle="direct-bank-transfer">
-            Credit Card
+          <label htmlFor="razorpay" data-bs-toggle="direct-bank-transfer">
+            Razorpay
           </label>
-          {showCard && (
-            <div className="direct-bank-transfer">
-              <div className="payment_card">
-                <CardElement
-                  options={{
-                    style: {
-                      base: {
-                        fontSize: "16px",
-                        color: "#424770",
-                        "::placeholder": {
-                          color: "#aab7c4",
-                        },
-                      },
-                      invalid: {
-                        color: "#9e2146",
-                      },
-                    },
-                  }}
-                />
-              </div>
-            </div>
-          )}
           <ErrorMsg msg={errors?.payment?.message} />
         </div>
         <div className="tp-checkout-payment-item">
           <input
             {...register(`payment`, {
-              required: `Payment Option is required!`,
+            required: `Payment Option is required!`,
             })}
-            onClick={() => setShowCard(false)}
             type="radio"
             id="cod"
             name="payment"
@@ -167,7 +158,7 @@ const CheckoutOrderArea = ({ checkoutData }) => {
       <div className="tp-checkout-btn-wrapper">
         <button
           type="submit"
-          disabled={!stripe || isCheckoutSubmit}
+          disabled={isCheckoutSubmit}
           className="tp-checkout-btn w-100"
         >
           Place Order

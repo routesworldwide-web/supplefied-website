@@ -11,7 +11,7 @@ export interface ICoupon {
   startTime:string;
   createdAt: string;
   updatedAt: string;
-  status:string;
+  status: "active" | "inactive";
 }
 
 
@@ -24,5 +24,5 @@ export interface IAddCoupon {
   minimumAmount: number;
   productType: string;
   startTime?:string;
-  status?:string;
+  status?: "active" | "inactive";
 }

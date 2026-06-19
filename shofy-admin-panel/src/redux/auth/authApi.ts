@@ -13,30 +13,6 @@ export const authApi = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
-
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-        try {
-          const result = await queryFulfilled;
-          const { token, ...others } = result.data;
-          Cookies.set(
-            "admin",
-            JSON.stringify({
-              accessToken: token,
-              user: others
-            }),
-            { expires: 0.5 }
-          );
-
-          dispatch(
-            userLoggedIn({
-              accessToken: token,
-              user: others
-            })
-          );
-        } catch (err) {
-          // do nothing
-        }
-      },
     }),
     // login
     loginAdmin: builder.mutation<IAdminLoginRes, IAdminLoginAdd>({
@@ -151,6 +127,14 @@ export const authApi = apiSlice.injectEndpoints({
       },
       invalidatesTags: ["AllStaff"],
     }),
+    updateStaffStatus: builder.mutation<{ message: string }, { id: string; status: "Pending" | "Active" | "Inactive" }>({
+      query: ({ id, status }) => ({
+        url: `/api/admin/update-status/${id}`,
+        method: "PATCH",
+        body: { status },
+      }),
+      invalidatesTags: ["AllStaff", "Stuff"],
+    }),
     // get single product
     getStuff: builder.query<IStuff, string>({
       query: (id) => `/api/admin/get/${id}`,
@@ -169,5 +153,6 @@ export const {
   useGetAllStaffQuery,
   useAddStaffMutation,
   useDeleteStaffMutation,
+  useUpdateStaffStatusMutation,
   useGetStuffQuery,
 } = authApi;

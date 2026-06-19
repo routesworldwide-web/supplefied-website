@@ -15,7 +15,9 @@ const customStyles = {
     bottom: "auto",
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
-    height: "calc(100% - 300px)",
+    width: "min(1120px, calc(100vw - 48px))",
+    maxHeight: "calc(100vh - 48px)",
+    overflow: "hidden",
   },
 };
 
@@ -27,6 +29,10 @@ const ProductModal = () => {
   const [activeImg, setActiveImg] = useState(img);
   const [loading,setLoading] = useState(false);
   const dispatch = useDispatch();
+  const galleryImages = [
+    { img },
+    ...(imageURLs?.filter((item) => item?.img && item.img !== img) || []),
+  ];
   // active image change when img change
   useEffect(() => {
     setActiveImg(img);
@@ -46,6 +52,7 @@ const ProductModal = () => {
         isOpen={isModalOpen}
         onRequestClose={() => dispatch(handleModalClose())}
         style={customStyles}
+        appElement={typeof document !== "undefined" ? document.getElementById("wrapper") : undefined}
         contentLabel="Product Modal"
       >
         <div className="tp-product-modal">
@@ -61,7 +68,7 @@ const ProductModal = () => {
             <DetailsThumbWrapper
               activeImg={activeImg}
               handleImageActive={handleImageActive}
-              imageURLs={imageURLs}
+              imageURLs={galleryImages}
               imgWidth={416}
               imgHeight={480}
               loading={loading}

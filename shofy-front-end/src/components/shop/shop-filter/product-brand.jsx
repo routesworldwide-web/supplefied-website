@@ -8,7 +8,7 @@ import { useGetActiveBrandsQuery } from "@/redux/features/brandApi";
 import { handleFilterSidebarClose } from "@/redux/features/shop-filter-slice";
 import ShopBrandLoader from "@/components/loader/shop/shop-brand-loader";
 
-const ProductBrand = ({setCurrPage,shop_right=false}) => {
+const ProductBrand = ({setCurrPage}) => {
   const { data: brands, isError, isLoading } = useGetActiveBrandsQuery();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -16,7 +16,7 @@ const ProductBrand = ({setCurrPage,shop_right=false}) => {
   const handleBrandRoute = (brand) => {
     setCurrPage(1);
     router.push(
-      `/${shop_right?'shop-right-sidebar':'shop'}?brand=${brand
+      `/shop?brand=${brand
         .toLowerCase()
         .replace("&", "")
         .split(" ")

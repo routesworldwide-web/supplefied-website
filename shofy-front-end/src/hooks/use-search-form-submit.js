@@ -1,25 +1,34 @@
 'use client';
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const useSearchFormSubmit = () => {
   const router = useRouter();
-  const [searchText, setSearchText] = useState("");
-  const [category, setCategory] = useState("");
+  const searchParams = useSearchParams();
+  const querySearchText = searchParams.get("searchText") || "";
+  const queryProductType = searchParams.get("productType") || "";
+  const [searchText, setSearchText] = useState(querySearchText);
+  const [category, setCategory] = useState(queryProductType);
+
+  useEffect(() => {
+    setSearchText(querySearchText);
+    setCategory(queryProductType);
+  }, [querySearchText, queryProductType]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const trimmedSearchText = searchText.trim();
 
-    if (searchText) {
-      let route = `/search?searchText=${searchText}`;
+    if (trimmedSearchText) {
+      const params = new URLSearchParams({
+        searchText: trimmedSearchText,
+      });
 
       if (category && category !== "Select Category") {
-        route += `&productType=${category}`;
-        setCategory("");
+        params.set("productType", category);
       }
 
-      router.push(route);
-      setSearchText("");
+      router.push(`/search?${params.toString()}`);
     } else {
       router.push(`/`);
       setSearchText("");

@@ -130,6 +130,10 @@
                             }
                         }
                         &-desc{
+                            & > span{
+                                color: var(--tp-theme-text);
+                            }
+
                             & p{
                                 font-size: 15px;
                                 margin-bottom: 0;
@@ -143,7 +147,7 @@
                         &-subtotal{
                             & span{
                                 &:last-child{
-                                    color: var(--tp-theme-primary);
+                                    color: var(--tp-theme-text);
                                 }
                             }
                         }
@@ -170,7 +174,7 @@
                                     padding-right: 27px;
 
                                     & span{
-                                        color: var(--tp-theme-primary);
+                                        color: var(--tp-theme-text);
                                     }
 
                                     &:hover{
@@ -209,6 +213,9 @@
                             & span{
                                 font-size: 16px;
                                 font-weight: 500;
+                                &:last-child{
+                                    color: var(--tp-theme-text);
+                                }
                             }
                         }
                     }

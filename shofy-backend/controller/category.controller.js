@@ -32,7 +32,7 @@ exports.addAllCategory = async (req,res,next) => {
 // add all category
 exports.getShowCategory = async (req,res,next) => {
   try {
-    const result = await categoryServices.getShowCategoryServices();
+    const result = await categoryServices.getShowCategoryServices(req.query);
     res.status(200).json({
       success:true,
       result,
@@ -59,7 +59,7 @@ exports.getAllCategory = async (req,res,next) => {
 // add all category
 exports.getProductTypeCategory = async (req,res,next) => {
   try {
-    const result = await categoryServices.getCategoryTypeService(req.params.type);
+    const result = await categoryServices.getCategoryTypeService(req.params.type, req.query);
     res.status(200).json({
       success:true,
       result,

@@ -1,5 +1,5 @@
 'use client';
-import React,{useState} from "react";
+import React,{useEffect,useState} from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
@@ -21,6 +21,8 @@ const ReviewForm = ({product_id}) => {
   const { user } = useSelector((state) => state.auth);
   const [rating, setRating] = useState(0);
   const [addReview, {}] = useAddReviewMutation();
+  const userName = user?.name || "";
+  const userEmail = user?.email || "";
 
   // Catch Rating value
   const handleRating = (rate) => {
@@ -28,18 +30,32 @@ const ReviewForm = ({product_id}) => {
   }
 
    // react hook form
-   const {register,handleSubmit,formState: { errors },reset} = useForm({
+   const {register,handleSubmit,formState: { errors },reset,setValue} = useForm({
     resolver: yupResolver(schema),
+    defaultValues: {
+      name: userName,
+      email: userEmail,
+      comment: "",
+    },
   });
+
+  useEffect(() => {
+    setValue("name", userName);
+    setValue("email", userEmail);
+  }, [setValue, userEmail, userName]);
+
   // on submit
   const onSubmit = (data) => {
     if(!user){
       notifyError("Please login first");
       return;
     }
+    if (!rating) {
+      notifyError("Please select a rating");
+      return;
+    }
     else {
       addReview({
-        userId: user?._id,
         productId: product_id,
         rating: rating,
         comment: data.comment,
@@ -48,10 +64,11 @@ const ReviewForm = ({product_id}) => {
           notifyError(result?.error?.data?.message);
         } else {
           notifySuccess(result?.data?.message);
+          reset({ name: userName, email: userEmail, comment: "" });
+          setRating(0);
         }
       });
     }
-    reset();
   };
 
   return (
@@ -75,7 +92,7 @@ const ReviewForm = ({product_id}) => {
           <div className="tp-product-details-review-input-title">
             <label htmlFor="msg">Your Review</label>
           </div>
-          <ErrorMsg msg={errors.name?.comment} />
+          <ErrorMsg msg={errors.comment?.message} />
         </div>
         <div className="tp-product-details-review-input-box">
           <div className="tp-product-details-review-input">
@@ -84,28 +101,30 @@ const ReviewForm = ({product_id}) => {
               name="name"
               id="name"
               type="text"
-              placeholder="Shahnewaz Sakil"
+              placeholder={user ? "Your account name" : "Login to autofill your name"}
+              readOnly={Boolean(userName)}
             />
           </div>
           <div className="tp-product-details-review-input-title">
             <label htmlFor="name">Your Name</label>
           </div>
-          <ErrorMsg msg={errors.name?.name} />
+          <ErrorMsg msg={errors.name?.message} />
         </div>
         <div className="tp-product-details-review-input-box">
           <div className="tp-product-details-review-input">
             <input
-            {...register("email", { required: `Name is required!` })}
+            {...register("email", { required: `Email is required!` })}
               name="email"
               id="email"
               type="email"
-              placeholder="support@supplefied.com"
+              placeholder={user ? "Your account email" : "Login to autofill your email"}
+              readOnly={Boolean(userEmail)}
             />
           </div>
           <div className="tp-product-details-review-input-title">
             <label htmlFor="email">Your Email</label>
           </div>
-          <ErrorMsg msg={errors.name?.email} />
+          <ErrorMsg msg={errors.email?.message} />
         </div>
       </div>
       <div className="tp-product-details-review-btn-wrapper">

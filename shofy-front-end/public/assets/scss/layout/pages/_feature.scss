@@ -167,8 +167,20 @@
     }
     &-icon-2{
         & span{
+            width: 36px;
+            height: 36px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             font-size: 35px;
-            color: var(--tp-common-black);
+            color: var(--tp-pink-1);
+            line-height: 1;
+
+            & svg{
+                width: 28px;
+                height: 28px;
+                display: block;
+            }
         }
     }
     &-content-2{

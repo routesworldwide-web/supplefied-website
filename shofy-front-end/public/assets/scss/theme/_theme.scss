@@ -146,6 +146,53 @@ body {
 	line-height: 26px;
 }
 
+.tp-home-watermark {
+	background-color: var(--tp-common-white);
+	background-image:
+		linear-gradient(rgba(255, 255, 255, .84), rgba(255, 255, 255, .84)),
+		url('/assets/img/logo/supplefied_logo.png'),
+		url('/assets/img/logo/supplefied_logo.png'),
+		url('/assets/img/logo/supplefied_logo.png');
+	background-position:
+		center,
+		center 10%,
+		center 50%,
+		center 90%;
+	background-repeat:
+		no-repeat,
+		no-repeat,
+		no-repeat,
+		no-repeat;
+	background-size:
+		100% 100%,
+		clamp(420px, 58vw, 820px) auto,
+		clamp(420px, 58vw, 820px) auto,
+		clamp(420px, 58vw, 820px) auto;
+
+	@media #{$sm, $xs} {
+		background-image:
+			linear-gradient(rgba(255, 255, 255, .86), rgba(255, 255, 255, .86)),
+			url('/assets/img/logo/supplefied_logo.png'),
+			url('/assets/img/logo/supplefied_logo.png'),
+			url('/assets/img/logo/supplefied_logo.png');
+		background-position:
+			center,
+			center 12%,
+			center 50%,
+			center 88%;
+		background-repeat:
+			no-repeat,
+			no-repeat,
+			no-repeat,
+			no-repeat;
+		background-size:
+			100% 100%,
+			88vw auto,
+			88vw auto,
+			88vw auto;
+	}
+}
+
 a{
 	text-decoration: none;
 }

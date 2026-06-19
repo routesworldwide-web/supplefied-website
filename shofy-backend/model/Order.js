@@ -50,6 +50,28 @@ const orderSchema = new mongoose.Schema(
       required: true,
       default: 0,
     },
+    coupon: {
+      title: {
+        type: String,
+        required: false,
+      },
+      couponCode: {
+        type: String,
+        required: false,
+      },
+      discountPercentage: {
+        type: Number,
+        required: false,
+      },
+      productType: {
+        type: String,
+        required: false,
+      },
+      discountAmount: {
+        type: Number,
+        required: false,
+      },
+    },
     totalAmount: {
       type: Number,
       required: true,
@@ -82,6 +104,46 @@ const orderSchema = new mongoose.Schema(
       type: String,
       enum: ["pending", "processing", "delivered",'cancel'],
       lowercase: true,
+    },
+    cancellation: {
+      reasonCode: {
+        type: String,
+        enum: [
+          "ordered_by_mistake",
+          "change_order",
+          "delivery_too_long",
+          "payment_issue",
+          "found_another_option",
+          "other",
+          "admin_cancelled",
+        ],
+        required: false,
+      },
+      reason: {
+        type: String,
+        trim: true,
+        maxlength: 500,
+        required: false,
+      },
+      cancelledBy: {
+        type: String,
+        enum: ["customer", "admin"],
+        required: false,
+      },
+      cancelledAt: {
+        type: Date,
+        required: false,
+      },
+      previousStatus: {
+        type: String,
+        enum: ["pending", "processing"],
+        required: false,
+      },
+      refundStatus: {
+        type: String,
+        enum: ["not_required", "pending", "processed", "failed"],
+        required: false,
+      },
     },
   },
   {

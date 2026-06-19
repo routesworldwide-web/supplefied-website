@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 // internal
 import Menus from "./header-com/menus";
 import useSticky from "@/hooks/use-sticky";
-import logo from "@assets/img/logo/Supplified_logo.png";
+import logo from "@assets/img/logo/supplefied_logo2.png";
 import useCartInfo from "@/hooks/use-cart-info";
 import OffCanvas from "@/components/common/off-canvas";
 import { openCartMini } from "@/redux/features/cartSlice";
@@ -19,6 +19,7 @@ import { CartTwo, CategoryMenu, Compare, Menu, Phone, ShippingCar, Wishlist } fr
 
 const Header = () => {
   const { wishlist } = useSelector((state) => state.wishlist);
+  const { compareItems } = useSelector((state) => state.compare);
   const [isOffCanvasOpen, setIsCanvasOpen] = useState(false);
   const [isCategoryActive, setIsCategoryActive] = useState(false);
   const { quantity } = useCartInfo();
@@ -37,7 +38,7 @@ const Header = () => {
                     <span>
                       <ShippingCar />
                     </span>
-                    <p>FREE Express Shipping On Orders ₹ 900+</p>
+                    <p>FREE Express Shipping On Orders ₹ 200+</p>
                   </div>
                 </div>
                 <div className="col-md-6">
@@ -110,9 +111,9 @@ const Header = () => {
                         </span>
                       </div>
                       <div className="tp-header-contact-content">
-                        <h5>Contact Us</h5>
+                        <h5 className="text-end">Contact Us</h5>
                         <p>
-                          <a href="tel:+918796200495">+918796200495</a>
+                          <a href="tel:+918796200495">+91 9891238727</a>
                         </p>
                       </div>
                     </div>
@@ -137,7 +138,7 @@ const Header = () => {
                 </div>
               </div>
               <div className="col-xl-6 col-lg-6 col-md-6 d-none d-md-block">
-                <div className="tp-header-sticky-menu main-menu menu-style-1 d-none d-lg-block">
+                <div className="tp-header-sticky-menu main-menu menu-style-1 d-none d-lg-block gap-5">
                   <nav id="mobile-menu">
                     <Menus />
                   </nav>
@@ -148,6 +149,7 @@ const Header = () => {
                   <div className="tp-header-action-item d-none d-lg-block">
                     <Link href="/compare" className="tp-header-action-btn">
                       <Compare />
+                      <span className="tp-header-action-badge">{compareItems.length}</span>
                     </Link>
                   </div>
                   <div className="tp-header-action-item d-none d-lg-block">

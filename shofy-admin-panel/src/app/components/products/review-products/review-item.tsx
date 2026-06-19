@@ -2,53 +2,135 @@ import dayjs from "dayjs";
 import Image from "next/image";
 import React from "react";
 import { Rating } from "react-simple-star-rating";
-import { IProduct } from "@/types/product-type";
 import DeleteReviews from "./delete-reviews";
+import { useUpdateReviewMutation } from "@/redux/review/reviewApi";
+import { notifyError, notifySuccess } from "@/utils/toast";
 
-const ReviewItem = ({ item }: { item: IProduct }) => {
-  // console.log('review-item',item)
-  const averageRating =
-    item.reviews && item.reviews?.length > 0
-      ? item.reviews.reduce((acc, review) => acc + review.rating, 0) /
-        item.reviews.length
-      : 0;
+export type ReviewRow = {
+  product: {
+    _id: string;
+    title: string;
+    img: string;
+  };
+  review: {
+    _id: string;
+    userId?: {
+      _id: string;
+      name: string;
+      email: string;
+    };
+    rating: number;
+    comment?: string;
+    status?: "Show" | "Hide";
+    updatedAt: string;
+    createdAt: string;
+  };
+};
+
+const ReviewItem = ({
+  item,
+  isHighlighted = false,
+}: {
+  item: ReviewRow;
+  isHighlighted?: boolean;
+}) => {
+  const { product, review } = item;
+  const reviewStatus = review.status || "Show";
+  const [updateReview, { isLoading }] = useUpdateReviewMutation();
+
+  const handleVisibilityToggle = async () => {
+    try {
+      await updateReview({
+        id: review._id,
+        status: reviewStatus === "Show" ? "Hide" : "Show",
+      }).unwrap();
+      notifySuccess("Review visibility updated");
+    } catch (error) {
+      notifyError("Review could not be updated");
+    }
+  };
+
   return (
     <tr
-      key={item._id}
-      className="bg-white border-b border-gray6 last:border-0 text-start mx-9"
+      id={`review-${review._id}`}
+      className={`border-b border-gray6 last:border-0 text-start transition-colors ${
+        isHighlighted ? "bg-themeLight/60" : "bg-white"
+      }`}
     >
-      <td className="pr-8 py-5 whitespace-nowrap">
-        <a href="#" className="flex items-center space-x-5">
+      <td className="pr-5 py-5 align-middle">
+        <div className="flex min-w-0 items-center gap-4">
           <Image
-            className="w-[60px] h-[60px] rounded-md"
-            src={item.img}
+            className="h-[60px] w-[60px] shrink-0 rounded-md object-cover"
+            src={product.img}
             alt="product-img"
-            width={282}
-            height={300}
+            width={60}
+            height={60}
           />
-          <span className="font-medium text-heading text-hover-primary transition">
-            {item.title}
+          <span className="min-w-0 break-words font-medium leading-5 text-heading">
+            {product.title}
           </span>
-        </a>
+        </div>
       </td>
-      <td className="px-3 py-3 font-normal text-heading text-end">
-        <div className="flex justify-end items-center space-x-1 text-tiny">
-          <span className="text-yellow flex items-center space-x-1">
+      <td className="px-3 py-3 align-middle font-normal text-[#55585B]">
+        <span className="block break-words font-medium leading-5 text-heading">
+          {review.userId?.name || "Unknown user"}
+        </span>
+        {review.userId?.email && (
+          <span className="mt-1 block break-all text-tiny leading-5">
+            {review.userId.email}
+          </span>
+        )}
+      </td>
+      <td className="px-3 py-3 align-middle font-normal text-[#55585B]">
+        <p className="mb-0 whitespace-normal break-words leading-5">
+          {review.comment || "No review content"}
+        </p>
+      </td>
+      <td className="px-3 py-3 align-middle font-normal text-heading text-end">
+        <div className="flex items-center justify-end gap-1 whitespace-nowrap text-tiny">
+          <span className="flex shrink-0 items-center text-yellow">
             <Rating
               allowFraction
               size={18}
-              initialValue={averageRating}
+              initialValue={review.rating}
               readonly={true}
             />
           </span>
-          <span>{averageRating}</span>
+          <span>{review.rating}</span>
         </div>
       </td>
-      <td className="px-3 py-3 font-normal text-[#55585B] text-end">
-        {dayjs(item.updatedAt).format("MMM D, YYYY h:mm A")}
+      <td className="px-3 py-3 align-middle text-end">
+        <button
+          type="button"
+          disabled={isLoading}
+          onClick={handleVisibilityToggle}
+          className="inline-flex items-center gap-2 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <span
+            className={`relative inline-flex h-6 w-11 items-center rounded-full border border-black shadow-sm transition-colors duration-200 ${
+              reviewStatus === "Show" ? "bg-success" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 rounded-full border border-black bg-white shadow-md transition-transform duration-200 ${
+                reviewStatus === "Show" ? "translate-x-5" : "translate-x-1"
+              }`}
+            />
+          </span>
+          <span
+            className={`text-[11px] font-medium ${
+              reviewStatus === "Show" ? "text-success" : "text-[#55585B]"
+            }`}
+          >
+            {reviewStatus === "Show" ? "Shown" : "Hidden"}
+          </span>
+        </button>
       </td>
-      <td className="px-9 py-3 text-end">
-        <DeleteReviews id={item._id} />
+      <td className="px-3 py-3 align-middle font-normal leading-5 text-[#55585B] text-end">
+        {dayjs(review.updatedAt).format("MMM D, YYYY h:mm A")}
+      </td>
+      <td className="px-3 py-3 align-middle text-end">
+        <DeleteReviews id={product._id} />
       </td>
     </tr>
   );

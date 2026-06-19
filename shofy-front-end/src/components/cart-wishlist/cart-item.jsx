@@ -6,9 +6,12 @@ import Link from "next/link";
 // internal
 import { Close, Minus, Plus } from "@/svg";
 import { add_cart_product, quantityDecrement, remove_product } from "@/redux/features/cartSlice";
+import { getProductDetailsUrl } from "@/utils/product-url";
+import { formatPrice, getLineTotal } from "@/utils/pricing";
 
 const CartItem = ({product}) => {
-  const {_id, img,title,price, orderQuantity = 0 } = product || {};
+  const {_id, img,title, orderQuantity = 0 } = product || {};
+  const productUrl = getProductDetailsUrl(product);
 
   const dispatch = useDispatch();
 
@@ -30,17 +33,17 @@ const CartItem = ({product}) => {
     <tr>
       {/* img */}
       <td className="tp-cart-img">
-        <Link href={`/product-details/${_id}`}>
+        <Link href={productUrl}>
           <Image src={img} alt="product img" width={70} height={100} />
         </Link>
       </td>
       {/* title */}
       <td className="tp-cart-title">
-        <Link href={`/product-details/${_id}`}>{title}</Link>
+        <Link href={productUrl}>{title}</Link>
       </td>
       {/* price */}
       <td className="tp-cart-price">
-        <span>${(price * orderQuantity).toFixed(2)}</span>
+        <span>{formatPrice(getLineTotal(product))}</span>
       </td>
       {/* quantity */}
       <td className="tp-cart-quantity">

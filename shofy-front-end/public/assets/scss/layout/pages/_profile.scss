@@ -271,13 +271,14 @@
 
                     & .tp-btn{
                         padding: 7px 18px;
-                        background-color: var(--tp-grey-1);
-                        color: var(--tp-common-black);
+                        background-color: var(--tp-theme-action-bg);
+                        color: var(--tp-theme-action-text);
+                        border-color: var(--tp-theme-action-border);
                         font-weight: 500;
                         min-width: 90px;
                         &:hover{
-                            color: var(--tp-common-white);
-                            background-color: var(--tp-theme-primary);
+                            color: var(--tp-theme-action-hover-text);
+                            background-color: var(--tp-theme-action-hover-bg);
                         }
                     }
                     
@@ -504,8 +505,8 @@
                     height: 25px;
                     line-height: 20px;
                     border: 2px solid var(--tp-common-white);
-                    background-color: var(--tp-theme-primary);
-                    color: var(--tp-common-white);
+                    background-color: var(--tp-theme-action-bg);
+                    color: var(--tp-theme-action-text);
                     border-radius: 50%;
                     font-size: 13px;
                     font-weight: 500;
@@ -585,16 +586,17 @@
     display: inline-block;
     font-size: 14px;
     font-weight: 500;
-    color: var(--tp-common-black);
+    color: var(--tp-theme-action-text);
+    background-color: var(--tp-theme-action-bg);
     font-family: var(--tp-ff-space);
     padding: 6px 18px;
-    border: 1px solid rgba($color: $black, $alpha: .12);
+    border: 1px solid var(--tp-theme-action-border);
     text-align: center;
 
     &:hover{
-        background-color: var(--tp-theme-primary);
-        border-color: var(--tp-theme-primary);
-        color: var(--tp-common-white);
+        background-color: var(--tp-theme-action-hover-bg);
+        border-color: var(--tp-theme-action-border);
+        color: var(--tp-theme-action-hover-text);
     }
 }
 

@@ -52,7 +52,11 @@ const CheckoutArea = () => {
               <form onSubmit={handleSubmit(submitHandler)}>
                 <div className="row">
                   <div className="col-lg-7">
-                    <CheckoutBillingArea register={register} errors={errors} />
+                    <CheckoutBillingArea
+                      register={register}
+                      errors={errors}
+                      checkoutData={checkoutData}
+                    />
                   </div>
                   <div className="col-lg-5">
                     <CheckoutOrderArea checkoutData={checkoutData} />

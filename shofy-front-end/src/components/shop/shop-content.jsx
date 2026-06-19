@@ -2,20 +2,12 @@
 import React,{ useState} from 'react';
 import Pagination from "@/ui/Pagination";
 import ProductItem from "../products/fashion/product-item";
-import CategoryFilter from "./shop-filter/category-filter";
-import ColorFilter from "./shop-filter/color-filter";
-import PriceFilter from "./shop-filter/price-filter";
-import ProductBrand from "./shop-filter/product-brand";
-import StatusFilter from "./shop-filter/status-filter";
-import TopRatedProducts from "./shop-filter/top-rated-products";
 import ShopListItem from "./shop-list-item";
 import ShopTopLeft from "./shop-top-left";
 import ShopTopRight from "./shop-top-right";
-import ResetButton from "./shop-filter/reset-button";
 
-const ShopContent = ({all_products,products,otherProps,shop_right,hidden_sidebar}) => {
-  const {priceFilterValues,selectHandleFilter,currPage,setCurrPage} = otherProps;
-  const {setPriceValue} = priceFilterValues || {};
+const ShopContent = ({all_products,products,otherProps}) => {
+  const {selectHandleFilter,currPage,setCurrPage} = otherProps;
   const [filteredRows, setFilteredRows] = useState(products);
   const [pageStart, setPageStart] = useState(0);
   const [countOfPage, setCountOfPage] = useState(12);
@@ -26,40 +18,12 @@ const ShopContent = ({all_products,products,otherProps,shop_right,hidden_sidebar
     setCountOfPage(pageCount);
   };
 
-  // max price
-  const maxPrice = all_products.reduce((max, product) => {
-    return product.price > max ? product.price : max;
-  }, 0);
   return (
     <>
      <section className="tp-shop-area pb-120">
         <div className="container">
           <div className="row">
-            {!shop_right && !hidden_sidebar && (
-              <div className="col-xl-3 col-lg-4">
-                <div className="tp-shop-sidebar mr-10">
-                  {/* filter */}
-                  <PriceFilter
-                    priceFilterValues={priceFilterValues}
-                    maxPrice={maxPrice}
-                  />
-                  {/* status */}
-                  <StatusFilter setCurrPage={setCurrPage} />
-                  {/* categories */}
-                  <CategoryFilter setCurrPage={setCurrPage} />
-                  {/* color */}
-                  <ColorFilter setCurrPage={setCurrPage} />
-                  {/* product rating */}
-                  <TopRatedProducts />
-                  {/* brand */}
-                  <ProductBrand setCurrPage={setCurrPage} />
-                  {/* reset filter */}
-                  <ResetButton setPriceValues={setPriceValue} maxPrice={maxPrice} />
-                </div>
-              </div>
-            )}
-
-            <div className={`${hidden_sidebar ? 'col-xl-12 col-lg-12' : 'col-xl-9 col-lg-8'}`}>
+            <div className="col-xl-12 col-lg-12">
               <div className="tp-shop-main-wrapper">
                 <div className="tp-shop-top mb-45">
                   <div className="row">
@@ -98,7 +62,7 @@ const ShopContent = ({all_products,products,otherProps,shop_right,hidden_sidebar
                             .map((item,i) => (
                               <div
                                 key={i}
-                                className="col-xl-4 col-md-6 col-sm-6"
+                                className="col-xl-3 col-lg-4 col-md-6 col-sm-6"
                               >
                                 <ProductItem product={item} />
                               </div>
@@ -143,29 +107,6 @@ const ShopContent = ({all_products,products,otherProps,shop_right,hidden_sidebar
               </div>
             </div>
 
-            {shop_right && (
-              <div className="col-xl-3 col-lg-4">
-                <div className="tp-shop-sidebar mr-10">
-                  {/* filter */}
-                  <PriceFilter
-                    priceFilterValues={priceFilterValues}
-                    maxPrice={maxPrice}
-                  />
-                  {/* status */}
-                  <StatusFilter setCurrPage={setCurrPage} />
-                  {/* categories */}
-                  <CategoryFilter setCurrPage={setCurrPage} />
-                  {/* color */}
-                  <ColorFilter setCurrPage={setCurrPage} />
-                  {/* product rating */}
-                  <TopRatedProducts />
-                  {/* brand */}
-                  <ProductBrand setCurrPage={setCurrPage} />
-                  {/* reset filter */}
-                  <ResetButton setPriceValues={setPriceValue} maxPrice={maxPrice} />
-                </div>
-             </div>
-            )}
           </div>
         </div>
       </section> 

@@ -13,7 +13,7 @@
                 }
             }
             &__price{
-                color: var(--tp-theme-secondary);
+                color: var(--tp-theme-text);
             }
 
             &__checkout-btn{
@@ -40,7 +40,7 @@
                 }
             }
             &__price{
-                color: var(--tp-theme-brown);
+                color: var(--tp-theme-text);
             }
 
             &__checkout-btn{
@@ -67,7 +67,7 @@
                 }
             }
             &__price{
-                color: var(--tp-theme-green);
+                color: var(--tp-theme-text);
             }
 
             &__checkout-btn{
@@ -268,7 +268,7 @@
             & span{
                 float: right;
                 font-size: 15px;
-                color: var(--tp-common-black);
+                color: var(--tp-theme-text);
                 font-weight: 500;
             }
         }
@@ -298,7 +298,7 @@
     &__price{
         font-size: 14px;
         font-weight: 500;
-        color: var(--tp-theme-primary);
+        color: var(--tp-theme-text);
     }
     &__quantity{
         font-size: 12px;
@@ -318,15 +318,16 @@
         }
 
         .#{$theme-prifix}-btn{
-            background-color: var(--tp-grey-1);
+            background-color: var(--tp-theme-action-bg);
             font-size: 15px;
             text-transform: capitalize;
-            color: var(--tp-common-black);
+            color: var(--tp-theme-action-text);
+            border-color: var(--tp-theme-action-border);
             padding: 10px 30px;
             text-align: center;
             &:hover{
-                background-color: var(--tp-common-black);
-                color: var(--tp-common-white);
+                background-color: var(--tp-theme-action-hover-bg);
+                color: var(--tp-theme-action-hover-text);
             }
         }
     }

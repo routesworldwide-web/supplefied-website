@@ -1,5 +1,15 @@
 import { apiSlice } from "../api/apiSlice";
 
+const getCategoryQuery = (path, arg) => {
+  const params = new URLSearchParams();
+  if (typeof arg === "object" && arg?.featured) {
+    params.set("featured", "true");
+  }
+
+  const query = params.toString();
+  return query ? `${path}?${query}` : path;
+};
+
 export const categoryApi = apiSlice.injectEndpoints({
   overrideExisting:true,
   endpoints: (builder) => ({
@@ -11,10 +21,13 @@ export const categoryApi = apiSlice.injectEndpoints({
       }),
     }),
     getShowCategory: builder.query({
-      query: () => `/api/category/show`
+      query: (arg) => getCategoryQuery(`/api/category/show`, arg)
     }),
     getProductTypeCategory: builder.query({
-      query: (type) => `/api/category/show/${type}`
+      query: (arg) => {
+        const type = typeof arg === "string" ? arg : arg?.type;
+        return getCategoryQuery(`/api/category/show/${type}`, arg);
+      }
     }),
   }),
 });

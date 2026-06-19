@@ -27,7 +27,6 @@ const sidebar_menu: Array<ISidebarMenus> = [
     title: "Products",
     subMenus: [
       { title: "Product List", link: "/product-list" },
-      { title: "Product Grid", link: "/product-grid" },
       { title: "Add Product", link: "/add-product" }
     ],
   },
@@ -70,26 +69,32 @@ const sidebar_menu: Array<ISidebarMenus> = [
   {
     id: 9,
     icon: Setting,
-    link: "#",
-    title: "Online store",
+    link: "/banners",
+    title: "Banners",
   },
   {
     id: 10,
+    icon: Pages,
+    link: "/blogs",
+    title: "Blogs",
+  },
+  {
+    id: 11,
     icon: StuffUser,
     link: "/our-staff",
     title: "Our Staff",
   },
-  {
-    id: 11,
-    icon: Pages,
-    link: "/dashboard",
-    title: "Pages",
-    subMenus: [
-      { title: "Register", link: "/register" },
-      { title: "Login", link: "/login" },
-      { title: "Forgot Password", link: "/forgot-password" }
-    ],
-  },
+  // {
+  //   id: 12,
+  //   icon: Pages,
+  //   link: "/dashboard",
+  //   title: "Pages",
+  //   subMenus: [
+  //     { title: "Register", link: "/register" },
+  //     { title: "Login", link: "/login" },
+  //     { title: "Forgot Password", link: "/forgot-password" }
+  //   ],
+  // },
 ];
 
 export default sidebar_menu;

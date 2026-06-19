@@ -1,30 +1,71 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useGetReviewProductsQuery } from "@/redux/product/productApi";
 import { Search } from "@/svg";
 import ErrorMsg from "../../common/error-msg";
-import ReviewItem from "./review-item";
+import ReviewItem, { ReviewRow } from "./review-item";
 import Pagination from "../../ui/Pagination";
 import usePagination from "@/hooks/use-pagination";
+import { useSearchParams } from "next/navigation";
 
 const ReviewProductArea = () => {
-  const {data: reviewProducts,isError,isLoading} = useGetReviewProductsQuery();
+  const { data: reviewProducts, isError, isLoading } = useGetReviewProductsQuery();
   const [searchValue, setSearchValue] = useState<string>("");
   const [selectValue, setSelectValue] = useState<string>("");
-  const paginationData = usePagination(reviewProducts?.data || [], 5);
+  const searchParams = useSearchParams();
+  const targetedReviewId = searchParams.get("review");
+
+  const reviewRows = useMemo<ReviewRow[]>(() => {
+    return (reviewProducts?.data || []).flatMap((product) =>
+      (product.reviews || []).map((review) => ({
+        review,
+        product: {
+          _id: product._id,
+          title: product.title,
+          img: product.img,
+        },
+      }))
+    );
+  }, [reviewProducts?.data]);
+
+  const filteredRows = useMemo(() => {
+    let rows = [...reviewRows];
+
+    if (searchValue) {
+      const term = searchValue.toLowerCase();
+      rows = rows.filter(({ product, review }) =>
+        product.title.toLowerCase().includes(term) ||
+        review.userId?.name?.toLowerCase().includes(term) ||
+        review.comment?.toLowerCase().includes(term)
+      );
+    }
+
+    if (selectValue) {
+      rows = rows.filter(({ review }) => Math.floor(review.rating) === parseInt(selectValue));
+    }
+
+    if (targetedReviewId) {
+      rows.sort((a, b) => {
+        if (a.review._id === targetedReviewId) return -1;
+        if (b.review._id === targetedReviewId) return 1;
+        return 0;
+      });
+    }
+
+    return rows;
+  }, [reviewRows, searchValue, selectValue, targetedReviewId]);
+
+  const paginationData = usePagination(filteredRows, 5);
   const { currentItems, handlePageClick, pageCount } = paginationData;
 
-  // search field
   const handleSearchReview = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue(e.target.value);
   };
 
-  // handle select input
   const handleSelectField = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectValue(e.target.value.slice(0, 1));
   };
 
-  // decide what to render
   let content = null;
 
   if (isLoading) {
@@ -33,28 +74,11 @@ const ReviewProductArea = () => {
   if (!isLoading && isError) {
     content = <ErrorMsg msg="There was an error" />;
   }
-  if (!isLoading && !isError && reviewProducts?.data.length === 0) {
-    content = <ErrorMsg msg="No Product Found" />;
+  if (!isLoading && !isError && reviewRows.length === 0) {
+    content = <ErrorMsg msg="No Review Found" />;
   }
 
-  if (!isError && reviewProducts?.success) {
-    let review_items = [...currentItems];
-    // search field
-    if (searchValue) {
-      review_items = review_items.filter((p) =>
-        p.title.toLowerCase().includes(searchValue.toLowerCase())
-      );
-    }
-    if (selectValue) {
-      review_items = review_items.filter((product) => {
-        const averageRating =
-          product.reviews && product.reviews?.length > 0
-            ? product.reviews.reduce((acc, review) => acc + review.rating, 0) /
-              product.reviews.length
-            : 0;
-        return Math.floor(averageRating) === parseInt(selectValue);
-      });
-    }
+  if (!isError && reviewProducts?.success && reviewRows.length > 0) {
     content = (
       <>
         <div className="tp-search-box flex items-center justify-between px-8 py-8 flex-wrap">
@@ -63,7 +87,7 @@ const ReviewProductArea = () => {
               onChange={handleSearchReview}
               className="input h-[44px] w-full pl-14"
               type="text"
-              placeholder="Search by product name"
+              placeholder="Search by product, user, or review"
             />
             <button className="absolute top-1/2 left-5 translate-y-[-50%] hover:text-theme">
               <Search />
@@ -85,67 +109,73 @@ const ReviewProductArea = () => {
             </div>
           </div>
         </div>
-        <div className="relative overflow-x-auto  mx-8">
-          <table className="w-[1400px] 2xl:w-full text-base text-left text-gray-500">
+        <div className="relative overflow-x-auto mx-8">
+          <table className="w-full min-w-[1320px] table-fixed text-base text-left text-gray-500">
+            <colgroup>
+              <col className="w-[24%]" />
+              <col className="w-[16%]" />
+              <col className="w-[24%]" />
+              <col className="w-[10%]" />
+              <col className="w-[11%]" />
+              <col className="w-[11%]" />
+              <col className="w-[4%]" />
+            </colgroup>
             <thead className="bg-white">
               <tr className="border-b border-gray6 text-tiny">
-                <th
-                  scope="col"
-                  className="pr-8 py-3 text-tiny text-text2 uppercase font-semibold"
-                >
+                <th scope="col" className="pr-5 py-3 text-tiny text-text2 uppercase font-semibold">
                   Product
                 </th>
-                <th
-                  scope="col"
-                  className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[250px] text-end"
-                >
+                <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold">
+                  Reviewed By
+                </th>
+                <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold">
+                  Review Content
+                </th>
+                <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold text-end">
                   Rating
                 </th>
-                <th
-                  scope="col"
-                  className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[250px] text-end"
-                >
+                <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold text-end">
+                  Visibility
+                </th>
+                <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold text-end">
                   Date
                 </th>
-
-                <th
-                  scope="col"
-                  className="px-9 py-3 text-tiny text-text2 uppercase  font-semibold w-[12%] text-end"
-                >
+                <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold text-end">
                   Action
                 </th>
               </tr>
             </thead>
             <tbody>
-              {review_items.map((item) => (
-                <ReviewItem key={item._id} item={item} />
+              {currentItems.map((item) => (
+                <ReviewItem
+                  key={item.review._id}
+                  item={item}
+                  isHighlighted={item.review._id === targetedReviewId}
+                />
               ))}
             </tbody>
           </table>
         </div>
 
-          <div className="flex justify-between items-center flex-wrap mx-8">
-            <p className="mb-0 text-tiny mr-3">
-              Showing 1-
-              {currentItems.length} of {reviewProducts?.data.length}
-            </p>
-            <div className="pagination py-3 flex justify-end items-center mr-8 pagination">
-              <Pagination
-                handlePageClick={handlePageClick}
-                pageCount={pageCount}
-              />
-            </div>
+        <div className="flex justify-between items-center flex-wrap mx-8">
+          <p className="mb-0 text-tiny mr-3">
+            Showing {currentItems.length} of {filteredRows.length}
+          </p>
+          <div className="pagination py-3 flex justify-end items-center mr-8 pagination">
+            <Pagination
+              handlePageClick={handlePageClick}
+              pageCount={pageCount}
+            />
           </div>
-
+        </div>
       </>
     );
   }
+
   return (
-    <>
-      <div className="bg-white rounded-t-md rounded-b-md shadow-xs py-4">
-        {content}
-      </div>
-    </>
+    <div className="bg-white rounded-t-md rounded-b-md shadow-xs py-4">
+      {content}
+    </div>
   );
 };
 

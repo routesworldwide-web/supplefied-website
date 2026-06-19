@@ -31,10 +31,45 @@ const addAllCoupon = async (req, res,next) => {
 // getAllCoupons
 const getAllCoupons = async (req, res,next) => {
   try {
-    const coupons = await Coupon.find({}).sort({ _id: -1 });
+    const filter =
+      req.query.status === "active"
+        ? { status: { $ne: "inactive" } }
+        : req.query.status === "inactive"
+        ? { status: "inactive" }
+        : {};
+    const coupons = await Coupon.find(filter).sort({ _id: -1 });
     res.send(coupons);
   } catch (error) {
     next(error)
+  }
+};
+// validateCoupon
+const validateCoupon = async (req, res, next) => {
+  try {
+    const couponCode = String(req.body.couponCode || "").trim();
+
+    if (!couponCode) {
+      return res.status(400).json({ message: "Coupon code is required" });
+    }
+
+    const coupon = await Coupon.findOne({
+      couponCode,
+      status: { $ne: "inactive" },
+    });
+
+    if (
+      !coupon ||
+      (coupon.startTime && dayjs().isBefore(dayjs(coupon.startTime))) ||
+      dayjs().isAfter(dayjs(coupon.endTime))
+    ) {
+      return res.status(404).json({
+        message: "This coupon is inactive, expired, or invalid",
+      });
+    }
+
+    res.send(coupon);
+  } catch (error) {
+    next(error);
   }
 };
 // getCouponById
@@ -50,17 +85,35 @@ const getCouponById = async (req, res,next) => {
 const updateCoupon = async (req, res,next) => {
   try {
     const coupon = await Coupon.findById(req.params.id);
-    if (coupon) {
-      coupon.title = req.body.title;
-      coupon.couponCode = req.body.couponCode;
-      coupon.endTime = dayjs().utc().format(req.body.endTime);
-      coupon.discountPercentage = req.body.discountPercentage;
-      coupon.minimumAmount = req.body.minimumAmount;
-      coupon.productType = req.body.productType;
-      coupon.logo = req.body.logo;
-      await coupon.save();
-      res.send({ message: 'Coupon Updated Successfully!' });
+    if (!coupon) {
+      return res.status(404).json({ message: "Coupon not found" });
     }
+
+    const editableFields = [
+      "title",
+      "couponCode",
+      "discountPercentage",
+      "minimumAmount",
+      "productType",
+      "logo",
+      "status",
+    ];
+
+    editableFields.forEach((field) => {
+      if (req.body[field] !== undefined) {
+        coupon[field] = req.body[field];
+      }
+    });
+
+    if (req.body.startTime !== undefined) {
+      coupon.startTime = dayjs(req.body.startTime).utc().toDate();
+    }
+    if (req.body.endTime !== undefined) {
+      coupon.endTime = dayjs(req.body.endTime).utc().toDate();
+    }
+
+    await coupon.save();
+    res.send({ message: 'Coupon Updated Successfully!' });
   } catch (error) {
     // console.log('coupon error',error)
     next(error)
@@ -83,6 +136,7 @@ module.exports = {
   addCoupon,
   addAllCoupon,
   getAllCoupons,
+  validateCoupon,
   getCouponById,
   updateCoupon,
   deleteCoupon,

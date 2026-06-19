@@ -5,18 +5,19 @@ import { useDispatch, useSelector } from 'react-redux';
 import Link from 'next/link';
 // internal
 import Menus from './header-com/menus';
-import logo from '@assets/img/logo/Supplified_logo.png';
+import logo from '@assets/img/logo/supplefied_logo2.png';
 import useSticky from '@/hooks/use-sticky';
 import useCartInfo from '@/hooks/use-cart-info';
 import { openCartMini } from '@/redux/features/cartSlice';
 import HeaderTopRight from './header-com/header-top-right';
 import CartMiniSidebar from '@/components/common/cart-mini-sidebar';
-import { CartTwo, Compare, Facebook, Menu, PhoneTwo, Wishlist, Search } from '@/svg';
+import { CartTwo, Compare, Instagram, Menu, PhoneTwo, Wishlist, Search } from '@/svg';
 import useSearchFormSubmit from '@/hooks/use-search-form-submit';
 import OffCanvas from '@/components/common/off-canvas';
 
 const HeaderTwo = ({ style_2 = false }) => {
   const { wishlist } = useSelector((state) => state.wishlist);
+  const { compareItems } = useSelector((state) => state.compare);
   const [isOffCanvasOpen, setIsCanvasOpen] = useState(false);
   const { setSearchText, handleSubmit, searchText } = useSearchFormSubmit();
   const { quantity } = useCartInfo();
@@ -34,15 +35,15 @@ const HeaderTwo = ({ style_2 = false }) => {
                     <div className="tp-header-info-item">
                       <a href="#">
                         <span>
-                          <Facebook />
-                        </span> Supplefied Supplements
+                          <Instagram />
+                        </span> Supplefied360
                       </a>
                     </div>
                     <div className="tp-header-info-item">
                       <a href="tel:402-763-282-46">
                         <span>
                           <PhoneTwo />
-                        </span> +91 8796200495
+                        </span> +91 9891238727
                       </a>
                     </div>
                   </div>
@@ -69,7 +70,7 @@ const HeaderTwo = ({ style_2 = false }) => {
                   </div>
                   <div className="col-xl-5 d-none d-xl-block">
                     <div className="main-menu menu-style-2">
-                      <nav className="tp-main-menu-content">
+                      <nav className="tp-main-menu-content ">
                         <Menus />
                       </nav>
                     </div>
@@ -92,6 +93,8 @@ const HeaderTwo = ({ style_2 = false }) => {
                         <div className="tp-header-action-item d-none d-lg-block">
                           <Link href="/compare" className="tp-header-action-btn">
                             <Compare />
+                            <span className="tp-header-action-badge">{compareItems.length}</span>
+
                           </Link>
                         </div>
                         <div className="tp-header-action-item d-none d-lg-block">

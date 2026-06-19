@@ -7,9 +7,12 @@ import Link from "next/link";
 import { Close, Minus, Plus } from "@/svg";
 import {add_cart_product,quantityDecrement} from "@/redux/features/cartSlice";
 import { remove_wishlist_product } from "@/redux/features/wishlist-slice";
+import { getProductDetailsUrl } from "@/utils/product-url";
+import ProductPrice from "@/components/common/product-price";
 
 const WishlistItem = ({ product }) => {
-  const { _id, img, title, price } = product || {};
+  const { _id, img, title } = product || {};
+  const productUrl = getProductDetailsUrl(product);
   const { cart_products } = useSelector((state) => state.cart);
   const isAddToCart = cart_products.find((item) => item._id === _id);
   const dispatch = useDispatch();
@@ -29,15 +32,15 @@ const WishlistItem = ({ product }) => {
   return (
     <tr>
       <td className="tp-cart-img">
-        <Link href={`/product-details/${_id}`}>
+        <Link href={productUrl}>
           <Image src={img} alt="product img" width={70} height={100} />
         </Link>
       </td>
       <td className="tp-cart-title">
-        <Link href={`/product-details/${_id}`}>{title}</Link>
+        <Link href={productUrl}>{title}</Link>
       </td>
       <td className="tp-cart-price">
-        <span>${price.toFixed(2)}</span>
+        <ProductPrice product={product} priceClassName="tp-cart-price" />
       </td>
       <td className="tp-cart-quantity">
         <div className="tp-product-quantity mt-10 mb-10">

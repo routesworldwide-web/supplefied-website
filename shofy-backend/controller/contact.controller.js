@@ -1,165 +1,84 @@
-const validator = require('validator');
-const { sendEmail } = require('../config/email');
-const { secret } = require('../config/secret');
+const ContactMessage = require("../model/ContactMessage");
+const { sendEmail } = require("../config/email");
+const { secret } = require("../config/secret");
+const {
+  createAdminNotification,
+} = require("../services/notification.service");
 
-// Stricter email validation
-const isValidEmail = (email) => {
-  const strictEmailRegex = /^[a-zA-Z0-9._%-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  
-  if (!strictEmailRegex.test(email)) {
-    return false;
-  }
-  
-  // Check for consecutive dots
-  if (email.includes('..')) {
-    return false;
-  }
-  
-  // Check for invalid patterns
-  if (email.startsWith('.') || email.endsWith('.')) {
-    return false;
-  }
-  
-  const [prefix, domain] = email.split('@');
-  
-  // Prefix validation
-  if (prefix.length < 1 || prefix.length > 64) {
-    return false;
-  }
-  
-  if (prefix.startsWith('.') || prefix.endsWith('.')) {
-    return false;
-  }
-  
-  // Domain validation
-  if (!domain || domain.length < 3) {
-    return false;
-  }
-  
-  // Get TLD (last part after last dot)
-  const parts = domain.split('.');
-  const tld = parts[parts.length - 1];
-  
-  // TLD must be at least 2 characters and only letters
-  if (tld.length < 2 || !/^[a-zA-Z]+$/.test(tld)) {
-    return false;
-  }
-  
-  // Check for obviously fake patterns
-  const fakeDomains = ['test.com', 'example.com', 'sample.com', 'demo.com', 'localhost', 'invalid.com'];
-  if (fakeDomains.includes(domain)) {
-    return false;
-  }
-  
-  return validator.isEmail(email);
-};
+const escapeHtml = (value = "") =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
-// Send contact form message to admin email
-const sendContactMessage = async (req, res) => {
+const submitContactMessage = async (req, res, next) => {
   try {
-    const { name, email, subject, message } = req.body;
+    const contactMessage = await ContactMessage.create({
+      name: req.body.name,
+      email: req.body.email,
+      subject: req.body.subject,
+      message: req.body.message,
+    });
 
-    // Validation
-    if (!name || !email || !subject || !message) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide all required fields: name, email, subject, and message',
+    const preview =
+      contactMessage.message.length > 120
+        ? `${contactMessage.message.slice(0, 117)}...`
+        : contactMessage.message;
+
+    await createAdminNotification({
+      type: "contact",
+      category: "general",
+      title: "New contact form query",
+      message: `${contactMessage.name}: ${contactMessage.subject}. ${preview} Check the support email for the complete query.`,
+      entityId: contactMessage._id,
+      metadata: {
+        email: contactMessage.email,
+        subject: contactMessage.subject,
+        message: contactMessage.message,
+      },
+    });
+
+    try {
+      await sendEmail({
+        from: secret.email_user,
+        to: secret.email_user,
+        replyTo: contactMessage.email,
+        subject: `Contact form: ${contactMessage.subject}`,
+        html: `
+          <h2>New Supplefied contact query</h2>
+          <p><strong>Name:</strong> ${escapeHtml(contactMessage.name)}</p>
+          <p><strong>Email:</strong> ${escapeHtml(contactMessage.email)}</p>
+          <p><strong>Subject:</strong> ${escapeHtml(contactMessage.subject)}</p>
+          <p><strong>Message:</strong></p>
+          <p>${escapeHtml(contactMessage.message).replace(/\n/g, "<br />")}</p>
+        `,
       });
+    } catch (emailError) {
+      console.error("Contact email delivery failed:", emailError.message);
     }
 
-    // Trim and validate
-    const nameTrimmed = name.trim();
-    const emailTrimmed = email.trim().toLowerCase();
-    const subjectTrimmed = subject.trim();
-    const messageTrimmed = message.trim();
-
-    if (nameTrimmed.length < 2) {
-      return res.status(400).json({
-        success: false,
-        message: 'Name must be at least 2 characters long',
-      });
-    }
-
-    if (!isValidEmail(emailTrimmed)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide a valid email address',
-      });
-    }
-
-    if (subjectTrimmed.length < 3) {
-      return res.status(400).json({
-        success: false,
-        message: 'Subject must be at least 3 characters long',
-      });
-    }
-
-    if (messageTrimmed.length < 10) {
-      return res.status(400).json({
-        success: false,
-        message: 'Message must be at least 10 characters long',
-      });
-    }
-
-    // Admin email address
-    const adminEmail = secret.admin_email || secret.email_user;
-
-    // Prepare email to admin
-    const adminEmailContent = {
-      from: secret.email_user,
-      to: adminEmail,
-      subject: `New Contact Form Query: ${subjectTrimmed}`,
-      html: `
-        <h2>New Contact Form Submission</h2>
-        <p><strong>From:</strong> ${nameTrimmed}</p>
-        <p><strong>Email:</strong> <a href="mailto:${emailTrimmed}">${emailTrimmed}</a></p>
-        <p><strong>Subject:</strong> ${subjectTrimmed}</p>
-        <hr />
-        <p><strong>Message:</strong></p>
-        <p>${messageTrimmed.replace(/\n/g, '<br>')}</p>
-        <hr />
-        <p><small>This is an automated email from your website contact form.</small></p>
-      `,
-    };
-
-    // Prepare confirmation email to user
-    const userEmailContent = {
-      from: secret.email_user,
-      to: emailTrimmed,
-      subject: 'We received your message - Supplefied',
-      html: `
-        <h2>Thank You for Contacting Us!</h2>
-        <p>Hi ${nameTrimmed},</p>
-        <p>We have received your message and will get back to you as soon as possible.</p>
-        <hr />
-        <p><strong>Your Message Details:</strong></p>
-        <p><strong>Subject:</strong> ${subjectTrimmed}</p>
-        <p><strong>Message:</strong></p>
-        <p>${messageTrimmed.replace(/\n/g, '<br>')}</p>
-        <hr />
-        <p>Best regards,<br />Supplefied Team</p>
-        <p><small>If you have any questions, please reply to this email.</small></p>
-      `,
-    };
-
-    // Send emails
-    await sendEmail(adminEmailContent);
-    await sendEmail(userEmailContent);
-
-    return res.status(200).json({
+    res.status(201).json({
       success: true,
-      message: 'Your message has been sent successfully! We will get back to you soon.',
+      message: "Your message has been submitted successfully.",
     });
   } catch (error) {
-    console.error('Error sending contact message:', error);
-    return res.status(500).json({
-      success: false,
-      message: 'An error occurred while sending your message. Please try again later.',
-      error: error.message,
-    });
+    if (error.name === "ValidationError") {
+      const firstError = Object.values(error.errors)[0];
+      return res.status(400).json({
+        success: false,
+        message: firstError?.message || "Please check your contact details.",
+      });
+    }
+
+    next(error);
+
   }
 };
 
 module.exports = {
-  sendContactMessage,
+
+  submitContactMessage,
+
 };

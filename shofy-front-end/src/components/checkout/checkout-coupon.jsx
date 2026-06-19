@@ -12,7 +12,7 @@ const CheckoutCoupon = ({ handleCouponCode, couponRef,couponApplyMsg }) => {
         <button
           onClick={() => setIsOpen(!isOpen)}
           type="button"
-          className="tp-checkout-coupon-form-reveal-btn"
+          className="tp-checkout-coupon-form-reveal-btn text-primary"
         >
           Click here to enter your code
         </button>

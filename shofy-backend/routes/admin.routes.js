@@ -12,7 +12,9 @@ const {
   forgetPassword,
   confirmAdminEmail,
   confirmAdminForgetPass,
+  updatedStatus,
 } = require("../controller/admin.controller");
+const verifyAdmin = require("../middleware/verifyAdmin");
 
 //register a staff
 router.post("/register", registerAdmin);
@@ -21,13 +23,13 @@ router.post("/register", registerAdmin);
 router.post("/login", loginAdmin);
 
 //login a admin
-router.patch("/change-password", changePassword);
+router.patch("/change-password", verifyAdmin, changePassword);
 
 //login a admin
-router.post("/add", addStaff);
+router.post("/add", verifyAdmin, addStaff);
 
 //login a admin
-router.get("/all", getAllStaff);
+router.get("/all", verifyAdmin, getAllStaff);
 
 //forget-password
 router.patch("/forget-password", forgetPassword);
@@ -36,15 +38,15 @@ router.patch("/forget-password", forgetPassword);
 router.patch("/confirm-forget-password", confirmAdminForgetPass);
 
 //get a staff
-router.get("/get/:id", getStaffById);
+router.get("/get/:id", verifyAdmin, getStaffById);
 
 // update a staff
-router.patch("/update-stuff/:id", updateStaff);
+router.patch("/update-stuff/:id", verifyAdmin, updateStaff);
 
 //update staf status
-// router.put("/update-status/:id", updatedStatus);
+router.patch("/update-status/:id", verifyAdmin, updatedStatus);
 
 //delete a staff
-router.delete("/:id", deleteStaff);
+router.delete("/:id", verifyAdmin, deleteStaff);
 
 module.exports = router;

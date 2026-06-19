@@ -9,8 +9,8 @@
         @extend %tp-ff-roboto;
         font-weight: 500;
         font-size: 14px;
-        color: var(--tp-common-white);
-        background-color: var(--tp-theme-primary);
+        color: var(--tp-theme-action-text);
+        background-color: var(--tp-theme-action-bg);
         width: 100%;
         padding: 12px 30px;
         text-align: left;
@@ -29,8 +29,9 @@
         }
 
         &:hover{
-            background-color: var(--tp-common-black);
-            color: var(--tp-common-white);
+            background-color: var(--tp-theme-action-hover-bg);
+            color: var(--tp-theme-action-hover-text);
+            box-shadow: inset 0 0 0 1px var(--tp-theme-action-border);
         }
     }
 
@@ -397,11 +398,11 @@
                             }
                         }
                         &:hover{
-                            background-color: var(--tp-theme-primary);
-                            border-color: var(--tp-theme-primary);
-                            color: var(--tp-common-white);
+                            background-color: var(--tp-theme-action-hover-bg);
+                            border-color: var(--tp-theme-action-border);
+                            color: var(--tp-theme-action-hover-text);
                             & i{
-                                color: var(--tp-common-white);
+                                color: var(--tp-theme-action-hover-text);
                             }
                         }
                     }
@@ -409,11 +410,11 @@
                         color: var(--tp-theme-primary);
     
                         & .dropdown-toggle-btn.dropdown-opened{
-                            background-color: var(--tp-theme-primary);
-                            border-color: var(--tp-theme-primary);
-                            color: var(--tp-common-white);
+                            background-color: var(--tp-theme-action-bg);
+                            border-color: var(--tp-theme-action-border);
+                            color: var(--tp-theme-action-text);
                             & i{
-                                color: var(--tp-common-white);
+                                color: var(--tp-theme-action-text);
                             }
                         }
                     }

@@ -7,7 +7,7 @@ import ShopFilterOffCanvas from "../common/shop-filter-offcanvas";
 import { useGetAllProductsQuery } from "@/redux/features/productApi";
 import ShopContent from "./shop-content";
 
-const ShopArea = ({shop_right=false,hidden_sidebar=false}) => {
+const ShopArea = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const category = searchParams.get('category');
@@ -159,8 +159,6 @@ const ShopArea = ({shop_right=false,hidden_sidebar=false}) => {
         all_products={products.data}
         products={product_items}
         otherProps={otherProps}
-        shop_right={shop_right}
-        hidden_sidebar={hidden_sidebar}
       />
         
          <ShopFilterOffCanvas

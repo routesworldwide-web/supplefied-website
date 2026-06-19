@@ -4,6 +4,7 @@ const {
   addCoupon,
   addAllCoupon,
   getAllCoupons,
+  validateCoupon,
   getCouponById,
   updateCoupon,
   deleteCoupon,
@@ -17,6 +18,9 @@ router.post('/all', addAllCoupon);
 
 //get all coupon
 router.get('/', getAllCoupons);
+
+//validate a coupon before applying it
+router.post('/validate', validateCoupon);
 
 //get a coupon
 router.get('/:id', getCouponById);

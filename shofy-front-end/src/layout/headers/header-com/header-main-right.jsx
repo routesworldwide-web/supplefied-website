@@ -11,10 +11,10 @@ import { openCartMini } from "@/redux/features/cartSlice";
 const HeaderMainRight = ({ setIsCanvasOpen }) => {
   const { user: userInfo } = useSelector((state) => state.auth);
   const { wishlist } = useSelector((state) => state.wishlist);
+  const { compareItems } = useSelector((state) => state.compare);
   const { quantity } = useCartInfo();
   const dispatch = useDispatch()
 
-  console.log("userInfo from redux:", userInfo);
   return (
     <div className="tp-header-main-right d-flex align-items-center justify-content-end">
       <div className="tp-header-login d-none d-lg-block">
@@ -65,6 +65,7 @@ const HeaderMainRight = ({ setIsCanvasOpen }) => {
         <div className="tp-header-action-item d-none d-lg-block">
           <Link href="/compare" className="tp-header-action-btn">
             <Compare />
+            <span className="tp-header-action-badge">{compareItems.length}</span>
           </Link>
         </div>
         <div className="tp-header-action-item d-none d-lg-block">

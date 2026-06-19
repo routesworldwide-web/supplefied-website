@@ -63,13 +63,13 @@ const OrderDetailsBottom = ({productData,ship_cost}:IPropType) => {
                     </a>
                   </td>
                   <td className="px-3 py-3 font-normal text-[#55585B] text-end">
-                    ${p.price.toFixed(2)}
+                    ₹{p.price.toFixed(2)}
                   </td>
                   <td className="px-3 py-3 font-normal text-[#55585B] text-end">
                     {p.orderQuantity}
                   </td>
                   <td className="px-3 py-3 font-normal text-[#55585B] text-end">
-                    ${(p.orderQuantity * p.price).toFixed(2)}
+                    ₹{(p.orderQuantity * p.price).toFixed(2)}
                   </td>
                 </tr>
                 ))}
@@ -89,7 +89,7 @@ const OrderDetailsBottom = ({productData,ship_cost}:IPropType) => {
                     Subtotal
                   </td>
                   <td className="px-3 py-3 pt-6 font-normal text-[#55585B] text-end">
-                    ${total.toFixed(2)}
+                    ₹{total.toFixed(2)}
                   </td>
                 </tr>
                 <tr className="bg-white border-b border-gray6 last:border-0 text-start mx-9">
@@ -97,7 +97,7 @@ const OrderDetailsBottom = ({productData,ship_cost}:IPropType) => {
                     Shipping cost:
                   </td>
                   <td className="px-3 py-3 font-normal text-[#55585B] text-end">
-                    ${ship_cost.toFixed(2)}
+                    ₹{ship_cost.toFixed(2)}
                   </td>
                 </tr>
                 <tr className="bg-white border-b border-gray6 last:border-0 text-start mx-9">
@@ -105,7 +105,7 @@ const OrderDetailsBottom = ({productData,ship_cost}:IPropType) => {
                     Grand total:
                   </td>
                   <td className="px-3 py-3 text-[#55585B] text-end text-lg font-semibold">
-                    ${grand_total.toFixed(2)}
+                    ₹{grand_total.toFixed(2)}
                   </td>
                 </tr>
               </tbody>

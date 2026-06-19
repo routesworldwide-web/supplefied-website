@@ -101,10 +101,12 @@
             & #{$self}{
                 &-action-btn-2{
                     &.active{
-                        background-color: var(--tp-common-black); 
+                        color: var(--tp-theme-action-text);
+                        background-color: var(--tp-theme-action-bg);
                     }
                     &:hover{
-                        background-color: var(--tp-common-black);
+                        color: var(--tp-theme-action-text);
+                        background-color: var(--tp-theme-action-bg);
                     }
                 }
             }
@@ -113,7 +115,9 @@
             & #{$self}{
                 &-action-btn-3{
                     &:hover{
-                        background-color: var(--tp-theme-primary);
+                        background-color: var(--tp-theme-action-hover-bg);
+                        border-color: var(--tp-theme-action-border);
+                        color: var(--tp-theme-action-hover-text);
 
                     }
                 }
@@ -128,8 +132,9 @@
             line-height: 42px;
             text-align: center;
             font-size: 18px;
-            color: var(--tp-common-black);
-            background-color: var(--tp-common-white);
+            color: var(--tp-theme-action-hover-text);
+            background-color: var(--tp-theme-action-hover-bg);
+            border: 1px solid var(--tp-theme-action-border);
             border-bottom: 0;
             box-shadow: 0px 1px 2px rgba(1, 15, 28, 0.2);
             border-radius: 50%;
@@ -145,12 +150,12 @@
                 }
             }
             &.active{
-                color: var(--tp-common-white);
-                background-color: var(--tp-common-black); 
+                color: var(--tp-theme-action-text);
+                background-color: var(--tp-theme-action-bg);
             }
             &:hover{
-                color: var(--tp-common-white);
-                background-color: var(--tp-common-black);
+                color: var(--tp-theme-action-text);
+                background-color: var(--tp-theme-action-bg);
 
                 #{$self}{
                     &-tooltip{

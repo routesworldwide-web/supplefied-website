@@ -27,6 +27,10 @@ const CategorySchema = mongoose.Schema({
     type: ObjectId,
     ref: "Products"
   }],
+   featured: {
+    type: Boolean,
+    default: false,
+   },
    status: {
     type: String,
     enum: ['Show', 'Hide'],

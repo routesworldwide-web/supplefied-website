@@ -6,15 +6,21 @@ import NavProfileTab from "./nav-profile-tab";
 import ProfileInfo from "./profile-info";
 import ChangePassword from "./change-password";
 import MyOrders from "./my-orders";
+import ShippingAddresses from "./shipping-addresses";
 import { useGetUserOrdersQuery } from "@/redux/features/order/orderApi";
 import Loader from "../loader/loader";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
 import ErrorMsg from "../common/error-msg";
 import Cookies from "js-cookie";
 
 const ProfileArea = () => {
   const router = useRouter();
-  const { data: orderData, isError, isLoading, } = useGetUserOrdersQuery();
+  const { user } = useSelector((state) => state.auth);
+  const { data: orderData, isError, isLoading, } = useGetUserOrdersQuery(
+    user?._id,
+    { skip: !user?._id }
+  );
   useEffect(() => {
     const isAuthenticate = Cookies.get("userInfo");
     if (!isAuthenticate) {
@@ -87,6 +93,15 @@ const ProfileArea = () => {
                     aria-labelledby="nav-order-tab"
                   >
                     <MyOrders orderData={orderData} />
+                  </div>
+
+                  <div
+                    className="tab-pane fade"
+                    id="nav-shipping-addresses"
+                    role="tabpanel"
+                    aria-labelledby="nav-shipping-addresses-tab"
+                  >
+                    <ShippingAddresses />
                   </div>
                 </div>
               </div>
