@@ -21,11 +21,9 @@ const sliderData = [
   {
     id: 1,
     pre_title: { text: "Starting at", text2: 274 },
-<<<<<<< HEAD
-    title: "The best tablet Collection 2023",
-=======
+
     title: "High-Quality Supplements for Real Progress.",
->>>>>>> dev
+
     subtitle: {
       text_1: "Exclusive offer ",
       percent: 35,
@@ -37,11 +35,9 @@ const sliderData = [
   {
     id: 2,
     pre_title: { text: "Starting at", text2: 999 },
-<<<<<<< HEAD
-    title: "The best note book collection 2023",
-=======
+
     title: "Trusted Nutrition for Muscle, Energy, and Wellness.",
->>>>>>> dev
+
     subtitle: {
       text_1: "Exclusive offer ",
       percent: 10,
@@ -53,11 +49,9 @@ const sliderData = [
   {
     id: 3,
     pre_title: { text: "Starting at", text2: 999 },
-<<<<<<< HEAD
-    title: "The best note book collection 2023",
-=======
+
     title: "Pure Nutrition Made for Everyday Athletes",
->>>>>>> dev
+
     subtitle: {
       text_1: "Exclusive offer ",
       percent: 10,
@@ -152,11 +146,9 @@ const HomeHeroSlider = () => {
                   <div className="col-xl-5 col-lg-6 col-md-6">
                     <div className="tp-slider-content p-relative z-index-1">
                       <span>
-<<<<<<< HEAD
-                        {item.pre_title.text} <b>₹{item.pre_title.text2}</b>
-=======
+
                         {item.pre_title.text} <b>Rs.{item.pre_title.text2}</b>
->>>>>>> dev
+
                       </span>
                       <h3 className="tp-slider-title">{item.title}</h3>
                       <p>
