@@ -13,7 +13,7 @@ const WishlistArea = () => {
           {wishlist.length === 0 &&
             <div className='text-center pt-50'>
               <h3>No Wishlist Items Found</h3>
-              <Link href="/shop" className="tp-cart-checkout-btn mt-20">Continue Shipping</Link>
+              <Link href="/shop" className="tp-cart-checkout-btn mt-20">Continue Shopping</Link>
             </div>
           }
           {wishlist.length > 0 &&

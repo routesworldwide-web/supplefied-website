@@ -5,7 +5,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 // internal
 import ErrorMsg from "../common/error-msg";
-import { notifySuccess } from "@/utils/toast";
+import { notifyError, notifySuccess } from "@/utils/toast";
+import { useSubmitContactMessageMutation } from "@/redux/features/contactApi";
 
 // schema
 const schema = Yup.object().shape({
@@ -19,18 +20,30 @@ const schema = Yup.object().shape({
 });
 
 const ContactForm = () => {
+    const [submitContactMessage, { isLoading }] =
+      useSubmitContactMessageMutation();
 
     // react hook form
     const {register,handleSubmit,formState: { errors },reset} = useForm({
       resolver: yupResolver(schema),
     });
     // on submit
-    const onSubmit = (data) => {
-      if(data){
-        notifySuccess('Message sent successfully!');
-      }
+    const onSubmit = async (data) => {
+      try {
+        const result = await submitContactMessage({
+          name: data.name.trim(),
+          email: data.email.trim(),
+          subject: data.subject.trim(),
+          message: data.message.trim(),
+        }).unwrap();
 
-      reset();
+        notifySuccess(result.message || "Message sent successfully!");
+        reset();
+      } catch (error) {
+        notifyError(
+          error?.data?.message || "Your message could not be submitted."
+        );
+      }
     };
 
   return (
@@ -81,7 +94,9 @@ const ContactForm = () => {
         </div>
       </div>
       <div className="tp-contact-btn">
-        <button type="submit">Send Message</button>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? "Sending..." : "Send Message"}
+        </button>
       </div>
     </form>
   );

@@ -2,6 +2,14 @@ const ApiError = require('../errors/api-error');
 const Category = require('../model/Category');
 const Products = require('../model/Products');
 
+const getFeaturedFilter = (query = {}) => {
+  if (query.featured === true || query.featured === 'true') {
+    return { featured: true };
+  }
+
+  return {};
+}
+
 // create category service
 exports.createCategoryService = async (data) => {
   const category = await Category.create(data);
@@ -16,8 +24,11 @@ exports.addAllCategoryService = async (data) => {
 }
 
 // get all show category service
-exports.getShowCategoryServices = async () => {
-  const category = await Category.find({status:'Show'}).populate('products');
+exports.getShowCategoryServices = async (query) => {
+  const category = await Category.find({
+    status: 'Show',
+    ...getFeaturedFilter(query),
+  }).populate('products');
   return category;
 }
 
@@ -28,8 +39,12 @@ exports.getAllCategoryServices = async () => {
 }
 
 // get type of category service
-exports.getCategoryTypeService = async (param) => {
-  const categories = await Category.find({productType:param}).populate('products');
+exports.getCategoryTypeService = async (param, query) => {
+  const categories = await Category.find({
+    productType: param,
+    status: 'Show',
+    ...getFeaturedFilter(query),
+  }).populate('products');
   return categories;
 }
 
@@ -47,7 +62,25 @@ exports.updateCategoryService = async (id,payload) => {
     throw new ApiError(404, 'Category not found !')
   }
 
-  const result = await Category.findOneAndUpdate({ _id:id }, payload, {
+  const allowedFields = [
+    'img',
+    'parent',
+    'children',
+    'productType',
+    'description',
+    'products',
+    'featured',
+    'status',
+  ];
+
+  const updatePayload = allowedFields.reduce((data, field) => {
+    if (Object.prototype.hasOwnProperty.call(payload, field)) {
+      data[field] = payload[field];
+    }
+    return data;
+  }, {});
+
+  const result = await Category.findOneAndUpdate({ _id:id }, updatePayload, {
     new: true,
   })
   return result

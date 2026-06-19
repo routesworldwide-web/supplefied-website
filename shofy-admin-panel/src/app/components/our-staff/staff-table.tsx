@@ -78,7 +78,7 @@ const StaffTables = () => {
                     </td>
                     <td className="px-9 py-3 text-end">
                       <div className="flex items-center justify-end space-x-2">
-                        <StaffAction id={item._id}/>
+                        <StaffAction id={item._id} status={item.status}/>
                       </div>
                     </td>
                   </tr>

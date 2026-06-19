@@ -464,10 +464,10 @@
                             font-size: 15px;
                             line-height: 1;
                             letter-spacing: -0.02em;
-                            color: var(--tp-common-black);
+                            color: var(--tp-theme-text);
 
                             &.new-price{
-                                color: var(--tp-common-black);
+                                color: var(--tp-theme-text);
                             }
                             &.old-price{
                             font-weight: 400;

@@ -1,6 +1,9 @@
 import { apiSlice } from "@/redux/api/apiSlice";
 import { userLoggedIn } from "./authSlice";
 import Cookies from "js-cookie";
+import { merge_guest_cart } from "../cartSlice";
+import { merge_saved_product_lists } from "../productListThunks";
+import { clear_shipping } from "../order/orderSlice";
 
 export const authApi = apiSlice.injectEndpoints({
   overrideExisting: true,
@@ -32,12 +35,16 @@ export const authApi = apiSlice.injectEndpoints({
             { expires: 0.5 }
           );
 
+          dispatch(apiSlice.util.resetApiState());
+          dispatch(clear_shipping());
           dispatch(
             userLoggedIn({
               accessToken: result.data.data.token,
               user: result.data.data.user,
             })
           );
+          dispatch(merge_saved_product_lists());
+          dispatch(merge_guest_cart());
         } catch (err) {
           // do nothing
         }
@@ -64,12 +71,16 @@ export const authApi = apiSlice.injectEndpoints({
             { expires: 0.5 }
           );
 
+          dispatch(apiSlice.util.resetApiState());
+          dispatch(clear_shipping());
           dispatch(
             userLoggedIn({
               accessToken: result.data.data.token,
               user: result.data.data.user,
             })
           );
+          dispatch(merge_saved_product_lists());
+          dispatch(merge_guest_cart());
         } catch (err) {
           // do nothing
         }
@@ -95,30 +106,6 @@ export const authApi = apiSlice.injectEndpoints({
     // confirmEmail
     confirmEmail: builder.query({
       query: (token) => `api/user/confirmEmail/${token}`,
-
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-        try {
-          const result = await queryFulfilled;
-
-          Cookies.set(
-            "userInfo",
-            JSON.stringify({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
-            }),
-            { expires: 0.5 }
-          );
-
-          dispatch(
-            userLoggedIn({
-              accessToken: result.data.data.token,
-              user: result.data.data.user,
-            })
-          );
-        } catch (err) {
-          // do nothing
-        }
-      },
     }),
     // reset password
     resetPassword: builder.mutation({
@@ -165,12 +152,15 @@ export const authApi = apiSlice.injectEndpoints({
             { expires: 0.5 }
           );
 
+          dispatch(apiSlice.util.resetApiState());
           dispatch(
             userLoggedIn({
               accessToken: result.data.data.token,
               user: result.data.data.user,
             })
           );
+          dispatch(merge_saved_product_lists());
+          dispatch(merge_guest_cart());
         } catch (err) {
           // do nothing
         }

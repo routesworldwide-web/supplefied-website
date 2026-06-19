@@ -16,8 +16,11 @@ router.get('/most-selling-category', userOrderController.mostSellingCategory);
 // get sales-report
 router.get('/dashboard-recent-order', userOrderController.getDashboardRecentOrder);
 
+// cancel a pending order owned by the logged-in customer
+router.patch('/:id/cancel', verifyToken, userOrderController.cancelOrderByUser);
+
 //get a order by id
-router.get('/:id', userOrderController.getOrderById);
+router.get('/:id', verifyToken, userOrderController.getOrderById);
 
 //get all order by a user
 router.get('/',verifyToken, userOrderController.getOrderByUser);

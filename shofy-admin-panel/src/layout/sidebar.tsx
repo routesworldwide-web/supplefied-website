@@ -1,12 +1,17 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import sidebar_menu from "@/data/sidebar-menus";
 import { DownArrow } from "@/svg";
 import Link from "next/link";
 import { useDispatch } from "react-redux";
 import { userLoggedOut } from "@/redux/auth/authSlice";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  useGetNotificationsQuery,
+  useMarkNotificationCategoryReadMutation,
+} from "@/redux/notification/notificationApi";
+import { NotificationCategory } from "@/types/notification-type";
 
 // prop type
 type IProps = {
@@ -18,6 +23,41 @@ export default function Sidebar({sideMenu,setSideMenu}:IProps) {
   const [isDropdown, setIsDropDown] = useState<string>("");
   const dispatch = useDispatch();
   const router = useRouter();
+  const pathname = usePathname();
+  const { data: notificationData } = useGetNotificationsQuery(undefined, {
+    pollingInterval: 10000,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const [markCategoryRead] = useMarkNotificationCategoryReadMutation();
+
+  useEffect(() => {
+    let category: NotificationCategory | null = null;
+
+    if (pathname.startsWith("/orders") || pathname.startsWith("/order-details")) {
+      category = "orders";
+    } else if (pathname.startsWith("/reviews")) {
+      category = "reviews";
+    } else if (pathname.startsWith("/our-staff")) {
+      category = "staff";
+    }
+
+    if (category) {
+      markCategoryRead(category);
+    }
+  }, [markCategoryRead, pathname]);
+
+  const getUnreadCount = (title: string) => {
+    const categoryByTitle: Partial<Record<string, NotificationCategory>> = {
+      Orders: "orders",
+      Reviews: "reviews",
+      "Our Staff": "staff",
+    };
+    const category = categoryByTitle[title];
+    return category
+      ? notificationData?.unreadByCategory?.[category] || 0
+      : 0;
+  };
 
   // handle active menu
   const handleMenuActive = (title: string) => {
@@ -43,21 +83,31 @@ export default function Sidebar({sideMenu,setSideMenu}:IProps) {
 
             <div className="py-4 pb-8 px-8 border-b border-gray h-[78px]">
               <Link href="/dashboard">
-                <Image
+                {/* <Image
                   className="w-[140px]"
                   width={140}
                   height={43}
                   src="/assets/img/logo/logo.svg"
                   alt="logo"
                   priority
-                />
+                /> */}
+
+                <span className="text-4xl font-semibold leading-3 tracking-[2px] underline text-black">Supplef<span className="text-[#E4D329]">i</span>ed</span>
+                <br className="" />
+             
+                <span className="text-lg font-semibold text-black">Admin Dashboard</span>
+
+
               </Link>
             </div>
             <div className="px-4 py-5">
               <ul>
-                {sidebar_menu.map((menu) => (
+                {sidebar_menu.map((menu) => {
+                  const unreadCount = getUnreadCount(menu.title);
+
+                  return (
                   <li key={menu.id}>
-                    {!menu.subMenus && menu.title !== 'Online store' && (
+                    {!menu.subMenus && (
                       <Link
                         href={menu.link}
                         onClick={() => handleMenuActive(menu.title)}
@@ -67,6 +117,11 @@ export default function Sidebar({sideMenu,setSideMenu}:IProps) {
                           <menu.icon />
                         </span>
                         {menu.title}
+                        {unreadCount > 0 && (
+                          <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-danger text-white text-[10px] leading-5 text-center font-semibold">
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </span>
+                        )}
 
                         {menu.subMenus && (
                           <span className="absolute right-4 top-[52%] transition-transform duration-300 origin-center w-4 h-4">
@@ -84,6 +139,11 @@ export default function Sidebar({sideMenu,setSideMenu}:IProps) {
                           <menu.icon />
                         </span>
                         {menu.title}
+                        {unreadCount > 0 && (
+                          <span className="ml-auto min-w-[20px] h-5 px-1.5 rounded-full bg-danger text-white text-[10px] leading-5 text-center font-semibold">
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                          </span>
+                        )}
 
                         {menu.subMenus && (
                           <span className="absolute right-4 top-[52%] transition-transform duration-300 origin-center w-4 h-4">
@@ -92,19 +152,6 @@ export default function Sidebar({sideMenu,setSideMenu}:IProps) {
                         )}
                       </a>
                     )}
-                    {menu.title === 'Online store' && (
-                      <a
-                        href="https://supplefied.com/"
-                        target="_blank"
-                        className={`group cursor-pointer rounded-md relative text-black text-lg font-medium inline-flex items-center w-full transition-colors ease-in-out duration-300 px-5 py-[9px] mb-2 hover:bg-gray sidebar-link-active`}
-                      >
-                        <span className="inline-block mr-[10px] text-xl">
-                          <menu.icon />
-                        </span>
-                        {menu.title}
-                      </a>
-                    )}
-
                     {menu.subMenus && (
                       <ul
                         className={`pl-[42px] pr-[20px] pb-3 ${isDropdown === menu.title ? "block" : "hidden"}`}
@@ -122,12 +169,16 @@ export default function Sidebar({sideMenu,setSideMenu}:IProps) {
                       </ul>
                     )}
                   </li>
-                ))}
+                  );
+                })}
               </ul>
             </div>
           </div>
-          <div className="text-center mb-6">
-            <button onClick={handleLogOut} className="tp-btn px-7 py-2">Logout</button>
+          <div className="ml-10 mb-6">
+            
+            <button onClick={handleLogOut} className="tp-btn px-7 py-2">
+              Logout
+            </button>
           </div>
         </div>
       </aside>

@@ -45,7 +45,7 @@
                     width: auto;
                     height: auto;
                     background-color: transparent;
-                    color: var(--tp-common-black);
+                    color: var(--tp-theme-text);
                     padding: 0;
                     border: 0;
                     font-weight: 500;
@@ -136,12 +136,7 @@
         }
     }
     &-categories{
-        height: 288px;
-        overflow-y: scroll;
-        overflow-y: scroll;
-        overscroll-behavior-y: contain;
-        scrollbar-width: thin;
-        padding-right: 10px;
+        height: auto;
         & ul{
             & li{
                 list-style: none;
@@ -275,7 +270,7 @@
         }
         label{
             font-size: 16px;
-            color: #55585B;
+            color: var(--tp-theme-text);
             position: relative;
             padding-left: 26px;
             
@@ -341,7 +336,7 @@
         }
         &-price{
             font-size: 14px;
-            color: #55585B;
+            color: var(--tp-theme-text);
         }
     }
     &-brand{
@@ -360,10 +355,5 @@
 }
 
 .tp-shop-widget-checkbox-circle-list{
-    height: 220px;
-    overflow-y: scroll;
-    overflow-y: scroll;
-    overscroll-behavior-y: contain;
-    scrollbar-width: thin;
-    padding-right: 10px;
+    height: auto;
 }

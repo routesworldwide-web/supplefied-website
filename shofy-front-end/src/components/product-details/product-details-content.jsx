@@ -2,14 +2,16 @@
 import React, { useState, useEffect } from "react";
 import DetailsThumbWrapper from "./details-thumb-wrapper";
 import DetailsWrapper from "./details-wrapper";
-import { useDispatch } from "react-redux";
 import DetailsTabNav from "./details-tab-nav";
 import RelatedProducts from "./related-products";
 
 const ProductDetailsContent = ({ productItem }) => {
   const { _id, img, imageURLs, videoId,status } = productItem || {};
   const [activeImg, setActiveImg] = useState(img);
-  const dispatch = useDispatch();
+  const galleryImages = [
+    { img },
+    ...(imageURLs?.filter((item) => item?.img && item.img !== img) || []),
+  ];
   // active image change when img change
   useEffect(() => {
     setActiveImg(img);
@@ -29,7 +31,7 @@ const ProductDetailsContent = ({ productItem }) => {
               <DetailsThumbWrapper
                 activeImg={activeImg}
                 handleImageActive={handleImageActive}
-                imageURLs={imageURLs}
+                imageURLs={galleryImages}
                 imgWidth={580}
                 imgHeight={670}
                 videoId={videoId}

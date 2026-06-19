@@ -3,6 +3,69 @@ const validator = require("validator");
 const crypto = require("crypto");
 const bcrypt = require("bcryptjs");
 
+const shippingAddressSchema = mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+      maxLength: 100,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+      maxLength: 100,
+    },
+    country: {
+      type: String,
+      required: true,
+      trim: true,
+      maxLength: 100,
+    },
+    address: {
+      type: String,
+      required: true,
+      trim: true,
+      maxLength: 300,
+    },
+    city: {
+      type: String,
+      required: true,
+      trim: true,
+      maxLength: 100,
+    },
+    zipCode: {
+      type: String,
+      required: true,
+      trim: true,
+      maxLength: 30,
+    },
+    contactNo: {
+      type: String,
+      required: true,
+      trim: true,
+      maxLength: 30,
+    },
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      validate: [validator.isEmail, "Provide a valid Email"],
+    },
+    orderNote: {
+      type: String,
+      required: false,
+      trim: true,
+      maxLength: 500,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
 const userSchema = mongoose.Schema(
   {
     name: {
@@ -25,6 +88,19 @@ const userSchema = mongoose.Schema(
       required: [false, "Password is required"],
       minLength: [6, "Must be at least 6 character"],
     },
+    authProviders: {
+      type: [String],
+      enum: ["password", "google"],
+      default: [],
+    },
+    googleId: {
+      type: String,
+      required: false,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
 
     role: {
       type: String,
@@ -34,15 +110,27 @@ const userSchema = mongoose.Schema(
 
     contactNumber: {
       type: String,
+      trim: true,
+      maxLength: 30,
       validate: [
         function(v) {
-          return !v || validator.isMobilePhone(v);
+          return !v || validator.isMobilePhone(v, "any");
         },
         "Please provide a valid contact number",
       ],
     },
 
     shippingAddress: String,
+    shippingAddresses: {
+      type: [shippingAddressSchema],
+      validate: [
+        function(v) {
+          return !v || v.length <= 3;
+        },
+        "You can save up to 3 shipping addresses",
+      ],
+      default: [],
+    },
 
     imageURL: {
       type: String,
@@ -88,6 +176,9 @@ userSchema.pre("save", function (next) {
     //  only run if password is modified, otherwise it will change every time we save the user!
     return next();
   }
+  if (!this.password) {
+    return next();
+  }
   const password = this.password;
   const hashedPassword = bcrypt.hashSync(password);
   this.password = hashedPassword;
@@ -96,8 +187,11 @@ userSchema.pre("save", function (next) {
 });
 // comparePassword
 userSchema.methods.comparePassword = function (password, hash) {
-  const isPasswordValid = bcrypt.compareSync(password, hash);
-  return isPasswordValid;
+  if (!password || !hash) {
+    return false;
+  }
+
+  return bcrypt.compareSync(password, hash);
 };
 // generateConfirmationToken
 userSchema.methods.generateConfirmationToken = function () {

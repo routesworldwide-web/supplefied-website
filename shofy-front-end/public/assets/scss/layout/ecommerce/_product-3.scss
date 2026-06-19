@@ -117,10 +117,10 @@
         &-3{
             font-weight: 500;
             font-size: 16px;
-            color: var(--tp-common-black);
+            color: var(--tp-theme-text);
 
             &.new-price{
-                color: var(--tp-common-black);
+                color: var(--tp-theme-text);
             }
             &.old-price{
                 font-weight: 400;
@@ -151,8 +151,9 @@
             height: 40px;
             width: 40px;
             line-height: 40px;
-            background: var(--tp-common-white);
-            border: 1px solid #DFE0E1;
+            color: var(--tp-theme-action-hover-text);
+            background: var(--tp-theme-action-hover-bg);
+            border: 1px solid var(--tp-theme-action-border);
             box-shadow: 0px 1px 1px rgba(1, 15, 28, 0.1);
             margin-bottom: 4px;
             &:last-child{
@@ -171,14 +172,14 @@
                 }
             }
             &.active{
-                color: var(--tp-common-white);
-                border-color: var(--tp-common-black);
-                background: var(--tp-common-black);   
+                color: var(--tp-theme-action-text);
+                border-color: var(--tp-theme-action-border);
+                background: var(--tp-theme-action-bg);
             }
             &:hover{
-                color: var(--tp-common-white);
-                border-color: var(--tp-common-black);
-                background: var(--tp-common-black);
+                color: var(--tp-theme-action-text);
+                border-color: var(--tp-theme-action-border);
+                background: var(--tp-theme-action-bg);
                 box-shadow: 0px 1px 1px rgba(1, 15, 28, 0.1);
 
                 #{$self}{

@@ -19,12 +19,12 @@ const menu_data = [
   //   title: 'Shop',
   //   link: '/shop',
   // },
-  {
-    id: 4,
-    single_link: true,
-    title: 'Coupons',
-    link: '/coupon',
-  },
+  // {
+  //   id: 4,
+  //   single_link: true,
+  //   title: 'Coupons',
+  //   link: '/coupon',
+  // },
   {
     id: 5,
     single_link: true,
@@ -61,12 +61,12 @@ export const mobile_menu = [
   //   title: 'Shop',
   //   link: '/shop',
   // },
-  {
-    id: 4,
-    single_link: true,
-    title: 'Coupons',
-    link: '/coupon',
-  },
+  // {
+  //   id: 4,
+  //   single_link: true,
+  //   title: 'Coupons',
+  //   link: '/coupon',
+  // },
   {
     id: 5,
     single_link: true,

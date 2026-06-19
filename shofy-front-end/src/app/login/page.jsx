@@ -12,7 +12,7 @@ export default function LoginPage() {
   return (
     <Wrapper>
       <HeaderTwo style_2={true} />
-      <CommonBreadcrumb title="Login" subtitle="Login" center={true} />
+      {/* <CommonBreadcrumb title="Login" subtitle="Login" center={true} /> */}
       <LoginArea/>
       <Footer primary_style={true} />
     </Wrapper>

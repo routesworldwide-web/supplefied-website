@@ -1,116 +1,151 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import React from "react";
 import { MonthSales, Received, Sales, TotalOrders } from "@/svg";
 import { useGetDashboardAmountQuery } from "@/redux/order/orderApi";
-import dayjs from "dayjs";
-import isToday from "dayjs/plugin/isToday";
-import isYesterday from "dayjs/plugin/isYesterday";
-import isBetween from "dayjs/plugin/isBetween";
 import ErrorMsg from "../common/error-msg";
-dayjs.extend(isToday, isYesterday);
-dayjs.extend(isBetween);
 
-type IPropType = {
+const formatCurrency = (value = 0) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(value);
+
+type CardItemProps = {
   title: string;
-  amount: number | undefined;
-  cash?: number;
-  card?: number;
+  value: string;
+  detail: string;
+  comparison?: string;
+  comparisonTone?: "positive" | "negative" | "neutral";
   icon: React.ReactNode;
-  clr: string;
-  clr2: string;
+  iconClass: string;
 };
 
-function CardItem({ title, amount, cash, card, icon, clr, clr2 }: IPropType) {
+function CardItem({
+  title,
+  value,
+  detail,
+  comparison,
+  comparisonTone = "neutral",
+  icon,
+  iconClass,
+}: CardItemProps) {
+  const comparisonClass =
+    comparisonTone === "positive"
+      ? "text-success bg-success/10"
+      : comparisonTone === "negative"
+      ? "text-danger bg-danger/10"
+      : "text-text3 bg-gray";
+
   return (
-    <div className="widget-item bg-white p-6 flex justify-between rounded-md">
-      <div>
-        <h4 className="text-xl font-semibold text-slate-700 mb-1 leading-none">
-          {amount && amount.toFixed(2)}
-        </h4>
-        <p className="text-tiny leading-4">{title}</p>
-        {(title === "Today Orders" || title === "Yesterday Orders") && (
-          <div className={`badge space-x-1 ${clr}`}>
-            <div className="flex text-center font-normal text-gray-50">
-              {cash !== undefined && (
-                <div className="px-1">Cash: {cash.toFixed(2)}</div>
-              )}
-              {card !== undefined && (
-                <div className="px-1">Card: {card.toFixed(2)}</div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-      <div>
+    <article className="relative overflow-hidden rounded-lg border border-gray6 bg-white p-6 shadow-xs transition-transform duration-200 hover:-translate-y-0.5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <p className="mb-3 text-tiny font-medium uppercase tracking-[0.12em] text-text3">
+            {title}
+          </p>
+          <h3 className="mb-2 truncate text-[26px] font-semibold leading-none text-heading">
+            {value}
+          </h3>
+          <p className="mb-0 text-base text-textBody">{detail}</p>
+        </div>
         <span
-          className={`text-lg text-white rounded-full flex items-center justify-center h-12 w-12 shrink-0 ${clr2}`}
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${iconClass}`}
         >
           {icon}
         </span>
       </div>
-    </div>
+
+      {comparison && (
+        <div className="mt-5 border-t border-gray6 pt-4">
+          <span
+            className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${comparisonClass}`}
+          >
+            {comparison}
+          </span>
+        </div>
+      )}
+    </article>
   );
 }
 
 const CardItems = () => {
-  const {
-    data: dashboardOrderAmount,
-    isError,
-    isLoading,
-  } = useGetDashboardAmountQuery();
-
-  // decide what to render
-  let content = null;
+  const { data, isError, isLoading } = useGetDashboardAmountQuery();
 
   if (isLoading) {
-    content = <h2>Loading....</h2>;
-  }
-  if (!isLoading && isError) {
-    content = <ErrorMsg msg="There was an error" />;
-  }
-
-  if (!isLoading && !isError) {
-    content = (
-      <>
-        <CardItem
-          title="Today Orders"
-          amount={dashboardOrderAmount?.todayOrderAmount} 
-          card={dashboardOrderAmount?.todayCardPaymentAmount} 
-          cash={dashboardOrderAmount?.todayCashPaymentAmount} 
-          icon={<Received />}
-          clr=""
-          clr2="bg-success"
-        />
-        <CardItem
-          title="Yesterday Orders"
-          amount={dashboardOrderAmount?.yesterdayOrderAmount}
-          card={dashboardOrderAmount?.yesterDayCardPaymentAmount}
-          cash={dashboardOrderAmount?.yesterDayCashPaymentAmount}
-          icon={<Sales />}
-          clr="text-purple bg-purple/10"
-          clr2="bg-purple"
-        />
-        <CardItem
-          title="Monthly Orders"
-          amount={dashboardOrderAmount?.monthlyOrderAmount}
-          icon={<MonthSales />}
-          clr="text-info bg-info/10"
-          clr2="bg-info"
-        />
-        <CardItem
-          title="Total Orders"
-          amount={dashboardOrderAmount?.totalOrderAmount}
-          icon={<TotalOrders />}
-          clr="text-warning bg-warning/10"
-          clr2="bg-warning"
-        />
-      </>
+    return (
+      <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div
+            key={index}
+            className="h-[174px] animate-pulse rounded-lg bg-white"
+          />
+        ))}
+      </div>
     );
   }
 
+  if (isError || !data) {
+    return <ErrorMsg msg="Dashboard totals could not be loaded" />;
+  }
+
+  const todayOrderCount = Number(data.todayOrderCount || 0);
+  const yesterdayOrderCount = Number(data.yesterdayOrderCount || 0);
+  const monthlyOrderCount = Number(data.monthlyOrderCount || 0);
+  const totalOrderCount = Number(data.totalOrderCount || 0);
+  const yesterdayRevenue = data.yesterdayOrderAmount || 0;
+  const revenueChange =
+    yesterdayRevenue > 0
+      ? ((data.todayOrderAmount - yesterdayRevenue) / yesterdayRevenue) * 100
+      : data.todayOrderAmount > 0
+      ? 100
+      : 0;
+  const revenueChangeLabel = `${Math.abs(revenueChange).toFixed(
+    0
+  )}% ${revenueChange >= 0 ? "above" : "below"} yesterday`;
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
-      {content}
+    <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+      <CardItem
+        title="Today's revenue"
+        value={formatCurrency(data.todayOrderAmount)}
+        detail={`${todayOrderCount} ${
+          todayOrderCount === 1 ? "order" : "orders"
+        } received`}
+        comparison={revenueChangeLabel}
+        comparisonTone={revenueChange > 0 ? "positive" : revenueChange < 0 ? "negative" : "neutral"}
+        icon={<Received />}
+        iconClass="bg-success/10 text-success"
+      />
+      <CardItem
+        title="Today's orders"
+        value={todayOrderCount.toLocaleString("en-IN")}
+        detail={`${formatCurrency(data.todayCashPaymentAmount)} COD · ${formatCurrency(
+          data.todayCardPaymentAmount
+        )} online`}
+        comparison={`${yesterdayOrderCount} orders yesterday`}
+        icon={<Sales />}
+        iconClass="bg-purple/10 text-purple"
+      />
+      <CardItem
+        title="This month"
+        value={formatCurrency(data.monthlyOrderAmount)}
+        detail={`${monthlyOrderCount.toLocaleString(
+          "en-IN"
+        )} non-cancelled orders`}
+        icon={<MonthSales />}
+        iconClass="bg-info/10 text-info"
+      />
+      <CardItem
+        title="Lifetime revenue"
+        value={formatCurrency(data.totalOrderAmount)}
+        detail={`${totalOrderCount.toLocaleString(
+          "en-IN"
+        )} completed or active orders`}
+        icon={<TotalOrders />}
+        iconClass="bg-warning/10 text-warning"
+      />
     </div>
   );
 };

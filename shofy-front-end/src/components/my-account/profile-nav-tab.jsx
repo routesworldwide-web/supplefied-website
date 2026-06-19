@@ -45,6 +45,11 @@ const ProfileNavTab = () => {
           icon="fa-light fa-clipboard-list-check"
         />
         <SingleNav
+          id="shipping-addresses"
+          title="Shipping Address"
+          icon="fa-regular fa-location-dot"
+        />
+        <SingleNav
           id="password"
           title="Change Password"
           icon="fa-regular fa-lock"

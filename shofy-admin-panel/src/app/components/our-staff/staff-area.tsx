@@ -63,7 +63,7 @@ const AddStaffArea = () => {
             </div>
             {/* Product Type */}
 
-            <button type="submit" className="tp-btn px-7 py-2">Add Stuff</button>
+            <button type="submit" className="tp-btn px-7 py-2">Add Staff</button>
           </div>
         </form>
       </div>

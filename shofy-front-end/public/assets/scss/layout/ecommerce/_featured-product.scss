@@ -79,10 +79,10 @@
         }
         font-weight: 500;
         font-size: 20px;
-        color: var(--tp-common-black);
+        color: var(--tp-theme-text);
         line-height: 1;
         &.new-price{
-            color: var(--tp-common-black);
+            color: var(--tp-theme-text);
         }
         &.old-price{
             font-weight: 400;
@@ -145,7 +145,7 @@
     &-price-3{
         & span{
             font-size: 20px;
-            color: var(--tp-theme-brown);
+            color: var(--tp-theme-text);
         }
     }
 }

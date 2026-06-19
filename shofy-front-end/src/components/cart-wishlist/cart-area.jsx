@@ -18,7 +18,7 @@ const CartArea = () => {
           {cart_products.length === 0 &&
             <div className='text-center pt-50'>
               <h3>No Cart Items Found</h3>
-              <Link href="/shop" className="tp-cart-checkout-btn mt-20">Continue Shipping</Link>
+              <Link href="/shop" className="tp-cart-checkout-btn mt-20">Continue Shopping</Link>
             </div>
           }
           {cart_products.length > 0 &&

@@ -9,7 +9,7 @@ import { useGetAllProductsQuery } from "@/redux/features/productApi";
 import { handleFilterSidebarClose } from "@/redux/features/shop-filter-slice";
 import ShopColorLoader from "@/components/loader/shop/color-filter-loader";
 
-const ColorFilter = ({setCurrPage,shop_right=false}) => {
+const ColorFilter = ({setCurrPage}) => {
   const { data: products, isError, isLoading } = useGetAllProductsQuery();
   const router = useRouter();
   const dispatch = useDispatch()
@@ -20,7 +20,7 @@ const ColorFilter = ({setCurrPage,shop_right=false}) => {
   const handleColor = (clr) => {
     setCurrPage(1)
     router.push(
-      `/${shop_right?'shop-right-sidebar':'shop'}?color=${clr
+      `/shop?color=${clr
         .toLowerCase()
         .split(" ")
         .join("-")}`

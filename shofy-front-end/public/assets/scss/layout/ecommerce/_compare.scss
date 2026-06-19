@@ -49,7 +49,7 @@
     &-price{
         & span{
             font-size: 14px;
-            color: $black;
+            color: var(--tp-theme-text);
             font-weight: 500;
             margin-right: 7px;
             &.old-price{
@@ -61,13 +61,14 @@
     &-add-to-cart{
         & .tp-btn{
             padding: 5px 18px;
-            background-color: transparent;
-            color: var(--tp-common-black);
+            background-color: var(--tp-theme-action-bg);
+            color: var(--tp-theme-action-text);
+            border-color: var(--tp-theme-action-border);
 
             &:hover{
-                background-color: var(--tp-theme-primary);
-                border-color: var(--tp-theme-primary);
-                color: var(--tp-common-white);
+                background-color: var(--tp-theme-action-hover-bg);
+                border-color: var(--tp-theme-action-border);
+                color: var(--tp-theme-action-hover-text);
             }
         }
     }

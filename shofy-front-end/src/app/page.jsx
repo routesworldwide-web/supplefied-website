@@ -21,17 +21,19 @@ export default function HomePage() {
     <Wrapper>
       <Header/>
       <HomeHeroSlider/>
-      <ElectronicCategory/>
-      <FeatureArea/>
-      <ProductArea/>
-      <BannerArea/>
-      <OfferProducts/>
-      <ProductGadgetArea/>
-      <ProductBanner/>
-       <NewArrivals/>
-      <ProductSmArea/>
-      <BlogArea/>
-      <InstagramArea/>
+      <div className="tp-home-watermark">
+        <ElectronicCategory/>
+        <FeatureArea/>
+        <ProductArea/>
+        <BannerArea/>
+        <OfferProducts/>
+        <ProductGadgetArea/>
+        <ProductBanner/>
+        <NewArrivals/>
+        <ProductSmArea/>
+        <BlogArea/>
+        <InstagramArea/>
+      </div>
       <CtaArea/>
       <Footer/>
     </Wrapper>

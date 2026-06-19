@@ -12,7 +12,7 @@ export default function RegisterPage() {
   return (
     <Wrapper>
       <HeaderTwo style_2={true} />
-      <CommonBreadcrumb title="Register" subtitle="Register" center={true} />
+      {/* <CommonBreadcrumb title="Register" subtitle="Register" center={true} /> */}
       <RegisterArea />
       <Footer primary_style={true} />
     </Wrapper>

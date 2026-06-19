@@ -17,7 +17,7 @@ const FeatureArea = () => {
                     </div>
                     <div className="tp-feature-content">
                       <h3 className="tp-feature-title">{item.title}</h3>
-                      <p>{item.subtitle}</p>
+                      {/* <p>{item.subtitle}</p> */}
                     </div>
                 </div>
               </div>

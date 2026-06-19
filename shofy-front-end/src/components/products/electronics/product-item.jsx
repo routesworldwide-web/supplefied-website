@@ -3,22 +3,30 @@ import Image from "next/image";
 import Link from "next/link";
 import { Rating } from "react-simple-star-rating";
 import dayjs from "dayjs";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 // internal
-import { Cart, QuickView, Wishlist } from "@/svg";
+import { Cart, CompareThree, QuickView, Wishlist } from "@/svg";
 import Timer from "@/components/common/timer";
 import { handleProductModal } from "@/redux/features/productModalSlice";
-import { add_cart_product } from "@/redux/features/cartSlice";
-import { add_to_wishlist } from "@/redux/features/wishlist-slice";
+import { getProductDetailsUrl } from "@/utils/product-url";
+import ProductPrice from "@/components/common/product-price";
+import useProductCardActions from "@/hooks/use-product-card-actions";
 
 const ProductItem = ({ product, offer_style = false }) => {
-  const { _id, img, category, title, reviews, price, discount,status,offerDate } = product || {};
-  console.log(status)
-  const { cart_products } = useSelector((state) => state.cart);
-  const { wishlist } = useSelector((state) => state.wishlist);
-  const isAddedToCart = cart_products.some((prd) => prd._id === _id);
-  const isAddedToWishlist = wishlist.some((prd) => prd._id === _id);
+  const { img, category, title, reviews, status, offerDate } = product || {};
+  const productUrl = getProductDetailsUrl(product);
   const dispatch = useDispatch();
+  const {
+    isInCart,
+    isInWishlist,
+    isInCompare,
+    cartLabel,
+    wishlistLabel,
+    compareLabel,
+    addToCart,
+    toggleWishlist,
+    toggleCompare,
+  } = useProductCardActions(product);
   const [ratingVal, setRatingVal] = useState(0);
   useEffect(() => {
     if (reviews && reviews.length > 0) {
@@ -31,15 +39,6 @@ const ProductItem = ({ product, offer_style = false }) => {
     }
   }, [reviews]);
 
-  // handle add product
-  const handleAddProduct = (prd) => {
-    dispatch(add_cart_product(prd));
-  };
-  // handle wishlist product
-  const handleWishlistProduct = (prd) => {
-    dispatch(add_to_wishlist(prd));
-  };
-
   return (
     <>
       <div
@@ -47,14 +46,14 @@ const ProductItem = ({ product, offer_style = false }) => {
           } tp-product-item transition-3`}
       >
         <div className="tp-product-thumb p-relative fix">
-          <Link href={`/product-details/${_id}`}>
+          <Link href={productUrl}>
             <Image
               src={img}
               width="0"
               height="0"
               sizes="100vw"
               style={{ width: '100%', height: 'auto' }}
-              alt="product-electronic"
+              alt={title || "product"}
             />
 
             <div className="tp-product-badge">
@@ -65,25 +64,15 @@ const ProductItem = ({ product, offer_style = false }) => {
           {/*  product action */}
           <div className="tp-product-action">
             <div className="tp-product-action-item d-flex flex-column">
-              {isAddedToCart ? (
-                <Link
-                  href="/cart"
-                  className={`tp-product-action-btn ${isAddedToCart ? 'active' : ''} tp-product-add-cart-btn`}
-                >
-                  <Cart /> <span className="tp-product-tooltip">View Cart</span>
-                </Link>
-              ) : (
-                <button
-                  onClick={() => handleAddProduct(product)}
-                  type="button"
-                  className={`tp-product-action-btn ${isAddedToCart ? 'active' : ''} tp-product-add-cart-btn`}
-                  disabled={status === 'out-of-stock'}
-                >
-                  <Cart />
-
-                  <span className="tp-product-tooltip">Add to Cart</span>
-                </button>
-              )}
+              <button
+                onClick={addToCart}
+                type="button"
+                className={`tp-product-action-btn ${isInCart ? 'active' : ''} tp-product-add-cart-btn`}
+                disabled={status === 'out-of-stock'}
+              >
+                <Cart />
+                <span className="tp-product-tooltip">{cartLabel}</span>
+              </button>
               <button
                 onClick={() => dispatch(handleProductModal(product))}
                 type="button"
@@ -95,12 +84,21 @@ const ProductItem = ({ product, offer_style = false }) => {
               </button>
               <button
                 type="button"
-                className={`tp-product-action-btn ${isAddedToWishlist ? 'active' : ''} tp-product-add-to-wishlist-btn`}
-                onClick={() => handleWishlistProduct(product)}
+                className={`tp-product-action-btn ${isInWishlist ? 'active' : ''} tp-product-add-to-wishlist-btn`}
+                onClick={toggleWishlist}
                 disabled={status === 'out-of-stock'}
               >
                 <Wishlist />
-                <span className="tp-product-tooltip">Add To Wishlist</span>
+                <span className="tp-product-tooltip">{wishlistLabel}</span>
+              </button>
+              <button
+                type="button"
+                className={`tp-product-action-btn ${isInCompare ? 'active' : ''} tp-product-add-to-compare-btn`}
+                onClick={toggleCompare}
+                disabled={status === 'out-of-stock'}
+              >
+                <CompareThree />
+                <span className="tp-product-tooltip">{compareLabel}</span>
               </button>
             </div>
           </div>
@@ -111,7 +109,7 @@ const ProductItem = ({ product, offer_style = false }) => {
             <a href="#">{category?.name}</a>
           </div>
           <h3 className="tp-product-title">
-            <Link href={`/product-details/${_id}`}>{title}</Link>
+            <Link href={productUrl}>{title}</Link>
           </h3>
           <div className="tp-product-rating d-flex align-items-center">
             <div className="tp-product-rating-icon">
@@ -129,38 +127,12 @@ const ProductItem = ({ product, offer_style = false }) => {
             </div>
           </div>
           <div className="tp-product-price-wrapper">
-            {discount > 0 ? (
-              <>
-                <span className="tp-product-price old-price">${price}</span>
-                <span className="tp-product-price new-price">
-                  {" "} ${(Number(price) - (Number(price) * Number(discount)) / 100).toFixed(2)}
-                </span>
-              </>
-            ) : (
-              <span className="tp-product-price new-price">${parseFloat(price).toFixed(2)}</span>
-            )}
+            <ProductPrice product={product} />
           </div>
-          {offer_style && (
+          {offer_style && offerDate?.endDate && !dayjs().isAfter(offerDate.endDate) && (
             <div className="tp-product-countdown">
               <div className="tp-product-countdown-inner">
-                {dayjs().isAfter(offerDate?.endDate) ? (
-                  <ul>
-                    <li>
-                      <span>{0}</span> Day
-                    </li>
-                    <li>
-                      <span>{0}</span> Hrs
-                    </li>
-                    <li>
-                      <span>{0}</span> Min
-                    </li>
-                    <li>
-                      <span>{0}</span> Sec
-                    </li>
-                  </ul>
-                ) : (
-                  <Timer expiryTimestamp={new Date(offerDate?.endDate)} />
-                )}
+                <Timer expiryTimestamp={new Date(offerDate.endDate)} />
               </div>
             </div>
           )}

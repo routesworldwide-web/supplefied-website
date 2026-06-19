@@ -1,26 +1,15 @@
 import { apiSlice } from "../../api/apiSlice";
-import { set_client_secret } from "./orderSlice";
 
 export const authApi = apiSlice.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
-    // createPaymentIntent
-    createPaymentIntent: builder.mutation({
+    // createRazorpayOrder
+    createRazorpayOrder: builder.mutation({
       query: (data) => ({
-        url: "api/order/create-payment-intent",
+        url: "api/order/create-razorpay-order",
         method: "POST",
         body: data,
       }),
-
-      async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-        try {
-          const result = await queryFulfilled;
-          dispatch(set_client_secret(result.clientSecret));
-        } catch (err) {
-          // do nothing
-        }
-      },
-
     }),
     // saveOrder
     saveOrder: builder.mutation({
@@ -35,7 +24,6 @@ export const authApi = apiSlice.injectEndpoints({
           const result = await queryFulfilled;
           if (result) {
             localStorage.removeItem("couponInfo");
-            localStorage.removeItem("cart_products");
             localStorage.removeItem("shipping_info");
           }
         } catch (err) {
@@ -47,7 +35,7 @@ export const authApi = apiSlice.injectEndpoints({
     // getUserOrders
     getUserOrders: builder.query({
       query: () => `/api/user-order`,
-      providesTags:["UserOrders"],
+      providesTags: (result, error, userId) => [{ type: "UserOrders", id: userId }],
       keepUnusedDataFor: 600,
     }),
     // getUserOrders
@@ -56,12 +44,24 @@ export const authApi = apiSlice.injectEndpoints({
       providesTags: (result, error, arg) => [{ type: "UserOrder", id: arg }],
       keepUnusedDataFor: 600,
     }),
+    cancelUserOrder: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/api/user-order/${id}/cancel`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result, error, arg) => [
+        "UserOrders",
+        { type: "UserOrder", id: arg.id },
+      ],
+    }),
   }),
 });
 
 export const {
-  useCreatePaymentIntentMutation,
+  useCreateRazorpayOrderMutation,
   useSaveOrderMutation,
   useGetUserOrderByIdQuery,
   useGetUserOrdersQuery,
+  useCancelUserOrderMutation,
 } = authApi;

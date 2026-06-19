@@ -28,6 +28,7 @@ const schemaTwo = Yup.object().shape({
 
 const ChangePassword = () => {
   const { user } = useSelector((state) => state.auth);
+  const hasPasswordProvider = user?.authProviders?.includes("password");
   const [changePassword, {}] = useChangePasswordMutation();
   // react hook form
   const {
@@ -36,30 +37,28 @@ const ChangePassword = () => {
     formState: { errors },
     reset,
   } = useForm({
-    resolver: yupResolver(user?.googleSignIn ? schemaTwo : schema),
+    resolver: yupResolver(hasPasswordProvider ? schema : schemaTwo),
   });
 
   // on submit
-  const onSubmit = (data) => {
-    changePassword({
-      email: user?.email,
-      password: data.password,
-      newPassword: data.newPassword,
-      googleSignIn: user?.googleSignIn,
-    }).then((result) => {
-      if (result?.error) {
-        notifyError(result?.error?.data?.message);
-      } else {
-        notifySuccess(result?.data?.message);
-      }
-    });
-    reset();
+  const onSubmit = async (data) => {
+    try {
+      const result = await changePassword({
+        password: data.password,
+        newPassword: data.newPassword,
+      }).unwrap();
+
+      notifySuccess(result?.message);
+      reset();
+    } catch (error) {
+      notifyError(error?.data?.message || "Password could not be changed");
+    }
   };
   return (
     <div className="profile__password">
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="row">
-          {!user?.googleSignIn && (
+          {hasPasswordProvider && (
             <div className="col-xxl-12">
               <div className="tp-profile-input-box">
                 <div className="tp-contact-input">
@@ -92,7 +91,7 @@ const ChangePassword = () => {
                 />
               </div>
               <div className="tp-profile-input-title">
-                <label htmlFor="new_pass">New Password</label>
+                <label htmlFor="newPassword">New Password</label>
               </div>
               <ErrorMsg msg={errors.newPassword?.message} />
             </div>
@@ -115,7 +114,7 @@ const ChangePassword = () => {
           </div>
           <div className="col-xxl-6 col-md-6">
             <div className="profile__btn">
-              <button type="submit" className="tp-btn">
+              <button type="submit" className="tp-btn text-light bg-black">
                 Update
               </button>
             </div>

@@ -4,19 +4,36 @@ import React, { useState } from "react";
 import Swal from "sweetalert2";
 import DeleteTooltip from "../tooltip/delete-tooltip";
 import EditTooltip from "../tooltip/edit-tooltip";
-import { useDeleteCategoryMutation } from "@/redux/category/categoryApi";
-import { useDeleteStaffMutation } from "@/redux/auth/authApi";
-import { notifyError } from "@/utils/toast";
+import { useDeleteStaffMutation, useUpdateStaffStatusMutation } from "@/redux/auth/authApi";
+import { notifyError, notifySuccess } from "@/utils/toast";
 
 // prop type
 type IPropType = {
   id: string;
+  status?: "Pending" | "Active" | "Inactive";
 };
 
-const StaffAction = ({ id }: IPropType) => {
+const StaffAction = ({ id, status }: IPropType) => {
   const [showEdit, setShowEdit] = useState<boolean>(false);
   const [showDelete, setShowDelete] = useState<boolean>(false);
-  const [deleteStaff, { data: delData }] = useDeleteStaffMutation();
+  const [deleteStaff] = useDeleteStaffMutation();
+  const [updateStaffStatus] = useUpdateStaffStatusMutation();
+
+  const handleStatusChange = async (nextStatus: "Active" | "Inactive") => {
+    const res = await updateStaffStatus({ id, status: nextStatus });
+
+    if ("error" in res) {
+      if ("data" in res.error) {
+        const errorData = res.error.data as { message?: string };
+        if (typeof errorData.message === "string") {
+          return notifyError(errorData.message);
+        }
+      }
+      return notifyError("Unable to update staff status");
+    }
+
+    notifySuccess(res.data.message);
+  };
 
   const handleDelete = async (id: string) => {
     Swal.fire({
@@ -73,6 +90,22 @@ const StaffAction = ({ id }: IPropType) => {
         </button>
         <DeleteTooltip showDelete={showDelete} />
       </div>
+      {status !== "Active" && (
+        <button
+          onClick={() => handleStatusChange("Active")}
+          className="h-10 px-3 text-tiny bg-success text-white rounded-md hover:bg-green-600"
+        >
+          Approve
+        </button>
+      )}
+      {status === "Active" && (
+        <button
+          onClick={() => handleStatusChange("Inactive")}
+          className="h-10 px-3 text-tiny bg-warning text-white rounded-md hover:bg-orange"
+        >
+          Disable
+        </button>
+      )}
     </>
   );
 };

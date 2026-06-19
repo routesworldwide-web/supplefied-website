@@ -187,6 +187,8 @@
     }
     &-thumb{
         & img{
+             width: 700px;
+                height: 466px;
             display: inline-block !important;
             @include animation-control(.9s);
             @media #{$xs}{
@@ -195,6 +197,11 @@
                 margin-top: 50px;
             }
         }
+    }
+    &-uploaded-slide{
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: cover;
     }
     &-btn{
         & .tp-btn{

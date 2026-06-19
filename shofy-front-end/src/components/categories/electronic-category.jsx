@@ -8,7 +8,10 @@ import { useGetProductTypeCategoryQuery } from '@/redux/features/categoryApi';
 import HomeCateLoader from '../loader/home/home-cate-loader';
 
 const ElectronicCategory = () => {
-  const { data: categories, isLoading, isError } = useGetProductTypeCategoryQuery('electronics');
+  const { data: categories, isLoading, isError } = useGetProductTypeCategoryQuery({
+    type: 'electronics',
+    featured: true,
+  });
   const router = useRouter()
 
   // handle category route

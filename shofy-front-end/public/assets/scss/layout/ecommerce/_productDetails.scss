@@ -132,8 +132,9 @@
                 text-align: center;
                 border-radius: 50%;
                 margin: 0 5px;
-                background-color: var(--tp-common-white);
-                color: var(--tp-common-black);
+                background-color: var(--tp-theme-action-bg);
+                color: var(--tp-theme-action-text);
+                border: 1px solid var(--tp-theme-action-border);
                 box-shadow: 0 0 0 3px rgba(0,0,0,.01);
                 visibility: hidden;
                 opacity: 0;
@@ -146,8 +147,8 @@
                     @extend %tp-svg-y-2;
                 }
                 &:hover{
-                    background-color: var(--tp-theme-primary);
-                    color: var(--tp-common-white);
+                    background-color: var(--tp-theme-action-hover-bg);
+                    color: var(--tp-theme-action-hover-text);
                     box-shadow: none;
                 }
             }
@@ -158,18 +159,19 @@
                 top: 50%;
                 left: 50%;
                 @include transform(translate(-50%, -50%));
-                color: var(--tp-common-black);
+                color: var(--tp-theme-action-text);
                 border-radius: 50%;
                 display: inline-block;
                 width: 80px;
                 height: 80px;
                 line-height: 80px;
                 text-align: center;
-                background-color: var(--tp-common-white);
+                background-color: var(--tp-theme-action-bg);
+                border: 1px solid var(--tp-theme-action-border);
                 @include animation(tp-pulse-2 2s infinite);
                 &:hover{
-                    color: var(--tp-common-white);
-                    background-color: var(--tp-theme-primary);
+                    color: var(--tp-theme-action-hover-text);
+                    background-color: var(--tp-theme-action-hover-bg);
                 }
             }
         }
@@ -204,7 +206,7 @@
             display: inline-block;
             font-size: 15px;
             color: var(--tp-theme-primary);
-            background-color: rgba($color: #0989FF, $alpha: .06);
+            background-color: rgba($color: $theme-primary, $alpha: .06);
             line-height: 1;
             padding: 4px 12px;
         }
@@ -379,15 +381,16 @@
     }
     &-add-to-cart-btn{
         font-size: 16px;
-        color: var(--tp-common-black);
+        color: var(--tp-theme-action-text);
         text-align: center;
         padding: 9px 30px;
-        border: 1px solid #E0E2E3;
+        border: 1px solid var(--tp-theme-action-border);
+        background-color: var(--tp-theme-action-bg);
 
         &:hover{
-            background-color: var(--tp-common-black);
-            border-color: var(--tp-common-black);
-            color: var(--tp-common-white);
+            background-color: var(--tp-theme-action-hover-bg);
+            border-color: var(--tp-theme-action-border);
+            color: var(--tp-theme-action-hover-text);
         }
     }
     &-buy-now-btn{
@@ -395,12 +398,13 @@
         font-size: 16px;
         font-weight: 500;
         padding: 10px 30px;
-        background-color: var(--tp-theme-primary);
-        color: var(--tp-common-white);
+        background-color: var(--tp-theme-action-bg);
+        color: var(--tp-theme-action-text);
+        border: 1px solid var(--tp-theme-action-border);
 
         &:hover{
-            background-color: var(--tp-common-black);
-            color: var(--tp-common-white);
+            background-color: var(--tp-theme-action-hover-bg);
+            color: var(--tp-theme-action-hover-text);
         }
     }
     &-action{
@@ -463,14 +467,16 @@
             height: 38px;
             line-height: 36px;
             text-align: center;
-            border: 1px solid #E6E7E8;
+            color: var(--tp-theme-action-text);
+            background-color: var(--tp-theme-action-bg);
+            border: 1px solid var(--tp-theme-action-border);
             border-radius: 50%;
             margin-right: 5px;
 
             &:hover{
-                background-color: var(--tp-theme-primary);
-                border-color: var(--tp-theme-primary);
-                color: var(--tp-common-white);
+                background-color: var(--tp-theme-action-hover-bg);
+                border-color: var(--tp-theme-action-border);
+                color: var(--tp-theme-action-hover-text);
             }
         }
     }
@@ -1289,25 +1295,26 @@
                 }
             }
             &-add-to-cart-btn{
-                background-color: var(--tp-theme-primary);
-                border-color: var(--tp-theme-primary);
-                color: var(--tp-common-white);
+                background-color: var(--tp-theme-action-bg);
+                border-color: var(--tp-theme-action-border);
+                color: var(--tp-theme-action-text);
                 
 
                 &:hover{
-                    background-color: var(--tp-common-black);
-                    border-color: var(--tp-common-black);
-                    color: var(--tp-common-white);
+                    background-color: var(--tp-theme-action-hover-bg);
+                    border-color: var(--tp-theme-action-border);
+                    color: var(--tp-theme-action-hover-text);
                 }
             }
             &-buy-now-btn{
-                background-color: var(--tp-common-white);
-                color: var(--tp-common-black);
+                background-color: var(--tp-theme-action-bg);
+                color: var(--tp-theme-action-text);
+                border-color: var(--tp-theme-action-border);
                 box-shadow: 0px 1px 3px rgba(1, 15, 28, 0.1);
 
                 &:hover{
-                    background-color: var(--tp-common-black);
-                    color: var(--tp-common-white);
+                    background-color: var(--tp-theme-action-hover-bg);
+                    color: var(--tp-theme-action-hover-text);
                 }
             }
             &-action-wrapper{
@@ -1317,14 +1324,15 @@
                 margin-bottom: 28px;
                 & a{
                     border-radius: 0;
-                    background-color: var(--tp-common-white);
-                    border-color: var(--tp-common-white);
+                    color: var(--tp-theme-action-text);
+                    background-color: var(--tp-theme-action-bg);
+                    border-color: var(--tp-theme-action-border);
                     box-shadow: 0px 1px 3px rgba(1, 15, 28, 0.1);
 
                     &:hover{
-                        background-color: var(--tp-theme-primary);
-                        border-color: var(--tp-theme-primary);
-                        color: var(--tp-common-white);
+                        background-color: var(--tp-theme-action-hover-bg);
+                        border-color: var(--tp-theme-action-border);
+                        color: var(--tp-theme-action-hover-text);
                     }
                 }
             }
@@ -1427,6 +1435,12 @@
     }
 }
 
+.tp-product-details-thumb-arrow button:hover,
+.tp-product-details-thumb-video-btn:hover,
+.tp-product-details-social a:hover{
+    color: var(--tp-theme-action-hover-text);
+}
+
 
 .#{$theme-prifix}-product-modal{
     & .modal-dialog{
@@ -1443,10 +1457,78 @@
     &-content{
         padding: 20px 20px 25px;
         position: relative;
+        max-height: calc(100vh - 88px);
+        overflow: hidden;
 
         @media #{$xs}{
             padding: 10px 10px 10px;
         }
+    }
+
+    .tp-product-details-thumb-wrapper{
+        position: relative;
+        top: auto;
+        margin-right: 30px;
+
+        & .nav-tabs{
+            margin-right: 8px;
+
+            & .nav-link{
+                width: 64px;
+                height: 82px;
+
+                &:not(:last-child){
+                    margin-bottom: 8px;
+                }
+            }
+        }
+    }
+
+    .tp-product-details-nav-main-thumb{
+        width: 430px;
+        height: min(56vh, 440px);
+        @include flexbox();
+        align-items: center;
+        justify-content: center;
+
+        & img{
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    }
+
+    .tp-product-details-wrapper{
+        margin-left: 0;
+        max-width: 560px;
+
+        & > p{
+            margin-bottom: 18px;
+            line-height: 1.5;
+        }
+    }
+
+    .tp-product-details-title{
+        font-size: 30px;
+        line-height: 1.18;
+        margin-bottom: 12px;
+    }
+
+    .tp-product-details-price-wrapper{
+        margin-bottom: 18px !important;
+    }
+
+    .tp-product-details-countdown{
+        margin-bottom: 20px;
+        padding: 11px 18px;
+    }
+
+    .tp-product-details-action-wrapper{
+        margin-bottom: 14px;
+    }
+
+    .tp-product-details-action-sm-btn{
+        margin-bottom: 0;
     }
 
     .tp-product-details-title {

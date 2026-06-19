@@ -34,8 +34,8 @@ const RegisterForm = () => {
         }
       }
     } else {
-      notifySuccess("Register successfully");
-      router.push('/dashboard')
+      notifySuccess(res.data.message || "Registration submitted. Please wait for admin approval.");
+      router.push('/login')
       reset();
     }
     reset();

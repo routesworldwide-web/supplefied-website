@@ -34,31 +34,39 @@ const productsSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  imageURLs: [{
-    color:{
-      name:{
-        type: String,
-        required: false,
-        trim: true,
-      },
-      clrCode:{
-        type: String,
-        required: false,
-        trim: true,
-      }
-    },
-    img:{
-      type: String,
-      required: false,
-      validate: [
-        function(v) {
-          return !v || validator.isURL(v, { require_protocol: false, require_tld: false });
+  imageURLs: {
+    type: [{
+      color:{
+        name:{
+          type: String,
+          required: false,
+          trim: true,
         },
-        "Please provide valid url(s)"
-      ]
-    },
-    sizes:[String]
-  }],
+        clrCode:{
+          type: String,
+          required: false,
+          trim: true,
+        }
+      },
+      img:{
+        type: String,
+        required: false,
+        validate: [
+          function(v) {
+            return !v || validator.isURL(v, { require_protocol: false, require_tld: false });
+          },
+          "Please provide valid url(s)"
+        ]
+      },
+      sizes:[String]
+    }],
+    validate: [
+      function(v) {
+        return !v || v.length <= 6;
+      },
+      "A product can have one primary image and up to five extra images"
+    ]
+  },
   parent:{
     type:String,
     required:true,
@@ -76,6 +84,10 @@ const productsSchema = mongoose.Schema({
   },
   discount: {
     type: Number,
+    default: 0,
+    set: function(v) {
+      return v === "" || v == null ? 0 : Number(v);
+    },
     min: [0, "Product price can't be negative"]
   },
   quantity: {

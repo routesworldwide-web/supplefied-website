@@ -8,7 +8,7 @@ import { useGetShowCategoryQuery } from "@/redux/features/categoryApi";
 import { handleFilterSidebarClose } from "@/redux/features/shop-filter-slice";
 import ShopCategoryLoader from "@/components/loader/shop/shop-category-loader";
 
-const CategoryFilter = ({setCurrPage,shop_right=false}) => {
+const CategoryFilter = ({setCurrPage}) => {
   const { data: categories, isLoading, isError } = useGetShowCategoryQuery();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -19,7 +19,7 @@ const CategoryFilter = ({setCurrPage,shop_right=false}) => {
   const handleCategoryRoute = (title) => {
     setCurrPage(1);
     router.push(
-      `/${shop_right?'shop-right-sidebar':'shop'}?category=${title
+      `/shop?category=${title
         .toLowerCase()
         .replace("&", "")
         .split(" ")

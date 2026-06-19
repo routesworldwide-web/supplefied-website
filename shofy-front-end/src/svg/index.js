@@ -33,6 +33,7 @@ import Plus from "./plus";
 import Minus from "./minus";
 import PhoneTwo from "./phone-2";
 import Facebook from "./facebook";
+import Instagram from "./instagram";
 import TextShapeLine from "./text-shape-line";
 import CompareThree from "./compare-3";
 import PrevLongArr from "./prev-long-arr";
@@ -77,8 +78,10 @@ import EmailTwo from "./email-2";
 import PhoneThree from "./phone-3";
 import LocationTwo from "./location-2";
 import CloseTwo from "./close-2";
+import SupplementJar from "./supplement-jar";
 
 export {
+  SupplementJar,
   ArrowNextTwo,
   ArrowPrevTwo,
   ArrowRightLong,
@@ -133,6 +136,7 @@ export {
   SliderPrevBtn,
   ShapeLineSm,
   Facebook,
+  Instagram,
   PhoneTwo,
   Minus,
   Plus,

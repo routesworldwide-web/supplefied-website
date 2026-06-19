@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
@@ -13,9 +13,12 @@ import { notifyError, notifySuccess } from '@/utils/toast';
 const schema = Yup.object().shape({
   name: Yup.string().required().label("Name"),
   email: Yup.string().required().email().label("Email"),
-  phone: Yup.string().required().min(11).label("Phone"),
-  address: Yup.string().required().label("Address"),
-  bio: Yup.string().required().min(20).label("Bio"),
+  contactNumber: Yup.string()
+    .nullable()
+    .matches(/^[0-9+\-\s()]{7,20}$|^$/, "Please enter a valid mobile number")
+    .label("Mobile Number"),
+  address: Yup.string().nullable().label("Address"),
+  bio: Yup.string().nullable().label("Bio"),
 });
 
 const ProfileInfo = () => {
@@ -26,24 +29,33 @@ const ProfileInfo = () => {
   const {register,handleSubmit,formState: { errors },reset} = useForm({
     resolver: yupResolver(schema),
   });
+
+  useEffect(() => {
+    reset({
+      name: user?.name || "",
+      email: user?.email || "",
+      contactNumber: user?.contactNumber || user?.phone || "",
+      address: user?.address || "",
+      bio: user?.bio || "",
+    });
+  }, [reset, user]);
+
   // on submit
-  const onSubmit = (data) => {
-    updateProfile({
-      id:user?._id,
-      name:data.name,
-      email:data.email,
-      phone:data.phone,
-      address:data.address,
-      bio:data.bio,
-    }).then((result) => {
-      if(result?.error){
-        notifyError(result?.error?.data?.message);
-      }
-      else {
-        notifySuccess(result?.data?.message);
-      }
-    })
-    reset();
+  const onSubmit = async (data) => {
+    try {
+      const result = await updateProfile({
+        id:user?._id,
+        name:data.name,
+        email:data.email,
+        contactNumber:data.contactNumber || "",
+        address:data.address || "",
+        bio:data.bio || "",
+      }).unwrap();
+
+      notifySuccess(result?.message);
+    } catch (error) {
+      notifyError(error?.data?.message || "Profile could not be updated");
+    }
   };
   return (
     <div className="profile__info">
@@ -54,7 +66,7 @@ const ProfileInfo = () => {
             <div className="col-xxl-6 col-md-6">
               <div className="profile__input-box">
                 <div className="profile__input">
-                  <input {...register("name", { required: `Name is required!` })} name='name' type="text" placeholder="Enter your username" defaultValue={user?.name} />
+                  <input {...register("name", { required: `Name is required!` })} name='name' type="text" placeholder="Enter your username" />
                   <span>
                     <UserThree/>
                   </span>
@@ -66,7 +78,7 @@ const ProfileInfo = () => {
             <div className="col-xxl-6 col-md-6">
               <div className="profile__input-box">
                 <div className="profile__input">
-                  <input {...register("email", { required: `Email is required!` })} name='email' type="email" placeholder="Enter your email" defaultValue={user?.email} />
+                  <input {...register("email", { required: `Email is required!` })} name='email' type="email" placeholder="Enter your email" />
                   <span>
                     <EmailTwo/>
                   </span>
@@ -78,11 +90,11 @@ const ProfileInfo = () => {
             <div className="col-xxl-12">
               <div className="profile__input-box">
                 <div className="profile__input">
-                  <input {...register("phone", { required: true })} name='phone' type="text" placeholder="Enter your number" defaultValue="0123 456 7889" />
+                  <input {...register("contactNumber")} name='contactNumber' type="tel" placeholder="Enter your mobile number" />
                   <span>
                     <PhoneThree/>
                   </span>
-                  <ErrorMsg msg={errors.phone?.message} />
+                  <ErrorMsg msg={errors.contactNumber?.message} />
                 </div>
               </div>
             </div>
@@ -90,7 +102,7 @@ const ProfileInfo = () => {
             <div className="col-xxl-12">
               <div className="profile__input-box">
                 <div className="profile__input">
-                  <input {...register("address", { required: true })} name='address' type="text" placeholder="Enter your address" defaultValue="3304 Randall Drive" />
+                  <input {...register("address")} name='address' type="text" placeholder="Enter your address" />
                   <span>
                     <LocationTwo/>
                   </span>
@@ -102,7 +114,7 @@ const ProfileInfo = () => {
             <div className="col-xxl-12">
               <div className="profile__input-box">
                 <div className="profile__input">
-                  <textarea {...register("bio", { required: true })} name='bio' placeholder="Enter your bio" defaultValue="Hi there, this is my bio..." />
+                  <textarea {...register("bio")} name='bio' placeholder="Enter your bio" />
                   <ErrorMsg msg={errors.bio?.message} />
                 </div>
               </div>

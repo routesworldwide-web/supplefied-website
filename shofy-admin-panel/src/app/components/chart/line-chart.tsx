@@ -1,137 +1,138 @@
-import { useState } from "react";
 import { Line } from "react-chartjs-2";
-import Chart from "chart.js/auto";
-import { CategoryScale } from "chart.js";
-// internal
+import {
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Tooltip,
+} from "chart.js";
+import dayjs from "dayjs";
 import ErrorMsg from "../common/error-msg";
 import { useGetSalesReportQuery } from "@/redux/order/orderApi";
-Chart.register(CategoryScale);
 
-// type
-type TActiveBtnType = {
-  title: string;
-  color: string;
-};
+ChartJS.register(
+  CategoryScale,
+  Filler,
+  LinearScale,
+  LineElement,
+  PointElement,
+  Tooltip
+);
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(value);
 
 const LineChart = () => {
-  const [activeButton, setActiveButton] = useState<TActiveBtnType>({
-    title: "Sales",
-    color: "green",
-  });
-
-  const handleClick = ({ title, color }: TActiveBtnType) => {
-    setActiveButton({ title, color });
-  };
-
   const { data: sales, isError, isLoading } = useGetSalesReportQuery();
 
-  // decide what to render
-  let content = null;
-
   if (isLoading) {
-    content = <h2>Loading....</h2>;
-  }
-  if (!isLoading && isError) {
-    content = <ErrorMsg msg="There was an error" />;
+    return <div className="h-[300px] animate-pulse rounded-lg bg-gray5" />;
   }
 
-  if (!isLoading && !isError && sales?.salesReport) {
-    // console.log(sales?.salesReport);
-    const salesReport = sales?.salesReport;
-
-    const barOptions = {
-      data: {
-        labels: salesReport
-          ?.slice()
-          ?.sort(
-            (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-          )
-          ?.map((or) => or.date),
-        datasets: [
-          activeButton.title === "Sales"
-            ? {
-                label: "Sales",
-                data: salesReport
-                  ?.slice()
-                  ?.sort(
-                    (a, b) =>
-                      new Date(a.date).getTime() - new Date(b.date).getTime()
-                  )
-                  ?.map((or) => or.total),
-                borderColor: "#10B981",
-                backgroundColor: "#10B981",
-                borderWidth: 3,
-                yAxisID: "y",
-              }
-            : {
-                label: "Order",
-                data: salesReport
-                  ?.slice()
-                  ?.sort(
-                    (a, b) =>
-                      new Date(a.date).getTime() - new Date(b.date).getTime()
-                  )
-                  ?.map((or) => or.order),
-                borderColor: "#F97316",
-                backgroundColor: "#F97316",
-                borderWidth: 3,
-                yAxisID: "y",
-              },
-        ],
-      },
-      options: {
-        responsive: true,
-      },
-      legend: {
-        display: false,
-      },
-    };
-
-    content = (
-      <div className="h-full w-full">
-        <Line {...barOptions} />
-      </div>
-    );
+  if (isError || !sales?.salesReport) {
+    return <ErrorMsg msg="Sales activity could not be loaded" />;
   }
+
+  const report = sales.salesReport;
+  const sevenDayRevenue = report.reduce((sum, entry) => sum + entry.total, 0);
+  const sevenDayOrders = report.reduce((sum, entry) => sum + entry.order, 0);
+  const averageOrder =
+    sevenDayOrders > 0 ? sevenDayRevenue / sevenDayOrders : 0;
+
+  const chartData = {
+    labels: report.map((entry) => dayjs(entry.date).format("ddd")),
+    datasets: [
+      {
+        label: "Revenue",
+        data: report.map((entry) => entry.total),
+        borderColor: "#0989FF",
+        backgroundColor: "rgba(9, 137, 255, 0.10)",
+        borderWidth: 2.5,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        pointBackgroundColor: "#ffffff",
+        pointBorderColor: "#0989FF",
+        pointBorderWidth: 2,
+        tension: 0.35,
+        fill: true,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: {
+      intersect: false,
+      mode: "index" as const,
+    },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        displayColors: false,
+        callbacks: {
+          title: (items: { dataIndex: number }[]) =>
+            dayjs(report[items[0].dataIndex].date).format("dddd, MMM D"),
+          label: (context: { parsed: { y: number } }) =>
+            `Revenue: ${formatCurrency(context.parsed.y)}`,
+          afterLabel: (context: { dataIndex: number }) =>
+            `Orders: ${report[context.dataIndex].order}`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        grid: { display: false },
+        border: { display: false },
+        ticks: { color: "#767A7D" },
+      },
+      y: {
+        beginAtZero: true,
+        border: { display: false },
+        grid: { color: "#EFF2F5" },
+        ticks: {
+          color: "#767A7D",
+          callback: (value: string | number) =>
+            Number(value) >= 1000
+              ? `₹${(Number(value) / 1000).toFixed(0)}k`
+              : `₹${value}`,
+        },
+      },
+    },
+  };
 
   return (
-    <>
-      <div className="text-sm font-medium text-center text-gray-500 border-b border-slate-200 mb-4">
-        <ul className="flex flex-wrap -mb-px">
-          <li className="mr-2">
-            <button
-              onClick={() => handleClick({ title: "Sales", color: "green" })}
-              type="button"
-              className={`chart-tab-btn inline-block p-2 rounded-t-lg border-transparent text-lg focus:border-0 focus-visible:border-0 focus-visible:shadow-white focus-visible:outline-0 ${
-                activeButton.title === "Sales"
-                  ? "text-green-600"
-                  : "hover:text-gray-600"
-              }   focus:outline-none focus:border-none`}
-            >
-              Sales
-            </button>
-          </li>
-
-          <li className="mr-2">
-            <button
-              onClick={() => handleClick({ title: "Orders", color: "red" })}
-              type="button"
-              className={`chart-tab-btn inline-block p-2 rounded-t-lg border-transparent text-lg focus:border-0 focus-visible:border-0 focus-visible:shadow-white focus-visible:outline-0 ${
-                activeButton.title === "Orders"
-                  ? "text-orange-500"
-                  : "hover:text-gray-600"
-              }  focus:outline-none focus:border-none`}
-            >
-              Orders
-            </button>
-          </li>
-        </ul>
+    <div>
+      <div className="mb-6 grid grid-cols-3 gap-3 border-b border-gray6 pb-5">
+        <div>
+          <p className="mb-1 text-tiny text-text3">7-day revenue</p>
+          <p className="mb-0 text-lg font-semibold text-heading">
+            {formatCurrency(sevenDayRevenue)}
+          </p>
+        </div>
+        <div>
+          <p className="mb-1 text-tiny text-text3">Orders</p>
+          <p className="mb-0 text-lg font-semibold text-heading">
+            {sevenDayOrders}
+          </p>
+        </div>
+        <div>
+          <p className="mb-1 text-tiny text-text3">Average order</p>
+          <p className="mb-0 text-lg font-semibold text-heading">
+            {formatCurrency(averageOrder)}
+          </p>
+        </div>
       </div>
-
-      {/* chart start */}
-      {content}
-      {/* chart end */}
-    </>
+      <div className="h-[300px]">
+        <Line data={chartData} options={chartOptions} />
+      </div>
+    </div>
   );
 };
 

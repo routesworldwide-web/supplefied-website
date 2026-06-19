@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useDispatch } from "react-redux";
 import { handleFilterSidebarClose } from "@/redux/features/shop-filter-slice";
 
-const StatusFilter = ({setCurrPage,shop_right=false}) => {
+const StatusFilter = ({setCurrPage}) => {
   const router = useRouter();
   const dispatch = useDispatch();
   const status = ["On sale", "In Stock"];
@@ -15,7 +15,7 @@ const StatusFilter = ({setCurrPage,shop_right=false}) => {
   const handleStatusRoute = (status) => {
     setCurrPage(1)
     router.push(
-      `/${shop_right?'shop-right-sidebar':'shop'}?status=${status
+      `/shop?status=${status
         .toLowerCase()
         .replace("&", "")
         .split(" ")

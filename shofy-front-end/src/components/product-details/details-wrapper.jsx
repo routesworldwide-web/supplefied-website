@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Rating } from 'react-simple-star-rating';
 import { useDispatch } from 'react-redux';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 // internal
 import { AskQuestion, CompareTwo, WishlistTwo } from '@/svg';
 import DetailsBottomInfo from './details-bottom-info';
@@ -12,12 +12,27 @@ import { add_cart_product } from '@/redux/features/cartSlice';
 import { add_to_wishlist } from '@/redux/features/wishlist-slice';
 import { add_to_compare } from '@/redux/features/compareSlice';
 import { handleModalClose } from '@/redux/features/productModalSlice';
+import { getProductDetailsUrl } from '@/utils/product-url';
+import ProductPrice from '@/components/common/product-price';
 
 const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBottom = false }) => {
-  const { sku, img, title, imageURLs, category, description, discount, price, status, reviews, tags, offerDate } = productItem || {};
+  const { title, category, description, status, reviews, offerDate } = productItem || {};
   const [ratingVal, setRatingVal] = useState(0);
   const [textMore, setTextMore] = useState(false);
+  const [productUrl, setProductUrl] = useState("");
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
   const dispatch = useDispatch()
+  const router = useRouter();
+  const whatsappQuery = encodeURIComponent(
+    `Hi, I have a question about ${title || "this product"}. ${productUrl}`
+  );
+  const whatsappUrl = `https://wa.me/918796200495?text=${whatsappQuery}`;
+
+  useEffect(() => {
+    if (productItem?._id) {
+      setProductUrl(`${window.location.origin}${getProductDetailsUrl(productItem)}`);
+    }
+  }, [productItem]);
 
   useEffect(() => {
     if (reviews && reviews.length > 0) {
@@ -33,6 +48,21 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
   // handle add product
   const handleAddProduct = (prd) => {
     dispatch(add_cart_product(prd));
+  };
+
+  // handle buy now product
+  const handleBuyNow = async (prd) => {
+    if (!prd || status === 'out-of-stock' || isBuyingNow) return;
+
+    setIsBuyingNow(true);
+
+    try {
+      await dispatch(add_cart_product(prd)).unwrap();
+      dispatch(handleModalClose());
+      router.push('/checkout');
+    } finally {
+      setIsBuyingNow(false);
+    }
   };
 
   // handle wishlist product
@@ -72,40 +102,8 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
 
       {/* price */}
       <div className="tp-product-details-price-wrapper mb-20">
-        {discount > 0 ? (
-          <>
-            <span className="tp-product-details-price old-price">${price}</span>
-            <span className="tp-product-details-price new-price">
-              {" "}${(Number(price) - (Number(price) * Number(discount)) / 100).toFixed(2)}
-            </span>
-          </>
-        ) : (
-          <span className="tp-product-details-price new-price">${price.toFixed(2)}</span>
-        )}
+        <ProductPrice product={productItem} priceClassName="tp-product-details-price" />
       </div>
-
-      {/* variations */}
-      {imageURLs.some(item => item?.color && item?.color?.name) && <div className="tp-product-details-variation">
-        <div className="tp-product-details-variation-item">
-          <h4 className="tp-product-details-variation-title">Color :</h4>
-          <div className="tp-product-details-variation-list">
-            {imageURLs.map((item, i) => (
-              <button onClick={() => handleImageActive(item)} key={i} type="button"
-                className={`color tp-color-variation-btn ${item.img === activeImg ? "active" : ""}`} >
-                <span
-                  data-bg-color={`${item.color.clrCode}`}
-                  style={{ backgroundColor: `${item.color.clrCode}` }}
-                ></span>
-                {item.color && item.color.name && (
-                  <span className="tp-color-variation-tootltip">
-                    {item.color.name}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>}
 
       {/* if ProductDetailsCountdown true start */}
       {offerDate?.endDate && <ProductDetailsCountdown offerExpiryTime={offerDate?.endDate} />}
@@ -122,9 +120,13 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
             <button onClick={() => handleAddProduct(productItem)} disabled={status === 'out-of-stock'} className="tp-product-details-add-to-cart-btn w-100">Add To Cart</button>
           </div>
         </div>
-        <Link href="/cart" onClick={() => dispatch(handleModalClose())}>
-          <button className="tp-product-details-buy-now-btn w-100">Buy Now</button>
-        </Link>
+        <button
+          onClick={() => handleBuyNow(productItem)}
+          disabled={status === 'out-of-stock' || isBuyingNow}
+          className="tp-product-details-buy-now-btn w-100"
+        >
+          {isBuyingNow ? 'Processing...' : 'Buy Now'}
+        </button>
       </div>
       {/* product-details-action-sm start */}
       <div className="tp-product-details-action-sm">
@@ -136,14 +138,19 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
           <WishlistTwo />
           Add Wishlist
         </button>
-        <button type="button" className="tp-product-details-action-sm-btn">
+        <a
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="tp-product-details-action-sm-btn"
+        >
           <AskQuestion />
           Ask a question
-        </button>
+        </a>
       </div>
       {/* product-details-action-sm end */}
 
-      {detailsBottom && <DetailsBottomInfo category={category?.name} sku={sku} tag={tags[0]} />}
+      {detailsBottom && <DetailsBottomInfo product={productItem} />}
     </div>
   );
 };

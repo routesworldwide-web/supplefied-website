@@ -28,11 +28,11 @@ const ProductImgUpload = ({
   }, [uploadData, isError, setImgUrl]);
 
   useEffect(() => {
-    if (default_img && initialLoad) {
+    if (default_img && initialLoad && !imgUrl) {
       setImgUrl(default_img);
       setInitialLoad(false);
     }
-  }, [default_img, initialLoad, setImgUrl]);
+  }, [default_img, imgUrl, initialLoad, setImgUrl]);
 
   // console.log(imgUrl);
   return (
@@ -52,7 +52,7 @@ const ProductImgUpload = ({
             setImgUrl={setImgUrl}
           />
         ) : (
-          <DefaultUploadImg img={default_img} isLoading={isLoading} wh={100} />
+          <DefaultUploadImg img={imgUrl || default_img} isLoading={isLoading} wh={100} />
         )}
       </div>
 
@@ -63,6 +63,7 @@ const ProductImgUpload = ({
             type="file"
             name="image"
             id="product_img"
+            accept="image/png,image/jpeg,image/webp"
             className="hidden"
           />
           <label

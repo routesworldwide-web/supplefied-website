@@ -7,14 +7,18 @@ import { Search } from "@/svg";
 import ErrorMsg from "../common/error-msg";
 import Pagination from "../ui/Pagination";
 import OrderStatusChange from "./status-change";
-import {useGetAllOrdersQuery} from "@/redux/order/orderApi";
+import { useGetAllOrdersQuery } from "@/redux/order/orderApi";
 import usePagination from "@/hooks/use-pagination";
-
+import { formatPrice, getCartTotals } from "@/utils/pricing";
 
 const OrderTable = () => {
-  const { data: orders, isError, isLoading, error } = useGetAllOrdersQuery();
-  const [searchVal,setSearchVal] = useState<string>("");
-  const [selectVal,setSelectVal] = useState<string>("");
+  const { data: orders, isError, isLoading } = useGetAllOrdersQuery(undefined, {
+    pollingInterval: 10000,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const [searchVal, setSearchVal] = useState<string>("");
+  const [selectVal, setSelectVal] = useState<string>("");
   const paginationData = usePagination(orders?.data || [], 5);
   const { currentItems, handlePageClick, pageCount } = paginationData;
 
@@ -33,11 +37,13 @@ const OrderTable = () => {
 
   if (!isLoading && !isError && orders?.success) {
     let orderItems = [...currentItems];
-    if(searchVal){
-      orderItems = orderItems.filter(v => v.invoice.toString().includes(searchVal))
+    if (searchVal) {
+      orderItems = orderItems.filter((v) => v.invoice.toString().includes(searchVal));
     }
-    if(selectVal){
-      orderItems = orderItems.filter(v => v.status.toLowerCase() === selectVal.toLowerCase())
+    if (selectVal) {
+      orderItems = orderItems.filter(
+        (v) => v.status.toLowerCase() === selectVal.toLowerCase()
+      );
     }
 
     content = (
@@ -45,58 +51,37 @@ const OrderTable = () => {
         <table className="w-[1500px] 2xl:w-full text-base text-left text-gray-500">
           <thead className="bg-white">
             <tr className="border-b border-gray6 text-tiny">
-              <th
-                scope="col"
-                className="pr-8 py-3 text-tiny text-text2 uppercase font-semibold w-[170px]"
-              >
+              <th scope="col" className="pr-8 py-3 text-tiny text-text2 uppercase font-semibold w-[170px]">
                 INVOICE NO
               </th>
-              <th
-                scope="col"
-                className="px-3 py-3 text-tiny text-text2 uppercase font-semibold"
-              >
+              <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold">
                 Customer
               </th>
-              <th
-                scope="col"
-                className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[170px] text-end"
-              >
+              <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[170px] text-end">
                 QTY
               </th>
-              <th
-                scope="col"
-                className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[170px] text-end"
-              >
+              <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[170px] text-end">
                 Total
               </th>
-              <th
-                scope="col"
-                className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[170px] text-end"
-              >
+              <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[170px] text-end">
                 Status
               </th>
-              <th
-                scope="col"
-                className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[170px] text-end"
-              >
+              <th scope="col" className="px-3 py-3 text-tiny text-text2 uppercase font-semibold w-[170px] text-end">
                 Date
               </th>
-              <th
-                scope="col"
-                className="px-9 py-3 text-tiny text-text2 uppercase  font-semibold w-[14%] text-end"
-              >
+              <th scope="col" className="px-9 py-3 text-tiny text-text2 uppercase  font-semibold w-[14%] text-end">
                 Action
               </th>
-              <th
-                scope="col"
-                className="px-9 py-3 text-tiny text-text2 uppercase  font-semibold w-[4%] text-end"
-              >
+              <th scope="col" className="px-9 py-3 text-tiny text-text2 uppercase  font-semibold w-[4%] text-end">
                 Invoice
               </th>
             </tr>
           </thead>
           <tbody>
-            {orderItems.map((item) => (
+            {orderItems.map((item) => {
+              const cartTotals = getCartTotals(item.cart);
+
+              return (
                 <tr
                   key={item._id}
                   className="bg-white border-b border-gray6 last:border-0 text-start mx-9"
@@ -123,16 +108,10 @@ const OrderTable = () => {
                   </td>
 
                   <td className="px-3 py-3 font-normal text-[#55585B] text-end">
-                    {item.cart.reduce(
-                      (acc, curr) => acc + curr.orderQuantity,
-                      0
-                    )}
+                    {cartTotals.quantity}
                   </td>
                   <td className="px-3 py-3 font-normal text-[#55585B] text-end">
-                    $
-                    {item.cart
-                      .reduce((acc, curr) => acc + curr.price, 0)
-                      .toFixed(2)}
+                    {formatPrice(item.totalAmount)}
                   </td>
                   <td className="px-3 py-3 text-end">
                     <span
@@ -148,7 +127,7 @@ const OrderTable = () => {
                           : ""
                       } px-3 py-1 rounded-md leading-none font-medium text-end`}
                     >
-                      {item.status}
+                      {item.status === "cancel" ? "Cancelled" : item.status}
                     </span>
                   </td>
                   <td className="px-3 py-3 font-normal text-[#55585B] text-end">
@@ -157,22 +136,22 @@ const OrderTable = () => {
 
                   <td className="px-9 py-3 text-end">
                     <div className="flex items-center justify-end space-x-2">
-                      <OrderStatusChange id={item._id}/>
+                      <OrderStatusChange
+                        id={item._id}
+                        currentStatus={item.status}
+                      />
                     </div>
                   </td>
-                  {/* order actions */}
                   <OrderActions id={item._id} />
-                  {/* order actions */}
                 </tr>
-              ))}
+              );
+            })}
           </tbody>
         </table>
 
-        {/* pagination start */}
         <div className="flex justify-between items-center flex-wrap">
           <p className="mb-0 text-tiny">
-            Showing 1-
-            {currentItems.length} of {orders?.data.length}
+            Showing 1-{currentItems.length} of {orders?.data.length}
           </p>
           <div className="pagination py-3 flex justify-end items-center sm:mx-8 pagination">
             <Pagination
@@ -181,19 +160,18 @@ const OrderTable = () => {
             />
           </div>
         </div>
-        {/* pagination end */}
       </>
     );
   }
 
-  // handle change input 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchVal(e.target.value);
   };
-  // handle change input 
+
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectVal(e.target.value);
   };
+
   return (
     <>
       <div className="tp-search-box flex items-center justify-between px-8 py-8 flex-wrap">

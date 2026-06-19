@@ -228,10 +228,9 @@
         margin-left: -30px;
         & > nav > ul{
             &  > li{
-                margin-right: 20px;
+                // margin-left: 32px;
                 @media #{$xl}{
-                    
-                    margin-right: 15px;
+                    // margin-right: 24px;
                 }
                 & > a{
                     padding: 22px 0;
@@ -284,7 +283,7 @@
             &  > li{
                 text-align: left;
                 @media #{$xl}{
-                    margin-right: 20px;
+                    // margin-right: 20px;
                 }
                 & > a{
                     padding: 17px 0;
@@ -516,5 +515,4 @@
         }
     }
 }
-
 

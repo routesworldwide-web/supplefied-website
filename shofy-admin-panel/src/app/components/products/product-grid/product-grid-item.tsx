@@ -47,7 +47,7 @@ const ProductGridItem = ({ product }: { product: IProduct }) => {
         </div>
         <div className="leading-none mb-2">
           <span className="text-base font-medium text-black">
-            ${price.toFixed(2)}
+            ₹{price.toFixed(2)}
           </span>
         </div>
       </div>

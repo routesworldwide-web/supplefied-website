@@ -1,6 +1,12 @@
 const Brand = require("../model/Brand");
 const Category = require("../model/Category");
 const Product = require("../model/Products");
+const mongoose = require("mongoose");
+
+const visibleReviewsPopulate = {
+  path: "reviews",
+  match: { status: { $ne: "Hide" } },
+};
 
 // create product service
 exports.createProductService = async (data) => {
@@ -36,7 +42,7 @@ exports.addAllProductService = async (data) => {
 
 // get product data
 exports.getAllProductsService = async () => {
-  const products = await Product.find({}).populate("reviews");
+  const products = await Product.find({}).populate(visibleReviewsPopulate);
   return products;
 };
 
@@ -49,19 +55,22 @@ exports.getProductTypeService = async (req) => {
     products = await Product.find({ productType: type })
       .sort({ createdAt: -1 })
       .limit(8)
-      .populate("reviews");
+      .populate(visibleReviewsPopulate);
   } else if (query.featured === "true") {
     products = await Product.find({
       productType: type,
       featured: true,
-    }).populate("reviews");
+    }).populate(visibleReviewsPopulate);
   } else if (query.topSellers === "true") {
-    products = await Product.find({ productType: type })
+    products = await Product.find({
+      productType: type,
+      sellCount: { $gt: 0 },
+    })
       .sort({ sellCount: -1 })
       .limit(8)
-      .populate("reviews");
+      .populate(visibleReviewsPopulate);
   } else {
-    products = await Product.find({ productType: type }).populate("reviews");
+    products = await Product.find({ productType: type }).populate(visibleReviewsPopulate);
   }
   return products;
 };
@@ -71,7 +80,7 @@ exports.getOfferTimerProductService = async (query) => {
   const products = await Product.find({
     productType: query,
     "offerDate.endDate": { $gt: new Date() },
-  }).populate("reviews");
+  }).populate(visibleReviewsPopulate);
   return products;
 };
 
@@ -80,16 +89,16 @@ exports.getPopularProductServiceByType = async (type) => {
   const products = await Product.find({ productType: type })
     .sort({ "reviews.length": -1 })
     .limit(8)
-    .populate("reviews");
+    .populate(visibleReviewsPopulate);
   return products;
 };
 
 exports.getTopRatedProductService = async () => {
   const products = await Product.find({
     reviews: { $exists: true, $ne: [] },
-  }).populate("reviews");
+  }).populate(visibleReviewsPopulate);
 
-  const topRatedProducts = products.map((product) => {
+  const topRatedProducts = products.filter((product) => product.reviews.length > 0).map((product) => {
     const totalRating = product.reviews.reduce(
       (sum, review) => sum + review.rating,
       0
@@ -109,10 +118,21 @@ exports.getTopRatedProductService = async () => {
 
 // get product data
 exports.getProductService = async (id) => {
-  const product = await Product.findById(id).populate({
+  const populateReviews = {
     path: "reviews",
+    match: { status: { $ne: "Hide" } },
     populate: { path: "userId", select: "name email imageURL" },
-  });
+  };
+  let product = null;
+
+  if (mongoose.Types.ObjectId.isValid(id)) {
+    product = await Product.findById(id).populate(populateReviews);
+  }
+
+  if (!product) {
+    product = await Product.findOne({ slug: id }).populate(populateReviews);
+  }
+
   return product;
 };
 
@@ -129,31 +149,53 @@ exports.getRelatedProductService = async (productId) => {
 
 // update a product
 exports.updateProductService = async (id, currProduct) => {
-  // console.log('currProduct',currProduct)
   const product = await Product.findById(id);
   if (product) {
-    product.title = currProduct.title;
-    product.brand.name = currProduct.brand.name;
-    product.brand.id = currProduct.brand.id;
-    product.category.name = currProduct.category.name;
-    product.category.id = currProduct.category.id;
-    product.sku = currProduct.sku;
-    product.img = currProduct.img;
-    product.slug = currProduct.slug;
-    product.unit = currProduct.unit;
-    product.imageURLs = currProduct.imageURLs;
-    product.tags = currProduct.tags;
-    product.parent = currProduct.parent;
-    product.children = currProduct.children;
-    product.price = currProduct.price;
-    product.discount = currProduct.discount;
-    product.quantity = currProduct.quantity;
-    product.status = currProduct.status;
-    product.productType = currProduct.productType;
-    product.description = currProduct.description;
-    product.additionalInformation = currProduct.additionalInformation;
-    product.offerDate.startDate = currProduct.offerDate.startDate;
-    product.offerDate.endDate = currProduct.offerDate.endDate;
+    const directFields = [
+      "title",
+      "sku",
+      "img",
+      "slug",
+      "unit",
+      "imageURLs",
+      "tags",
+      "parent",
+      "children",
+      "price",
+      "discount",
+      "quantity",
+      "status",
+      "productType",
+      "description",
+      "additionalInformation",
+      "featured",
+      "sizes",
+      "videoId",
+    ];
+
+    // Product list toggles send partial payloads; only update fields that are present.
+    directFields.forEach((field) => {
+      if (Object.prototype.hasOwnProperty.call(currProduct, field)) {
+        product[field] = currProduct[field];
+      }
+    });
+
+    if (currProduct.brand) {
+      if (currProduct.brand.name) product.brand.name = currProduct.brand.name;
+      if (currProduct.brand.id) product.brand.id = currProduct.brand.id;
+    }
+
+    if (currProduct.category) {
+      if (currProduct.category.name) product.category.name = currProduct.category.name;
+      if (currProduct.category.id) product.category.id = currProduct.category.id;
+    }
+
+    if (currProduct.offerDate) {
+      product.offerDate = {
+        ...(product.offerDate || {}),
+        ...currProduct.offerDate,
+      };
+    }
 
     await product.save();
   }

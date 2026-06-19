@@ -27,6 +27,7 @@ export const apiSlice = createApi({
     "DashboardMostSellingCategory",
     "DashboardRecentOrders",
     "AllProducts",
+    "Product",
     "StockOutProducts",
     "AllCategory",
     "AllBrands",
@@ -37,6 +38,9 @@ export const apiSlice = createApi({
     "AllCoupons",
     "Coupon",
     "AllStaff",
-    "Stuff"
+    "Stuff",
+    "Banners",
+    "Blogs",
+    "Notifications"
   ],
 });

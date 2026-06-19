@@ -5,9 +5,117 @@ dayjs.extend(utc);
 const jwt = require('jsonwebtoken');
 const { tokenForVerify } = require("../config/auth");
 const Admin = require("../model/Admin");
+const AdminLoginAttempt = require("../model/AdminLoginAttempt");
 const { generateToken } = require("../utils/token");
 const { sendEmail } = require("../config/email");
 const { secret } = require("../config/secret");
+const {
+  createAdminNotification,
+} = require("../services/notification.service");
+
+const ADMIN_STATUSES = ["Pending", "Active", "Inactive"];
+const LOGIN_ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_ATTEMPT_RETENTION_MS = 24 * 60 * 60 * 1000;
+const LOGIN_ALERT_THRESHOLD = 7;
+
+const getRequestIp = (req) => {
+  const forwarded = req.headers["x-forwarded-for"];
+  const forwardedIp =
+    typeof forwarded === "string" ? forwarded.split(",")[0].trim() : "";
+  return forwardedIp || req.ip || req.socket?.remoteAddress || "unknown";
+};
+
+const maskIpAddress = (ipAddress) => {
+  if (!ipAddress || ipAddress === "unknown") return "unknown IP";
+
+  if (ipAddress.includes(".")) {
+    const parts = ipAddress.split(".");
+    return parts.length === 4
+      ? `${parts[0]}.${parts[1]}.${parts[2]}.*`
+      : "masked IP";
+  }
+
+  if (ipAddress.includes(":")) {
+    return `${ipAddress.split(":").slice(0, 3).join(":")}:*`;
+  }
+
+  return "masked IP";
+};
+
+const recordFailedLogin = async (req, email) => {
+  try {
+    const now = new Date();
+    const normalizedEmail = String(email || "unknown").trim().toLowerCase();
+    const ipAddress = getRequestIp(req);
+    let attempt = await AdminLoginAttempt.findOne({
+      email: normalizedEmail,
+      ipAddress,
+    });
+
+    if (
+      !attempt ||
+      now.getTime() - attempt.firstAttemptAt.getTime() >
+        LOGIN_ATTEMPT_WINDOW_MS
+    ) {
+      attempt = await AdminLoginAttempt.findOneAndUpdate(
+        { email: normalizedEmail, ipAddress },
+        {
+          $set: {
+            count: 1,
+            firstAttemptAt: now,
+            lastAttemptAt: now,
+            alertedAt: null,
+            expiresAt: new Date(now.getTime() + LOGIN_ATTEMPT_RETENTION_MS),
+          },
+        },
+        { new: true, upsert: true, setDefaultsOnInsert: true }
+      );
+    } else {
+      attempt.count += 1;
+      attempt.lastAttemptAt = now;
+      attempt.expiresAt = new Date(
+        now.getTime() + LOGIN_ATTEMPT_RETENTION_MS
+      );
+      await attempt.save();
+    }
+
+    if (attempt.count >= LOGIN_ALERT_THRESHOLD) {
+      const claimedAlert = await AdminLoginAttempt.findOneAndUpdate(
+        { _id: attempt._id, alertedAt: null },
+        { $set: { alertedAt: now } },
+        { new: true }
+      );
+
+      if (!claimedAlert) return;
+
+      await createAdminNotification({
+        type: "security",
+        category: "general",
+        title: "Repeated failed admin login",
+        message: `${claimedAlert.count} failed login attempts for ${normalizedEmail} from ${maskIpAddress(
+          ipAddress
+        )} within 15 minutes.`,
+        metadata: {
+          email: normalizedEmail,
+          ipAddress,
+          attemptCount: claimedAlert.count,
+        },
+      });
+    }
+  } catch (error) {
+    console.error("Failed admin login could not be recorded:", error.message);
+  }
+};
+
+const clearFailedLogins = async (email) => {
+  try {
+    await AdminLoginAttempt.deleteMany({
+      email: String(email || "").trim().toLowerCase(),
+    });
+  } catch (error) {
+    console.error("Admin login attempts could not be cleared:", error.message);
+  }
+};
 
 // register
 const registerAdmin = async (req, res,next) => {
@@ -21,17 +129,32 @@ const registerAdmin = async (req, res,next) => {
       const newStaff = new Admin({
         name: req.body.name,
         email: req.body.email,
-        role: req.body.role,
+        role: "Admin",
+        status: "Pending",
         password: bcrypt.hashSync(req.body.password),
       });
       const staff = await newStaff.save();
-      const token = generateToken(staff);
-      res.status(200).send({
-        token,
+      await createAdminNotification({
+        type: "staff",
+        category: "staff",
+        title: "New staff approval request",
+        message: `${staff.name} (${staff.email}) registered and is waiting for approval.`,
+        link: `/our-staff/${staff._id}`,
+        entityId: staff._id,
+        metadata: {
+          name: staff.name,
+          email: staff.email,
+          status: staff.status,
+        },
+      });
+
+      res.status(201).send({
+        message: "Registration submitted. Please wait for admin approval.",
         _id: staff._id,
         name: staff.name,
         email: staff.email,
         role: staff.role,
+        status: staff.status,
         joiningData: Date.now(),
       });
     }
@@ -46,6 +169,25 @@ const loginAdmin = async (req, res,next) => {
     const admin = await Admin.findOne({ email: req.body.email });
     // console.log(admin)
     if (admin && bcrypt.compareSync(req.body.password, admin.password)) {
+      if (admin.status === "Pending") {
+        return res.status(403).send({
+          message: "Your admin account is pending approval.",
+        });
+      }
+
+      if (admin.status === "Inactive") {
+        return res.status(403).send({
+          message: "Your admin account is inactive. Please contact an administrator.",
+        });
+      }
+
+      if (admin.status !== "Active") {
+        return res.status(403).send({
+          message: "Your admin account is not approved.",
+        });
+      }
+
+      await clearFailedLogins(admin.email);
       const token = generateToken(admin);
       res.send({
         token,
@@ -55,8 +197,10 @@ const loginAdmin = async (req, res,next) => {
         email: admin.email,
         image: admin.image,
         role: admin.role,
+        status: admin.status,
       });
     } else {
+      await recordFailedLogin(req, req.body.email);
       res.status(401).send({
         message: "Invalid Email or password!",
       });
@@ -208,6 +352,7 @@ const addStaff = async (req, res,next) => {
         phone: req.body.phone,
         joiningDate: req.body.joiningDate,
         role: req.body.role,
+        status: "Active",
         image: req.body.image,
       });
       await newStaff.save();
@@ -295,16 +440,27 @@ const updatedStatus = async (req, res) => {
   try {
     const newStatus = req.body.status;
 
-    await Admin.updateOne(
-      { _id: req.params.id },
-      {
-        $set: {
-          status: newStatus,
-        },
-      }
-    );
+    if (!ADMIN_STATUSES.includes(newStatus)) {
+      return res.status(400).send({
+        message: "Invalid admin status",
+      });
+    }
+
+    const updatedAdmin = await Admin.findByIdAndUpdate(
+      req.params.id,
+      { $set: { status: newStatus } },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedAdmin) {
+      return res.status(404).send({
+        message: "Admin not found",
+      });
+    }
+
     res.send({
-      message: `Store ${newStatus} Successfully!`,
+      message: `Admin ${newStatus} successfully!`,
+      data: updatedAdmin,
     });
   } catch (err) {
     res.status(500).send({

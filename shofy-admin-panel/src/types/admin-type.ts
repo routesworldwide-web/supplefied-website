@@ -20,15 +20,17 @@ export interface IAdminLoginRes {
   email: string;
   phone?: string;
   role?: string;
+  status?: "Pending" | "Active" | "Inactive";
 }
 
 // Admin RegisterRes
 export interface IAdminRegisterRes {
-  token: string;
+  message: string;
   _id: string;
   name: string;
   email: string;
   role: string;
+  status: "Pending" | "Active" | "Inactive";
   joiningData: string;
 }
 
@@ -70,7 +72,7 @@ export interface IStuff {
   city?: string;
   email: string;
   phone?: string;
-  status?: "Active" | "Inactive";
+  status?: "Pending" | "Active" | "Inactive";
   password?: string;
   role: "Admin" | "Super Admin" | "Manager" | "CEO";
   joiningDate?: string;

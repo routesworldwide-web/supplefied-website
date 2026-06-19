@@ -19,6 +19,13 @@ const orderRoutes = require("./routes/order.routes");
 const couponRoutes = require("./routes/coupon.routes");
 const reviewRoutes = require("./routes/review.routes");
 const adminRoutes = require("./routes/admin.routes");
+const cartRoutes = require("./routes/cart.routes");
+const productListRoutes = require("./routes/product-list.routes");
+const bannerRoutes = require("./routes/banner.routes");
+const blogRoutes = require("./routes/blog.routes");
+const newsletterRoutes = require("./routes/newsletter.routes");
+const notificationRoutes = require("./routes/notification.routes");
+const contactRoutes = require("./routes/contact.routes");
 // const uploadRouter = require('./routes/uploadFile.route');
 const cloudinaryRoutes = require("./routes/cloudinary.routes");
 
@@ -42,6 +49,13 @@ app.use("/api/user-order", userOrderRoutes);
 app.use("/api/review", reviewRoutes);
 app.use("/api/cloudinary", cloudinaryRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/product-list", productListRoutes);
+app.use("/api/banner", bannerRoutes);
+app.use("/api/blog", blogRoutes);
+app.use("/api/newsletter", newsletterRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/contact", contactRoutes);
 
 // root route
 app.get("/", (req, res) => res.send("Apps worked successfully"));

@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import useProductSubmit from "@/hooks/useProductSubmit";
 import ErrorMsg from "../../common/error-msg";
 import FormField from "../form-field";
@@ -8,7 +8,7 @@ import { useGetProductQuery } from "@/redux/product/productApi";
 import OfferDatePicker from "../add-product/offer-date-picker";
 import ProductTypeBrand from "../add-product/product-type-brand";
 import AdditionalInformation from "../add-product/additional-information";
-import ProductVariants from "../add-product/product-variants";
+import ProductImages from "../add-product/product-variants";
 import ProductImgUpload from "../add-product/product-img-upload";
 import Tags from "../add-product/tags";
 import ProductCategory from "../../category/product-category";
@@ -17,13 +17,10 @@ const EditProductSubmit = ({ id }: { id: string }) => {
   const { data: product, isError, isLoading } = useGetProductQuery(id);
   const {
     handleSubmit,
-    handleSubmitProduct,
     register,
     errors,
     tags,
     setTags,
-    setSizes,
-    sizes,
     setAdditionalInformation,
     control,
     setCategory,
@@ -33,14 +30,49 @@ const EditProductSubmit = ({ id }: { id: string }) => {
     img,
     setBrand,
     setProductType,
-    imageURLs,
     setImageURLs,
+    setStatus,
     offerDate,
     setOfferDate,
     isSubmitted,
-    setIsSubmitted,
     handleEditProduct,
   } = useProductSubmit();
+  const initializedProductId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!product || initializedProductId.current === product._id) {
+      return;
+    }
+
+    initializedProductId.current = product._id;
+    setImg(product.img || "");
+    setImageURLs(product.imageURLs?.filter((item) => item.img && item.img !== product.img) || []);
+    setBrand(product.brand || { name: "", id: "" });
+    setCategory(product.category || { name: "", id: "" });
+    setParent(product.category?.name || product.parent || "");
+    setChildren(product.children || "");
+    setProductType(product.productType || "");
+    setStatus(product.status || "in-stock");
+    setOfferDate({
+      startDate: product.offerDate?.startDate || null,
+      endDate: product.offerDate?.endDate || null,
+    });
+    setAdditionalInformation(product.additionalInformation || []);
+    setTags(product.tags || []);
+  }, [
+    product,
+    setAdditionalInformation,
+    setBrand,
+    setCategory,
+    setChildren,
+    setImageURLs,
+    setImg,
+    setOfferDate,
+    setParent,
+    setProductType,
+    setStatus,
+    setTags,
+  ]);
 
   // decide what to render
   let content = null;
@@ -137,7 +169,6 @@ const EditProductSubmit = ({ id }: { id: string }) => {
                   <OfferDatePicker
                     offerDate={offerDate}
                     setOfferDate={setOfferDate}
-                    defaultValue={product.offerDate}
                   />
                   <span className="text-tiny leading-4">
                     set the product offer and end date
@@ -157,7 +188,7 @@ const EditProductSubmit = ({ id }: { id: string }) => {
               default_value={{
                 brand: product.brand.name,
                 product_type: product.productType,
-                unit: product.unit,
+                unit: product.unit || "",
               }}
             />
             {/* product type and brands end */}
@@ -169,13 +200,11 @@ const EditProductSubmit = ({ id }: { id: string }) => {
             />
             {/* additional information page end */}
 
-            {/* product variations start */}
-            <ProductVariants
+            <ProductImages
               isSubmitted={isSubmitted}
               setImageURLs={setImageURLs}
-              default_value={product.imageURLs}
+              default_value={product.imageURLs?.filter((item) => item.img !== product.img)}
             />
-            {/* product variations end */}
           </div>
 
           {/* right side */}

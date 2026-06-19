@@ -9,37 +9,39 @@
 	font-family: var(--tp-ff-jost);
 	font-weight: 400;
 	font-size: 16px;
-	background-color: var(--tp-common-black);
+	background-color: var(--tp-theme-action-bg);
 	padding: 9px 26px;
-	color: var(--tp-common-white);
-	border: 1px solid var(--tp-common-black);
+	color: var(--tp-theme-action-text);
+	border: 1px solid var(--tp-theme-action-border);
 
 	& svg{
 		@extend %tp-svg-y-2;
 	}
 
 	&:hover{
-		color: var(--tp-common-black);
-		background-color: transparent;
+		color: var(--tp-theme-action-hover-text);
+		background-color: var(--tp-theme-action-hover-bg);
 	}
 
 
-	&-2{/* for home electronic */
+	&-2{/* for home */
 		font-family: var(--tp-ff-roboto);
 		font-weight: 500;
 		font-size: 14px;
-		background-color: var(--tp-theme-primary);
+		background-color: var(--tp-theme-action-bg);
+		color: var(--tp-theme-action-text);
 		padding: 9px 26px 7px;
 		border-radius: 6px;
 		border: 0;
 
 		&:hover{
-			background-color: var(--tp-common-black);
-			color: var(--tp-common-white);
+			background-color: var(--tp-theme-action-hover-bg);
+			color: var(--tp-theme-action-hover-text);
+			box-shadow: inset 0 0 0 1px var(--tp-theme-action-border);
 		}
 	}
 
-	&-white{ /* for home electronic */
+	&-white{ /* for home */
 		background-color: var(--tp-common-white);
 		padding: 7px 26px;
 		box-shadow: 0px 1px 2px rgba(1, 15, 28, 0.1);
@@ -52,8 +54,9 @@
 		}
 	}
 
-	&-blue{ /* for home electronic */
-		background-color: var(--tp-theme-primary);
+	&-blue{ /* for home */
+		background-color: var(--tp-theme-action-bg);
+		color: var(--tp-theme-action-text);
 	}
 
 	&-border{
@@ -102,9 +105,9 @@
 			}
 
 			&:hover{
-				background-color: var(--tp-theme-primary);
-				border-color: var(--tp-theme-primary);
-				color: var(--tp-common-white);
+				background-color: var(--tp-theme-action-bg);
+				border-color: var(--tp-theme-action-border);
+				color: var(--tp-theme-action-text);
 			}
 		}
 	}
@@ -141,8 +144,8 @@
 	display: inline-block;
 	font-size: 14px;
 	font-weight: 600;
-	color: var(--tp-common-white);
-	background: var(--tp-theme-primary);
+	color: var(--tp-theme-action-text);
+	background: var(--tp-theme-action-bg);
 	text-align: center;
 	font-family: var(--tp-ff-space);
 	padding: 9px 22px;
@@ -155,8 +158,9 @@
 		padding-left: 5px;
 	}
 	&:hover{
-		background-color: var(--tp-common-black);
-		color: var(--tp-common-white);
+		background-color: var(--tp-theme-action-hover-bg);
+		color: var(--tp-theme-action-hover-text);
+		box-shadow: inset 0 0 0 1px var(--tp-theme-action-border);
 	}
 }
 
@@ -385,9 +389,9 @@
 	}
 
 	&:hover{
-		color: var(--tp-common-white);
-		background-color: var(--tp-theme-primary);
-		border-color: var(--tp-theme-primary);
+		color: var(--tp-theme-action-text);
+		background-color: var(--tp-theme-action-bg);
+		border-color: var(--tp-theme-action-border);
 	}
 }
 
@@ -395,8 +399,8 @@
 	font-weight: 500;
 	font-size: 14px;
 	line-height: 1;
-	color: var(--tp-common-white);
-	background-color: var(--tp-common-black);
+	color: var(--tp-theme-action-text);
+	background-color: var(--tp-theme-action-bg);
 	display: inline-block;
 	padding: 13px 35px 9px;
 	border: 1px solid var(--tp-common-black);
@@ -405,8 +409,9 @@
 	}
 
 	&:hover{
-		color: var(--tp-common-black);
-		background-color: var(--tp-common-white);
+		color: var(--tp-theme-action-hover-text);
+		background-color: var(--tp-theme-action-hover-bg);
+		border-color: var(--tp-theme-action-border);
 	}
 
 	@media #{$md}{
@@ -418,14 +423,15 @@
 .#{$theme-prifix}-product-list-add-to-cart-btn{
 	font-weight: 500;
 	font-size: 14px;
-	color: var(--tp-common-white);
-	background-color: var(--tp-common-black);
+	color: var(--tp-theme-action-text);
+	background-color: var(--tp-theme-action-bg);
 	display: inline-block;
 	padding: 5px 20px;
 
 	&:hover{
-		background-color: var(--tp-theme-primary);
-		color: var(--tp-common-white);
+		background-color: var(--tp-theme-action-hover-bg);
+		color: var(--tp-theme-action-hover-text);
+		box-shadow: inset 0 0 0 1px var(--tp-theme-action-border);
 	}
 
 }
@@ -436,16 +442,17 @@
 	font-size: 14px;
 	padding: 11px 26px 9px;
 	border: 0;
-	color: var(--tp-common-white);
-	background-color: var(--tp-theme-primary);
+	color: var(--tp-theme-action-text);
+	background-color: var(--tp-theme-action-bg);
 	&-2{
 		border-radius: 6px;
 		font-family: var(--tp-ff-roboto);
 	}
 
 	&:hover{
-		background-color: var(--tp-common-black);
-		color: var(--tp-common-white);
+		background-color: var(--tp-theme-action-hover-bg);
+		color: var(--tp-theme-action-hover-text);
+		box-shadow: inset 0 0 0 1px var(--tp-theme-action-border);
 	}
 	
 }

@@ -9,9 +9,12 @@ import { handleProductModal } from "@/redux/features/productModalSlice";
 import { add_cart_product } from "@/redux/features/cartSlice";
 import { add_to_wishlist } from "@/redux/features/wishlist-slice";
 import { add_to_compare } from "@/redux/features/compareSlice";
+import { getProductDetailsUrl } from "@/utils/product-url";
+import ProductPrice from "@/components/common/product-price";
 
 const ShopListItem = ({ product }) => {
-  const { _id, img, category, title, reviews, price, discount, tags, description } = product || {};
+  const { img, category, title, reviews, tags, description } = product || {};
+  const productUrl = getProductDetailsUrl(product);
   const dispatch = useDispatch()
   const [ratingVal, setRatingVal] = useState(0);
   useEffect(() => {
@@ -42,7 +45,7 @@ const ShopListItem = ({ product }) => {
   return (
     <div className="tp-product-list-item d-md-flex">
       <div className="tp-product-list-thumb p-relative fix">
-        <Link href={`/product-details/${_id}`}>
+        <Link href={productUrl}>
           <Image src={img} alt="product img" width={350} height={310} />
         </Link>
 
@@ -88,22 +91,13 @@ const ShopListItem = ({ product }) => {
             {tags?.map((t, i) => <a key={i} href="#">{t}</a>)}
           </div>
           <h3 className="tp-product-title-2">
-            <Link href={`/product-details/${_id}`}>{title}</Link>
+            <Link href={productUrl}>{title}</Link>
           </h3>
           <div className="tp-product-rating-icon tp-product-rating-icon-2">
             <Rating allowFraction size={16} initialValue={ratingVal} readonly={true} />
           </div>
           <div className="tp-product-price-wrapper-2">
-            {discount > 0 ? (
-              <>
-                <span className="tp-product-price-2 new-price">${price}</span>
-                <span className="tp-product-price-2 old-price">
-                  {" "} ${(Number(price) - (Number(price) * Number(discount)) / 100).toFixed(2)}
-                </span>
-              </>
-            ) : (
-              <span className="tp-product-price-2 new-price">${price}</span>
-            )}
+            <ProductPrice product={product} priceClassName="tp-product-price-2" />
           </div>
           <p>
             {description.substring(0, 100)}

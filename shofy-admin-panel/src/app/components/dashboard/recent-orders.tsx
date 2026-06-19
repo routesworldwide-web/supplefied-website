@@ -6,6 +6,7 @@ import TableHead from "./table-head";
 import Pagination from "../ui/Pagination";
 import { useGetRecentOrdersQuery } from "@/redux/order/orderApi";
 import usePagination from "@/hooks/use-pagination";
+import Link from "next/link";
 
 const RecentOrders = () => {
   const { data: recentOrders, isError, isLoading } = useGetRecentOrdersQuery();
@@ -49,22 +50,27 @@ const RecentOrders = () => {
   return (
     <>
       <div className="grid grid-cols-12 gap-6 mb-6">
-        <div className="bg-white p-8 col-span-12 xl:col-span-12 2xl:col-span-12 rounded-md">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="font-medium tracking-wide text-slate-700 text-lg mb-0 leading-none">
-              Recent Orders
-            </h3>
-            <a
-              href="order-list.html"
-              className="leading-none text-base text-info border-b border-info border-dotted capitalize font-medium hover:text-info/60 hover:border-info/60"
+        <div className="col-span-12 rounded-lg border border-gray6 bg-white p-5 shadow-xs sm:p-7">
+          <div className="mb-5 flex items-center justify-between gap-4">
+            <div>
+              <h3 className="mb-1 text-xl font-semibold text-heading">
+                Recent orders
+              </h3>
+              <p className="mb-0 text-base text-text3">
+                Latest customer activity and fulfilment status
+              </p>
+            </div>
+            <Link
+              href="/orders"
+              className="shrink-0 rounded-md bg-themeLight px-3 py-2 text-tiny font-medium text-theme hover:bg-theme hover:text-white"
             >
-              View All
-            </a>
+              View all orders
+            </Link>
           </div>
 
           {/* table */}
-          <div className="overflow-scroll 2xl:overflow-visible">
-            <div className="w-[700px] 2xl:w-full">{content}</div>
+          <div className="overflow-x-auto">
+            <div className="min-w-[900px]">{content}</div>
           </div>
         </div>
       </div>

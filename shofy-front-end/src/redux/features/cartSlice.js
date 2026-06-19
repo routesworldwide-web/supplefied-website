@@ -1,104 +1,257 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { getLocalStorage, setLocalStorage } from "@/utils/localstorage";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import Cookies from "js-cookie";
 import { notifyError, notifySuccess } from "@/utils/toast";
+
+const GUEST_CART_KEY = "guestCartId";
+
+const getApiBaseUrl = () => process.env.NEXT_PUBLIC_API_BASE_URL || "";
+
+const createGuestCartId = () => {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  const cryptoObj = window.crypto || window.msCrypto;
+
+  if (cryptoObj?.randomUUID) {
+    return cryptoObj.randomUUID();
+  }
+
+  return `guest-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+};
+
+const getGuestCartId = (createIfMissing = true) => {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  let guestCartId = localStorage.getItem(GUEST_CART_KEY);
+
+  if (!guestCartId && createIfMissing) {
+    guestCartId = createGuestCartId();
+    localStorage.setItem(GUEST_CART_KEY, guestCartId);
+  }
+
+  return guestCartId;
+};
+
+const clearGuestCartId = () => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(GUEST_CART_KEY);
+  }
+};
+
+const getAccessToken = () => {
+  try {
+    const userInfo = Cookies.get("userInfo");
+    return userInfo ? JSON.parse(userInfo)?.accessToken : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+const buildHeaders = ({ includeGuest = true } = {}) => {
+  const headers = {
+    "Content-Type": "application/json",
+  };
+  const token = getAccessToken();
+  const guestCartId = getGuestCartId(includeGuest && !token);
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  if (guestCartId) {
+    headers["x-guest-cart-id"] = guestCartId;
+  }
+
+  return headers;
+};
+
+const requestCart = async (path = "", options = {}) => {
+  const response = await fetch(`${getApiBaseUrl()}/api/cart${path}`, {
+    ...options,
+    headers: {
+      ...buildHeaders(options.cartHeaders),
+      ...(options.headers || {}),
+    },
+  });
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result?.message || result?.error || "Cart request failed");
+  }
+
+  return result.data;
+};
+
+export const get_cart_products = createAsyncThunk("cart/get", async () => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("cart_products");
+  }
+
+  return requestCart("/", {
+    method: "GET",
+    cartHeaders: { includeGuest: true },
+  });
+});
+
+export const add_cart_product = createAsyncThunk(
+  "cart/add",
+  async (payload, { getState }) => {
+    const product = payload?.product || payload;
+    const quantity = payload?.quantity || getState().cart.orderQuantity || 1;
+    const productId = product?.productId || product?._id;
+
+    if (!productId) {
+      throw new Error("Product id is required");
+    }
+
+    return requestCart("/items", {
+      method: "POST",
+      body: JSON.stringify({ productId, quantity }),
+      cartHeaders: { includeGuest: true },
+    });
+  }
+);
+
+export const update_cart_product = createAsyncThunk(
+  "cart/update",
+  async ({ productId, quantity }) => {
+    return requestCart(`/items/${productId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ quantity }),
+      cartHeaders: { includeGuest: true },
+    });
+  }
+);
+
+export const quantityDecrement = createAsyncThunk(
+  "cart/decrement",
+  async (product) => {
+    const productId = product?.productId || product?._id;
+    const nextQuantity = Math.max(Number(product?.orderQuantity || 1) - 1, 1);
+
+    return requestCart(`/items/${productId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ quantity: nextQuantity }),
+      cartHeaders: { includeGuest: true },
+    });
+  }
+);
+
+export const remove_product = createAsyncThunk("cart/remove", async (product) => {
+  const productId = product?.productId || product?._id || product?.id;
+
+  return requestCart(`/items/${productId}`, {
+    method: "DELETE",
+    cartHeaders: { includeGuest: true },
+  });
+});
+
+export const clearCart = createAsyncThunk("cart/clear", async () => {
+  return requestCart("/", {
+    method: "DELETE",
+    cartHeaders: { includeGuest: true },
+  });
+});
+
+export const merge_guest_cart = createAsyncThunk("cart/merge", async () => {
+  const guestCartId = getGuestCartId(false);
+  const cart = await requestCart("/merge", {
+    method: "POST",
+    body: JSON.stringify({ guestCartId }),
+    headers: guestCartId ? { "x-guest-cart-id": guestCartId } : {},
+    cartHeaders: { includeGuest: false },
+  });
+  clearGuestCartId();
+  localStorage.removeItem("cart_products");
+  return cart;
+});
 
 const initialState = {
   cart_products: [],
   orderQuantity: 1,
-  cartMiniOpen:false,
+  cartMiniOpen: false,
+  totalAmount: 0,
+  totalQuantity: 0,
+  isLoading: false,
+};
+
+const applyCart = (state, payload) => {
+  state.cart_products = payload?.items || [];
+  state.totalAmount = payload?.totalAmount || 0;
+  state.totalQuantity = payload?.totalQuantity || 0;
 };
 
 export const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    add_cart_product: (state, { payload }) => {
-      const isExist = state.cart_products.some((i) => i._id === payload._id);
-      if (!isExist) {
-        const newItem = {
-          ...payload,
-          orderQuantity: state.orderQuantity,
-        };
-        state.cart_products.push(newItem);
-        notifySuccess(`${state.orderQuantity} ${payload.title} added to cart`);
-      } else {
-        state.cart_products.map((item) => {
-          if (item._id === payload._id) {
-            if (item.quantity >= item.orderQuantity + state.orderQuantity) {
-              item.orderQuantity =
-                state.orderQuantity !== 1
-                  ? state.orderQuantity + item.orderQuantity
-                  : item.orderQuantity + 1;
-              notifySuccess(`${state.orderQuantity} ${item.title} added to cart`);
-            } else {
-              notifyError("No more quantity available for this product!");
-              state.orderQuantity = 1;
-            }
-          }
-          return { ...item };
-        });
-      }
-      setLocalStorage("cart_products", state.cart_products);
-    },
-    increment: (state, { payload }) => {
+    increment: (state) => {
       state.orderQuantity = state.orderQuantity + 1;
     },
-    decrement: (state, { payload }) => {
-      state.orderQuantity =
-        state.orderQuantity > 1
-          ? state.orderQuantity - 1
-          : (state.orderQuantity = 1);
+    decrement: (state) => {
+      state.orderQuantity = state.orderQuantity > 1 ? state.orderQuantity - 1 : 1;
     },
-    quantityDecrement: (state, { payload }) => {
-      state.cart_products.map((item) => {
-        if (item._id === payload._id) {
-          if (item.orderQuantity > 1) {
-            item.orderQuantity = item.orderQuantity - 1;
-          }
-        }
-        return { ...item };
-      });
-      setLocalStorage("cart_products", state.cart_products);
-    },
-    remove_product: (state, { payload }) => {
-      state.cart_products = state.cart_products.filter(
-        (item) => item._id !== payload.id
-      );
-      setLocalStorage("cart_products", state.cart_products);
-      notifyError(`${payload.title} Remove from cart`);
-    },
-    get_cart_products: (state, action) => {
-      state.cart_products = getLocalStorage("cart_products");
-    },
-    initialOrderQuantity: (state, { payload }) => {
+    initialOrderQuantity: (state) => {
       state.orderQuantity = 1;
     },
-    clearCart:(state) => {
-      const isClearCart = window.confirm('Are you sure you want to remove all items ?');
-      if(isClearCart){
-        state.cart_products = []
-      }
-      setLocalStorage("cart_products", state.cart_products);
+    clearCartState: (state) => {
+      state.cart_products = [];
+      state.totalAmount = 0;
+      state.totalQuantity = 0;
+      state.orderQuantity = 1;
     },
-    openCartMini:(state,{payload}) => {
-      state.cartMiniOpen = true
+    openCartMini: (state) => {
+      state.cartMiniOpen = true;
     },
-    closeCartMini:(state,{payload}) => {
-      state.cartMiniOpen = false
+    closeCartMini: (state) => {
+      state.cartMiniOpen = false;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(add_cart_product.fulfilled, (state, action) => {
+        applyCart(state, action.payload);
+        state.orderQuantity = 1;
+        notifySuccess("Product added to cart");
+      })
+      .addCase(remove_product.fulfilled, (state, action) => {
+        applyCart(state, action.payload);
+        notifyError("Product removed from cart");
+      })
+      .addMatcher(
+        (action) => action.type.startsWith("cart/") && action.type.endsWith("/pending"),
+        (state) => {
+          state.isLoading = true;
+        }
+      )
+      .addMatcher(
+        (action) => action.type.startsWith("cart/") && action.type.endsWith("/fulfilled"),
+        (state, action) => {
+          state.isLoading = false;
+          applyCart(state, action.payload);
+          state.orderQuantity = 1;
+        }
+      )
+      .addMatcher(
+        (action) => action.type.startsWith("cart/") && action.type.endsWith("/rejected"),
+        (state, action) => {
+          state.isLoading = false;
+          notifyError(action.error?.message || "Cart update failed");
+        }
+      );
   },
 });
 
 export const {
-  add_cart_product,
   increment,
   decrement,
-  get_cart_products,
-  remove_product,
-  quantityDecrement,
   initialOrderQuantity,
-  clearCart,
+  clearCartState,
   closeCartMini,
   openCartMini,
 } = cartSlice.actions;
+
 export default cartSlice.reducer;

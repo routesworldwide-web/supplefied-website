@@ -6,6 +6,8 @@ import Link from 'next/link';
 import ErrorMsg from '@/components/common/error-msg';
 import { useGetTopRatedProductsQuery } from '@/redux/features/productApi';
 import ShopTopRatedLoader from '@/components/loader/shop/top-rated-prd-loader';
+import { getProductDetailsUrl } from '@/utils/product-url';
+import ProductPrice from '@/components/common/product-price';
 
 const TopRatedProducts = () => {
   const { data: products, isError, isLoading } = useGetTopRatedProductsQuery();
@@ -28,7 +30,7 @@ const TopRatedProducts = () => {
     content = product_items.map((item) => (
       <div key={item._id} className="tp-shop-widget-product-item d-flex align-items-center">
         <div className="tp-shop-widget-product-thumb">
-          <Link href={`/product-details/${item._id}`}>
+          <Link href={getProductDetailsUrl(item)}>
             <Image src={item.img} alt="product img" width={70} height={70} />
           </Link>
         </div>
@@ -42,10 +44,10 @@ const TopRatedProducts = () => {
             </div>
           </div>
           <h4 className="tp-shop-widget-product-title">
-            <Link href={`/product-details/${item._id}`}>{item.title.substring(0,20)}...</Link>
+            <Link href={getProductDetailsUrl(item)}>{item.title.substring(0,20)}...</Link>
           </h4>
           <div className="tp-shop-widget-product-price-wrapper">
-            <span className="tp-shop-widget-product-price">${item.price.toFixed(2)}</span>
+            <ProductPrice product={item} priceClassName="tp-shop-widget-product-price" />
           </div>
         </div>
       </div>
