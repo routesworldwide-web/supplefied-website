@@ -42,6 +42,17 @@ const globalErrorHandler = (error, req, res, next) => {
           },
         ]
       : []
+  } else if (error && typeof error === 'object') {
+    statusCode = error.http_code || error.statusCode || error.status || statusCode
+    message = error.message || error.error?.message || message
+    errorMessages = message
+      ? [
+          {
+            path: '',
+            message,
+          },
+        ]
+      : []
   }
 
   res.status(statusCode).json({
