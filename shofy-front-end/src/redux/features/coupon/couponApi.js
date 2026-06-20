@@ -5,13 +5,13 @@ export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     // get offer coupon
     getOfferCoupons: builder.query({
-      query: () => `api/coupon?status=active`,
+      query: () => `/api/coupon?status=active`,
       providesTags:['Coupon'],
       keepUnusedDataFor: 600,
     }),
     validateCoupon: builder.mutation({
       query: (couponCode) => ({
-        url: `api/coupon/validate`,
+        url: `/api/coupon/validate`,
         method: "POST",
         body: { couponCode },
       }),

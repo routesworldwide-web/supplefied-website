@@ -12,9 +12,9 @@ const verifyAdmin = require("../middleware/verifyAdmin");
 const router = express.Router();
 
 // get orders
-router.get("/orders", getOrders);
+router.get("/orders", verifyAdmin, getOrders);
 // single order
-router.get("/:id", getSingleOrder);
+router.get("/:id", verifyAdmin, getSingleOrder);
 // create Razorpay payment order
 router.post("/create-razorpay-order", createRazorpayOrder);
 // save Order

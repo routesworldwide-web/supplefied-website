@@ -19,6 +19,8 @@ const nextConfig = {
       "lh3.googleusercontent.com",
       "localhost",
       "35.200.248.118",
+      "supplefied.com",
+      "www.supplefied.com",
     ],
     remotePatterns: [
       {

@@ -3,16 +3,14 @@ const router = express.Router();
 // internal
 const uploader = require('../middleware/uploder');
 const { cloudinaryController } = require('../controller/cloudinary.controller');
-// NOTE: Using disk-storage uploader from middleware/uploder.js for local file uploads.
-// The Cloudinary-backed implementation is preserved and commented inside the controller for later re-enable.
+const verifyAdmin = require('../middleware/verifyAdmin');
+// add single image
+router.post('/add-img', verifyAdmin, uploader.single('image'), cloudinaryController.saveImageCloudinary);
 
-// add single image (disk storage)
-router.post('/add-img', uploader.single('image'), cloudinaryController.saveImageCloudinary);
-
-// add multiple images (disk storage)
-router.post('/add-multiple-img', uploader.array('images', 5), cloudinaryController.addMultipleImageCloudinary);
+// add multiple images
+router.post('/add-multiple-img', verifyAdmin, uploader.array('images', 5), cloudinaryController.addMultipleImageCloudinary);
 
 // delete image
-router.delete('/img-delete', cloudinaryController.cloudinaryDeleteController);
+router.delete('/img-delete', verifyAdmin, cloudinaryController.cloudinaryDeleteController);
 
 module.exports = router;

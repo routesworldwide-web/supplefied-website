@@ -2,7 +2,8 @@ import Wrapper from "@/layout/wrapper";
 import Breadcrumb from "../../components/breadcrumb/breadcrumb";
 import EditStaffArea from "@/app/components/our-staff/stuff-edit-area";
 
-const CategoryEditPage = ({ params }: { params: { id: string } }) => {
+const CategoryEditPage = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
   return (
     <Wrapper>
       <div className="body-content px-8 py-8 bg-slate-100">
@@ -11,7 +12,7 @@ const CategoryEditPage = ({ params }: { params: { id: string } }) => {
         {/* breadcrumb end */}
 
         {/*staff area start */}
-        <EditStaffArea id={params.id}/>
+        <EditStaffArea id={id}/>
         {/*staff area end */}
       </div>
     </Wrapper>

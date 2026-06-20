@@ -26,13 +26,45 @@ const blogRoutes = require("./routes/blog.routes");
 const newsletterRoutes = require("./routes/newsletter.routes");
 const notificationRoutes = require("./routes/notification.routes");
 const contactRoutes = require("./routes/contact.routes");
+const authRoutes = require("./routes/auth.routes");
 // const uploadRouter = require('./routes/uploadFile.route');
 const cloudinaryRoutes = require("./routes/cloudinary.routes");
 
+const defaultAllowedOrigins = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "https://supplefied.com",
+  "https://www.supplefied.com",
+];
+const allowedOrigins = (secret.allowed_origins || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const trustedOrigins = new Set(
+  allowedOrigins.length ? allowedOrigins : defaultAllowedOrigins
+);
+
 // middleware
-app.use(cors());
-app.use(express.json());
-app.use(morgan('dev'));
+app.set("trust proxy", 1);
+app.disable("x-powered-by");
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || trustedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      const error = new Error("Origin is not allowed by CORS");
+      error.statusCode = 403;
+      callback(error);
+    },
+    methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+app.use(express.json({ limit: "1mb" }));
+app.use(morgan(secret.env === "production" ? "combined" : "dev"));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // connect database
@@ -56,14 +88,14 @@ app.use("/api/blog", blogRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/auth", authRoutes);
 
 // root route
 app.get("/", (req, res) => res.send("Apps worked successfully"));
+app.get("/health", (req, res) =>
+  res.status(200).json({ status: "ok", service: "supplefied-api" })
+);
 
-app.listen(PORT, () => console.log(`server running on port ${PORT}`));
-
-// global error handler
-app.use(globalErrorHandler);
 //* handle not found
 app.use((req, res, next) => {
   res.status(404).json({
@@ -76,7 +108,11 @@ app.use((req, res, next) => {
       },
     ],
   });
-  next();
 });
+
+// global error handler
+app.use(globalErrorHandler);
+
+app.listen(PORT, () => console.log(`server running on port ${PORT}`));
 
 module.exports = app;

@@ -1,9 +1,11 @@
-.env
-.env.local
-.env.production
-shofy-backend/.env
-shofy-front-end/.env.production
-shofy-admin-panel/.env.production
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.production.example
+
+**/.next/
+**/node_modules/
+**/*.tsbuildinfo
 
 # Block suspicious miner files
 xmrig*

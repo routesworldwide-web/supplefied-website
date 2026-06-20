@@ -4,7 +4,7 @@ export const userAddressApi = apiSlice.injectEndpoints({
   overrideExisting: true,
   endpoints: (builder) => ({
     getShippingAddresses: builder.query({
-      query: () => "api/user/shipping-addresses",
+      query: () => "/api/user/shipping-addresses",
       transformResponse: (response) => response?.data || [],
       providesTags: (result, error, userId) => [
         { type: "ShippingAddresses", id: userId },
@@ -12,7 +12,7 @@ export const userAddressApi = apiSlice.injectEndpoints({
     }),
     addShippingAddress: builder.mutation({
       query: (data) => ({
-        url: "api/user/shipping-addresses",
+        url: "/api/user/shipping-addresses",
         method: "POST",
         body: data,
       }),
@@ -20,7 +20,7 @@ export const userAddressApi = apiSlice.injectEndpoints({
     }),
     updateShippingAddress: builder.mutation({
       query: ({ id, ...data }) => ({
-        url: `api/user/shipping-addresses/${id}`,
+        url: `/api/user/shipping-addresses/${id}`,
         method: "PUT",
         body: data,
       }),
@@ -28,7 +28,7 @@ export const userAddressApi = apiSlice.injectEndpoints({
     }),
     deleteShippingAddress: builder.mutation({
       query: (id) => ({
-        url: `api/user/shipping-addresses/${id}`,
+        url: `/api/user/shipping-addresses/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["ShippingAddresses"],

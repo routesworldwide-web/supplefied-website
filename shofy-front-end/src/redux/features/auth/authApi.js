@@ -10,7 +10,7 @@ export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     registerUser: builder.mutation({
       query: (data) => ({
-        url: "api/user/signup",
+        url: "/api/user/signup",
         method: "POST",
         body: data,
       }),
@@ -18,7 +18,7 @@ export const authApi = apiSlice.injectEndpoints({
     // signUpProvider
     signUpProvider: builder.mutation({
       query: (token) => ({
-        url: `api/user/register/${token}`,
+        url: `/api/user/register/${token}`,
         method: "POST",
       }),
 
@@ -53,7 +53,7 @@ export const authApi = apiSlice.injectEndpoints({
     // login
     loginUser: builder.mutation({
       query: (data) => ({
-        url: "api/user/login",
+        url: "/api/user/login",
         method: "POST",
         body: data,
       }),
@@ -88,7 +88,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     // get me
     getUser: builder.query({
-      query: () => "api/user/me",
+      query: () => "/api/user/me",
 
       async onQueryStarted(arg, { queryFulfilled, dispatch }) {
         try {
@@ -105,12 +105,12 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     // confirmEmail
     confirmEmail: builder.query({
-      query: (token) => `api/user/confirmEmail/${token}`,
+      query: (token) => `/api/user/confirmEmail/${token}`,
     }),
     // reset password
     resetPassword: builder.mutation({
       query: (data) => ({
-        url: "api/user/forget-password",
+        url: "/api/user/forget-password",
         method: "PATCH",
         body: data,
       }),
@@ -118,7 +118,7 @@ export const authApi = apiSlice.injectEndpoints({
     // confirmForgotPassword
     confirmForgotPassword: builder.mutation({
       query: (data) => ({
-        url: "api/user/confirm-forget-password",
+        url: "/api/user/confirm-forget-password",
         method: "PATCH",
         body: data,
       }),
@@ -126,7 +126,7 @@ export const authApi = apiSlice.injectEndpoints({
     // change password
     changePassword: builder.mutation({
       query: (data) => ({
-        url: "api/user/change-password",
+        url: "/api/user/change-password",
         method: "PATCH",
         body: data,
       }),

@@ -1,22 +1,5 @@
-const fs = require("fs");
-const path = require("path");
 const { Banner, BANNER_PLACEMENTS, isSafeRedirectLink } = require("../model/Banner");
-
-const getBannerUrl = (req, filename) => {
-  const protocol = req.protocol || "http";
-  const host = req.get("host") || "localhost:7000";
-  return `${protocol}://${host}/images/banners/${filename}`;
-};
-
-const removeLocalBannerImage = (imageId) => {
-  if (!imageId) return;
-
-  const imagePath = path.join(process.cwd(), "public", "images", "banners", imageId);
-
-  if (fs.existsSync(imagePath)) {
-    fs.unlinkSync(imagePath);
-  }
-};
+const { cloudinaryServices } = require("../services/cloudinary.service");
 
 const getBanners = async (req, res, next) => {
   try {
@@ -69,17 +52,20 @@ const createBanner = async (req, res, next) => {
     const { title, placement, redirectLink, sortOrder, status } = req.body;
 
     if (!BANNER_PLACEMENTS.includes(placement)) {
-      removeLocalBannerImage(req.file.filename);
       return res.status(400).json({ success: false, message: "Invalid banner placement" });
     }
 
     if (!isSafeRedirectLink(redirectLink)) {
-      removeLocalBannerImage(req.file.filename);
       return res.status(400).json({
         success: false,
         message: "Redirect link must be a safe internal link",
       });
     }
+
+    const image = await cloudinaryServices.cloudinaryImageUpload(
+      req.file.buffer,
+      "supplefied/banners"
+    );
 
     const banner = await Banner.create({
       title,
@@ -87,8 +73,8 @@ const createBanner = async (req, res, next) => {
       redirectLink,
       sortOrder: Number(sortOrder || 0),
       status: status || "active",
-      image: getBannerUrl(req, req.file.filename),
-      imageId: req.file.filename,
+      image: image.secure_url,
+      imageId: image.public_id,
     });
 
     res.status(201).json({
@@ -97,9 +83,6 @@ const createBanner = async (req, res, next) => {
       data: banner,
     });
   } catch (error) {
-    if (req.file?.filename) {
-      removeLocalBannerImage(req.file.filename);
-    }
     next(error);
   }
 };
@@ -109,25 +92,16 @@ const updateBanner = async (req, res, next) => {
     const banner = await Banner.findById(req.params.id);
 
     if (!banner) {
-      if (req.file?.filename) {
-        removeLocalBannerImage(req.file.filename);
-      }
       return res.status(404).json({ success: false, message: "Banner not found" });
     }
 
     const { title, placement, redirectLink, sortOrder, status } = req.body;
 
     if (placement && !BANNER_PLACEMENTS.includes(placement)) {
-      if (req.file?.filename) {
-        removeLocalBannerImage(req.file.filename);
-      }
       return res.status(400).json({ success: false, message: "Invalid banner placement" });
     }
 
     if (redirectLink && !isSafeRedirectLink(redirectLink)) {
-      if (req.file?.filename) {
-        removeLocalBannerImage(req.file.filename);
-      }
       return res.status(400).json({
         success: false,
         message: "Redirect link must be a safe internal link",
@@ -140,13 +114,19 @@ const updateBanner = async (req, res, next) => {
     if (typeof sortOrder !== "undefined") banner.sortOrder = Number(sortOrder || 0);
     if (status) banner.status = status;
 
-    if (req.file?.filename) {
-      removeLocalBannerImage(banner.imageId);
-      banner.image = getBannerUrl(req, req.file.filename);
-      banner.imageId = req.file.filename;
+    if (req.file?.buffer) {
+      const oldImageId = banner.imageId;
+      const image = await cloudinaryServices.cloudinaryImageUpload(
+        req.file.buffer,
+        "supplefied/banners"
+      );
+      banner.image = image.secure_url;
+      banner.imageId = image.public_id;
+      await banner.save();
+      await cloudinaryServices.cloudinaryImageDelete(oldImageId);
+    } else {
+      await banner.save();
     }
-
-    await banner.save();
 
     res.status(200).json({
       success: true,
@@ -154,9 +134,6 @@ const updateBanner = async (req, res, next) => {
       data: banner,
     });
   } catch (error) {
-    if (req.file?.filename) {
-      removeLocalBannerImage(req.file.filename);
-    }
     next(error);
   }
 };
@@ -169,7 +146,7 @@ const deleteBanner = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Banner not found" });
     }
 
-    removeLocalBannerImage(banner.imageId);
+    await cloudinaryServices.cloudinaryImageDelete(banner.imageId);
     await banner.deleteOne();
 
     res.status(200).json({

@@ -26,4 +26,5 @@ module.exports.secret = {
   razorpay_key_secret: process.env.RAZORPAY_KEY_SECRET,
   client_url: process.env.STORE_URL, 
   admin_url:process.env.ADMIN_URL, 
+  allowed_origins: process.env.ALLOWED_ORIGINS,
 }

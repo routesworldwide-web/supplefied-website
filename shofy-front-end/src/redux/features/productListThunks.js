@@ -1,9 +1,10 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import Cookies from "js-cookie";
+import { API_BASE_URL } from "@/config/api";
 
 const GUEST_CART_KEY = "guestCartId";
 
-const getApiBaseUrl = () => process.env.NEXT_PUBLIC_API_BASE_URL || "";
+const getApiBaseUrl = () => API_BASE_URL;
 
 const createGuestCartId = () => {
   if (typeof window === "undefined") {

@@ -2,19 +2,20 @@ const express = require('express');
 const router = express.Router();
 const userOrderController = require('../controller/user.order.controller');
 const verifyToken = require('../middleware/verifyToken');
+const verifyAdmin = require('../middleware/verifyAdmin');
 
 
 // get dashboard amount
-router.get('/dashboard-amount', userOrderController.getDashboardAmount);
+router.get('/dashboard-amount', verifyAdmin, userOrderController.getDashboardAmount);
 
 // get sales-report
-router.get('/sales-report', userOrderController.getSalesReport);
+router.get('/sales-report', verifyAdmin, userOrderController.getSalesReport);
 
 // get sales-report
-router.get('/most-selling-category', userOrderController.mostSellingCategory);
+router.get('/most-selling-category', verifyAdmin, userOrderController.mostSellingCategory);
 
 // get sales-report
-router.get('/dashboard-recent-order', userOrderController.getDashboardRecentOrder);
+router.get('/dashboard-recent-order', verifyAdmin, userOrderController.getDashboardRecentOrder);
 
 // cancel a pending order owned by the logged-in customer
 router.patch('/:id/cancel', verifyToken, userOrderController.cancelOrderByUser);

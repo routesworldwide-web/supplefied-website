@@ -21,11 +21,11 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     deleteCloudinaryImg: builder.mutation<
       ICloudinaryDeleteResponse,
-      { folder_name: string; id: string }
+      { id: string }
     >({
-      query({ folder_name, id }) {
+      query({ id }) {
         return {
-          url: `/api/cloudinary/img-delete?folder_name=${folder_name}&id=${id}`,
+          url: `/api/cloudinary/img-delete?id=${encodeURIComponent(id)}`,
           method: "DELETE",
         };
       },

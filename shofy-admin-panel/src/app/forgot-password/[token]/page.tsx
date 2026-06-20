@@ -6,6 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useAdminConfirmForgotPasswordMutation } from "@/redux/auth/authApi";
 import ErrorMsg from "@/app/components/common/error-msg";
 import { notifyError, notifySuccess } from "@/utils/toast";
+import { useParams } from "next/navigation";
 
 // schema
 const schema = Yup.object().shape({
@@ -16,7 +17,8 @@ const schema = Yup.object().shape({
   ),
 });
 
-const ForgetPasswordPage = ({ params }: { params: { token: string } }) => {
+const ForgetPasswordPage = () => {
+  const params = useParams<{ token: string }>();
   const token = params.token;
   const [adminConfirmForgotPassword, {}] =
     useAdminConfirmForgotPasswordMutation();

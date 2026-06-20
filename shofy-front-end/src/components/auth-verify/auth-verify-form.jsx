@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
+import { API_BASE_URL } from "@/config/api";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { toast } from "react-toastify";
@@ -49,7 +50,7 @@ const AuthVerifyForm = () => {
       setIsLoading(true);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/auth/verify`,
+        `${API_BASE_URL}/api/auth/verify`,
         {
           method: "POST",
           headers: {

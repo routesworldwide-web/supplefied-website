@@ -1,24 +1,5 @@
-const fs = require("fs");
-const path = require("path");
 const { Blog, createSlug } = require("../model/Blog");
-
-const BLOG_IMAGE_DIR = path.join(process.cwd(), "public", "images", "blogs");
-
-const getBlogImageUrl = (req, filename) => {
-  const protocol = req.protocol || "http";
-  const host = req.get("host") || "localhost:7000";
-  return `${protocol}://${host}/images/blogs/${filename}`;
-};
-
-const removeLocalBlogImage = (imageId) => {
-  if (!imageId) return;
-
-  const imagePath = path.join(BLOG_IMAGE_DIR, imageId);
-
-  if (fs.existsSync(imagePath)) {
-    fs.unlinkSync(imagePath);
-  }
-};
+const { cloudinaryServices } = require("../services/cloudinary.service");
 
 const parseJsonField = (value, fallback) => {
   if (typeof value === "undefined") return fallback;
@@ -192,20 +173,25 @@ const createBlog = async (req, res, next) => {
     const secondaryImage = req.files?.secondaryImage?.[0];
 
     if (!primaryImage) {
-      if (secondaryImage) {
-        removeLocalBlogImage(secondaryImage.filename);
-      }
       return res.status(400).json({ success: false, message: "Primary image is required" });
     }
 
     const payload = buildBlogPayload(req);
     payload.slug = await ensureUniqueSlug(payload.slug || payload.title);
-    payload.primaryImage = getBlogImageUrl(req, primaryImage.filename);
-    payload.primaryImageId = primaryImage.filename;
+    const primaryUpload = await cloudinaryServices.cloudinaryImageUpload(
+      primaryImage.buffer,
+      "supplefied/blogs"
+    );
+    payload.primaryImage = primaryUpload.secure_url;
+    payload.primaryImageId = primaryUpload.public_id;
 
     if (secondaryImage) {
-      payload.secondaryImage = getBlogImageUrl(req, secondaryImage.filename);
-      payload.secondaryImageId = secondaryImage.filename;
+      const secondaryUpload = await cloudinaryServices.cloudinaryImageUpload(
+        secondaryImage.buffer,
+        "supplefied/blogs"
+      );
+      payload.secondaryImage = secondaryUpload.secure_url;
+      payload.secondaryImageId = secondaryUpload.public_id;
     }
 
     const blog = await Blog.create(payload);
@@ -216,8 +202,6 @@ const createBlog = async (req, res, next) => {
       data: blog,
     });
   } catch (error) {
-    req.files?.primaryImage?.forEach((file) => removeLocalBlogImage(file.filename));
-    req.files?.secondaryImage?.forEach((file) => removeLocalBlogImage(file.filename));
     next(error);
   }
 };
@@ -227,8 +211,6 @@ const updateBlog = async (req, res, next) => {
     const blog = await Blog.findById(req.params.id);
 
     if (!blog) {
-      req.files?.primaryImage?.forEach((file) => removeLocalBlogImage(file.filename));
-      req.files?.secondaryImage?.forEach((file) => removeLocalBlogImage(file.filename));
       return res.status(404).json({ success: false, message: "Blog not found" });
     }
 
@@ -244,15 +226,25 @@ const updateBlog = async (req, res, next) => {
     const secondaryImage = req.files?.secondaryImage?.[0];
 
     if (primaryImage) {
-      removeLocalBlogImage(blog.primaryImageId);
-      blog.primaryImage = getBlogImageUrl(req, primaryImage.filename);
-      blog.primaryImageId = primaryImage.filename;
+      const oldPrimaryImageId = blog.primaryImageId;
+      const primaryUpload = await cloudinaryServices.cloudinaryImageUpload(
+        primaryImage.buffer,
+        "supplefied/blogs"
+      );
+      blog.primaryImage = primaryUpload.secure_url;
+      blog.primaryImageId = primaryUpload.public_id;
+      await cloudinaryServices.cloudinaryImageDelete(oldPrimaryImageId);
     }
 
     if (secondaryImage) {
-      removeLocalBlogImage(blog.secondaryImageId);
-      blog.secondaryImage = getBlogImageUrl(req, secondaryImage.filename);
-      blog.secondaryImageId = secondaryImage.filename;
+      const oldSecondaryImageId = blog.secondaryImageId;
+      const secondaryUpload = await cloudinaryServices.cloudinaryImageUpload(
+        secondaryImage.buffer,
+        "supplefied/blogs"
+      );
+      blog.secondaryImage = secondaryUpload.secure_url;
+      blog.secondaryImageId = secondaryUpload.public_id;
+      await cloudinaryServices.cloudinaryImageDelete(oldSecondaryImageId);
     }
 
     if (blog.status === "published" && !blog.publishedAt) {
@@ -267,8 +259,6 @@ const updateBlog = async (req, res, next) => {
       data: blog,
     });
   } catch (error) {
-    req.files?.primaryImage?.forEach((file) => removeLocalBlogImage(file.filename));
-    req.files?.secondaryImage?.forEach((file) => removeLocalBlogImage(file.filename));
     next(error);
   }
 };
@@ -281,8 +271,10 @@ const deleteBlog = async (req, res, next) => {
       return res.status(404).json({ success: false, message: "Blog not found" });
     }
 
-    removeLocalBlogImage(blog.primaryImageId);
-    removeLocalBlogImage(blog.secondaryImageId);
+    await Promise.all([
+      cloudinaryServices.cloudinaryImageDelete(blog.primaryImageId),
+      cloudinaryServices.cloudinaryImageDelete(blog.secondaryImageId),
+    ]);
     await blog.deleteOne();
 
     res.status(200).json({

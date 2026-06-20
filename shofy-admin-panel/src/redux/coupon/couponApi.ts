@@ -18,7 +18,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     // getUserOrders
     getAllCoupons: builder.query<ICoupon[], void>({
-      query: () => `/api/coupon`,
+      query: () => `/api/coupon/admin`,
       providesTags: ["AllCoupons"],
       keepUnusedDataFor: 600,
     }),

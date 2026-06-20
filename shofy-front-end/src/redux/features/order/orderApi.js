@@ -6,7 +6,7 @@ export const authApi = apiSlice.injectEndpoints({
     // createRazorpayOrder
     createRazorpayOrder: builder.mutation({
       query: (data) => ({
-        url: "api/order/create-razorpay-order",
+        url: "/api/order/create-razorpay-order",
         method: "POST",
         body: data,
       }),
@@ -14,7 +14,7 @@ export const authApi = apiSlice.injectEndpoints({
     // saveOrder
     saveOrder: builder.mutation({
       query: (data) => ({
-        url: "api/order/saveOrder",
+        url: "/api/order/saveOrder",
         method: "POST",
         body: data,
       }),

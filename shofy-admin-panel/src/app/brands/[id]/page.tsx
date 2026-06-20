@@ -2,7 +2,8 @@ import EditBrand from "@/app/components/brand/edit-brand";
 import Breadcrumb from "../../components/breadcrumb/breadcrumb";
 import Wrapper from "@/layout/wrapper";
 
-const BrandPage = ({ params }: { params: { id: string } }) => {
+const BrandPage = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
   return (
     <Wrapper>
       <div className="body-content px-8 py-8 bg-slate-100">
@@ -11,7 +12,7 @@ const BrandPage = ({ params }: { params: { id: string } }) => {
         {/* breadcrumb end */}
 
         {/*add category area start */}
-        <EditBrand id={params.id} />
+        <EditBrand id={id} />
         {/*add category area end */}
       </div>
     </Wrapper>

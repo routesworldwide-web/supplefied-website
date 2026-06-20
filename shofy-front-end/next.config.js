@@ -17,8 +17,16 @@ const nextConfig = {
         hostname: "lh3.googleusercontent.com",
         pathname: "**",
       },
-
-      // ADD THIS
+      {
+        protocol: "https",
+        hostname: "supplefied.com",
+        pathname: "/images/**",
+      },
+      {
+        protocol: "https",
+        hostname: "www.supplefied.com",
+        pathname: "/images/**",
+      },
       {
         protocol: "http",
         hostname: "localhost",

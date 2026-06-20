@@ -9,7 +9,7 @@ export const authApi = apiSlice.injectEndpoints({
     // registerAdmin
     registerAdmin: builder.mutation<IAdminRegisterRes, IAdminRegisterAdd>({
       query: (data) => ({
-        url: "api/admin/register",
+        url: "/api/admin/register",
         method: "POST",
         body: data,
       }),
@@ -17,7 +17,7 @@ export const authApi = apiSlice.injectEndpoints({
     // login
     loginAdmin: builder.mutation<IAdminLoginRes, IAdminLoginAdd>({
       query: (data) => ({
-        url: "api/admin/login",
+        url: "/api/admin/login",
         method: "POST",
         body: data,
       }),
@@ -49,7 +49,7 @@ export const authApi = apiSlice.injectEndpoints({
     // reset password
     forgetPassword: builder.mutation<{message:string},{email:string}>({
       query: (data) => ({
-        url: "api/admin/forget-password",
+        url: "/api/admin/forget-password",
         method: "PATCH",
         body: data,
       }),
@@ -57,7 +57,7 @@ export const authApi = apiSlice.injectEndpoints({
     // confirmForgotPassword
     adminConfirmForgotPassword: builder.mutation<{message:string},{token:string,password:string}>({
       query: (data) => ({
-        url: "api/admin/confirm-forget-password",
+        url: "/api/admin/confirm-forget-password",
         method: "PATCH",
         body: data,
       }),
@@ -65,7 +65,7 @@ export const authApi = apiSlice.injectEndpoints({
     // change password
     adminChangePassword: builder.mutation<{ message: string }, { email: string; oldPass: string; newPass: string }>({
       query: (data) => ({
-        url: "api/admin/change-password",
+        url: "/api/admin/change-password",
         method: "PATCH",
         body: data,
       }),
@@ -105,7 +105,7 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     addStaff: builder.mutation<{ message: string }, IAddStuff>({
       query: (data) => ({
-        url: "api/admin/add",
+        url: "/api/admin/add",
         method: "POST",
         body: data,
       }),

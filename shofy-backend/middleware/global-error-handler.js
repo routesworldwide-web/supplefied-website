@@ -32,6 +32,7 @@ const globalErrorHandler = (error, req, res, next) => {
         ]
       : []
   } else if (error instanceof Error) {
+    statusCode = error.statusCode || error.status || statusCode
     message = error?.message
     errorMessages = error?.message
       ? [

@@ -2,11 +2,12 @@ import Wrapper from "@/layout/wrapper";
 import HeaderTwo from "@/layout/headers/header-2";
 import ProductDetailsArea from "@/components/product-details/product-details-area";
 import Footer from "@/layout/footers/footer";
+import { API_BASE_URL } from "@/config/api";
 
 const getProduct = async (productKey) => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/product/single-product/${productKey}`,
+      `${API_BASE_URL}/api/product/single-product/${productKey}`,
       { cache: "no-store" }
     );
 

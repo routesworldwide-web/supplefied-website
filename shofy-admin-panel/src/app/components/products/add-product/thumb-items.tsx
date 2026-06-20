@@ -17,12 +17,7 @@ const ThumbItems = ({ uploadItems }: IPropType) => {
   const handleDeleteImg = (file: { url: string; id: string }) => {
     try {
       const { id } = file;
-      const folder_name = id.split("/")[0];
-      const public_id = id.split("/")[1];
-      deleteCloudinaryImg({
-        folder_name: folder_name,
-        id: public_id,
-      });
+      deleteCloudinaryImg({ id });
       // Handle the response if needed
       setItems((prevItems) => prevItems.filter((item) => item.id !== id));
       if (delData?.data?.result === "ok") {

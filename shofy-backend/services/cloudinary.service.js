@@ -1,51 +1,36 @@
-/*
-  Cloudinary service functions are archived below for future re-enable.
-  Current setup uses local disk storage for uploads. If you want to
-  restore Cloudinary, uncomment and provide valid Cloudinary env vars.
-
-const { secret } = require("../config/secret");
+const { Readable } = require("stream");
 const cloudinary = require("../utils/cloudinary");
-const { Readable } = require('stream');
 
-// cloudinary Image Upload
-const cloudinaryImageUpload = (imageBuffer) => {
-  return new Promise((resolve, reject) => {
+const cloudinaryImageUpload = (imageBuffer, folder = "supplefied") =>
+  new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { upload_preset: secret.cloudinary_upload_preset },
+      {
+        folder,
+        resource_type: "image",
+        use_filename: false,
+        unique_filename: true,
+        overwrite: false,
+      },
       (error, result) => {
         if (error) {
-          console.error('Error uploading to Cloudinary:', error);
           reject(error);
-        } else {
-          resolve(result);
+          return;
         }
+
+        resolve(result);
       }
     );
 
-    const bufferStream = new Readable();
-    bufferStream.push(imageBuffer);
-    bufferStream.push(null);
+    Readable.from(imageBuffer).pipe(uploadStream);
+  });
 
-    bufferStream.pipe(uploadStream);
+const cloudinaryImageDelete = async (publicId) => {
+  if (!publicId) return null;
+  return cloudinary.uploader.destroy(publicId, {
+    resource_type: "image",
+    invalidate: true,
   });
 };
-
-// cloudinaryImageDelete
-const cloudinaryImageDelete = async (public_id) => {
-  const deletionResult = await cloudinary.uploader.destroy(public_id);
-  return deletionResult;
-};
-
-exports.cloudinaryServices = {
-  cloudinaryImageDelete,
-  cloudinaryImageUpload,
-};
-*/
-
-// Stubbed exports while Cloudinary is disabled. These helpers return
-// rejected promises so callers fail fast and it's obvious Cloudinary is off.
-const cloudinaryImageUpload = () => Promise.reject(new Error('Cloudinary disabled'));
-const cloudinaryImageDelete = () => Promise.reject(new Error('Cloudinary disabled'));
 
 exports.cloudinaryServices = {
   cloudinaryImageDelete,

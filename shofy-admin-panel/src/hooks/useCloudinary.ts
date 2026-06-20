@@ -44,12 +44,7 @@ const useCloudinary = (
   const handleDeleteImg = (file: { url: string; id: string }) => {
     try {
       const { id } = file;
-      const folder_name = id.split("/")[0];
-      const public_id = id.split("/")[1];
-      deleteCloudinaryImg({
-        folder_name: folder_name,
-        id: public_id,
-      });
+      deleteCloudinaryImg({ id });
       notifySuccess("Image deleted successfully");
       setItem({ url: "", id: "" });
     } catch (error) {
