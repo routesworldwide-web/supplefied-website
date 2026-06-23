@@ -137,9 +137,9 @@
     }
     &-title{
         @extend %tp-ff-roboto;
-        font-weight: 900;
-        font-size: 56px;
-        line-height: 1.07;
+        font-weight: 600;
+        font-size: 50px;
+        line-height: 1.09;
         color: var(--tp-common-white);
         margin-bottom: 12px;
         @include animation-control(.5s);

@@ -17,9 +17,10 @@ export const authApi = apiSlice.injectEndpoints({
     }),
     // signUpProvider
     signUpProvider: builder.mutation({
-      query: (token) => ({
-        url: `/api/user/register/${token}`,
+      query: (credential) => ({
+        url: "/api/user/register",
         method: "POST",
+        body: { credential },
       }),
 
       async onQueryStarted(arg, { queryFulfilled, dispatch }) {

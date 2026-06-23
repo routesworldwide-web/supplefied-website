@@ -9,6 +9,7 @@ module.exports.secret = {
   db_url: process.env.MONGO_URI,
   token_secret: process.env.TOKEN_SECRET,
   jwt_secret_for_verify: process.env.JWT_SECRET_FOR_VERIFY,
+  google_client_id: process.env.GOOGLE_CLIENT_ID,
 
   email_service: process.env.SERVICE,
   email_user: process.env.EMAIL_USER,
@@ -27,4 +28,5 @@ module.exports.secret = {
   client_url: process.env.STORE_URL, 
   admin_url:process.env.ADMIN_URL, 
   allowed_origins: process.env.ALLOWED_ORIGINS,
+  turnstile_secret_key: process.env.TURNSTILE_SECRET_KEY,
 }

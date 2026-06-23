@@ -10,6 +10,7 @@ import ErrorMsg from "../common/error-msg";
 
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { useSubmitContactMessageMutation } from "@/redux/features/contactApi";
+import TurnstileWidget from "../common/turnstile-widget";
 
 
 // schema
@@ -29,6 +30,8 @@ const schema = Yup.object().shape({
 });
 
 const ContactForm = () => {
+    const [turnstileToken, setTurnstileToken] = useState("");
+    const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
     const [submitContactMessage, { isLoading }] =
       useSubmitContactMessageMutation();
@@ -39,12 +42,17 @@ const ContactForm = () => {
     });
     // on submit
     const onSubmit = async (data) => {
+      if (!turnstileToken) {
+        return notifyError("Please complete the security verification.");
+      }
+
       try {
         const result = await submitContactMessage({
           name: data.name.trim(),
           email: data.email.trim(),
           subject: data.subject.trim(),
           message: data.message.trim(),
+          turnstileToken,
         }).unwrap();
 
         notifySuccess(result.message || "Message sent successfully!");
@@ -53,6 +61,9 @@ const ContactForm = () => {
         notifyError(
           error?.data?.message || "Your message could not be submitted."
         );
+      } finally {
+        setTurnstileToken("");
+        setTurnstileResetKey((key) => key + 1);
       }
     };
 
@@ -104,8 +115,13 @@ const ContactForm = () => {
           <ErrorMsg msg={errors.remember?.message} />
         </div>
       </div>
+      <TurnstileWidget
+        action="contact"
+        onVerify={setTurnstileToken}
+        resetKey={turnstileResetKey}
+      />
       <div className="tp-contact-btn">
-        <button type="submit" disabled={isLoading}>
+        <button type="submit" disabled={isLoading || !turnstileToken}>
 
           {isLoading ? "Sending..." : "Send Message"}
 

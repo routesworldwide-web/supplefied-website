@@ -934,3 +934,334 @@
         font-size: 16px;
     }
 }
+
+/* Clean storefront mobile drawer
+----------------------------------------*/
+.offcanvas__area.offcanvas__radius {
+    width: min(420px, 100%);
+    background: #f7f8fa;
+
+    & .offcanvas__wrapper {
+        min-height: 100%;
+        padding: 24px 24px 32px;
+    }
+
+    & .offcanvas__content {
+        padding-bottom: 0;
+    }
+
+    & .offcanvas__top {
+        min-height: 54px;
+        margin-bottom: 22px;
+        padding-right: 48px;
+    }
+
+    & .offcanvas__logo img {
+        width: auto;
+        max-width: 154px;
+        height: auto;
+    }
+
+    & .offcanvas__close {
+        top: 24px;
+        right: 24px;
+        z-index: 4;
+    }
+
+    & .offcanvas__close-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border: 1px solid #e1e4e8;
+        border-radius: 50%;
+        background: var(--tp-common-white);
+        box-shadow: 0 6px 18px rgba(1, 15, 28, .07);
+    }
+
+    & .offcanvas__search {
+        position: relative;
+        display: flex;
+        align-items: center;
+        height: 50px;
+        margin-bottom: 18px;
+        border: 1px solid #dfe3e8;
+        border-radius: 12px;
+        background: var(--tp-common-white);
+        box-shadow: 0 8px 24px rgba(1, 15, 28, .05);
+
+        & > i {
+            flex: 0 0 auto;
+            margin-left: 16px;
+            color: #7d8288;
+            font-size: 17px;
+        }
+
+        & input {
+            width: 100%;
+            height: 100%;
+            padding: 0 12px;
+            border: 0;
+            outline: 0;
+            background: transparent;
+            color: var(--tp-common-black);
+            font-size: 14px;
+
+            &::placeholder {
+                color: #92979d;
+            }
+        }
+
+        & button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex: 0 0 auto;
+            width: 40px;
+            height: 40px;
+            margin-right: 5px;
+            border-radius: 9px;
+            color: var(--tp-theme-action-text);
+            background: var(--tp-theme-action-bg);
+        }
+    }
+
+    & .offcanvas__quick-actions {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 26px;
+    }
+
+    & .offcanvas__quick-action {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 7px;
+        min-height: 82px;
+        padding: 10px 6px;
+        border: 1px solid #e1e4e8;
+        border-radius: 12px;
+        color: var(--tp-common-black);
+        background: var(--tp-common-white);
+        font-size: 12px;
+        font-weight: 600;
+        box-shadow: 0 7px 20px rgba(1, 15, 28, .04);
+
+        &:hover {
+            color: var(--tp-theme-primary);
+            border-color: rgba($color: $theme-primary, $alpha: .35);
+            @include transform(translateY(-2px));
+        }
+    }
+
+    & .offcanvas__quick-icon {
+        position: relative;
+        font-size: 21px;
+        line-height: 1;
+
+        & b {
+            position: absolute;
+            top: -10px;
+            right: -13px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 18px;
+            height: 18px;
+            padding: 0 5px;
+            border: 2px solid var(--tp-common-white);
+            border-radius: 999px;
+            color: var(--tp-theme-action-text);
+            background: var(--tp-theme-action-bg);
+            font-size: 9px;
+            line-height: 1;
+        }
+    }
+
+    & .offcanvas__section {
+        margin-bottom: 24px;
+    }
+
+    & .offcanvas__section-title {
+        display: block;
+        margin-bottom: 10px;
+        color: #8b9096;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    & .offcanvas__category {
+        padding: 0;
+    }
+
+    & .tp-offcanvas-category-toggle {
+        padding: 13px 16px;
+        border-radius: 11px;
+        color: var(--tp-common-black);
+        background: var(--tp-common-white);
+        border: 1px solid #e1e4e8;
+        font-size: 14px;
+        font-weight: 600;
+
+        &::after {
+            right: 16px;
+            color: #858a91;
+        }
+    }
+
+    & .tp-category-mobile-menu .tp-category-menu-content {
+        margin-top: 8px;
+        border-radius: 12px;
+        background: var(--tp-common-white);
+    }
+
+    & .tp-main-menu-mobile {
+        margin-bottom: 0;
+        padding: 3px 16px;
+        border: 1px solid #e1e4e8;
+        border-radius: 12px;
+        background: var(--tp-common-white);
+    }
+
+    & .mean-container {
+        margin-bottom: 0;
+
+        & .mean-nav ul li a {
+            padding: 13px 0;
+            border-color: #edf0f2;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    }
+
+    & .offcanvas__account-card {
+        margin-bottom: 14px;
+        padding: 17px;
+        border: 1px solid #e1e4e8;
+        border-radius: 14px;
+        background: var(--tp-common-white);
+        box-shadow: 0 8px 24px rgba(1, 15, 28, .05);
+    }
+
+    & .offcanvas__account-heading {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+
+        & strong,
+        & small {
+            display: block;
+        }
+
+        & strong {
+            margin-bottom: 2px;
+            color: var(--tp-common-black);
+            font-size: 14px;
+        }
+
+        & small {
+            max-width: 250px;
+            overflow: hidden;
+            color: #858a91;
+            font-size: 11px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    & .offcanvas__account-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        color: var(--tp-theme-primary);
+        background: rgba($color: $theme-primary, $alpha: .1);
+        font-size: 20px;
+    }
+
+    & .offcanvas__account-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+
+        & a,
+        & button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            min-height: 40px;
+            padding: 8px 10px;
+            border: 1px solid #dfe3e8;
+            border-radius: 9px;
+            color: var(--tp-common-black);
+            background: #fafbfc;
+            font-size: 12px;
+            font-weight: 600;
+
+            &:hover {
+                color: var(--tp-theme-action-text);
+                border-color: var(--tp-theme-action-border);
+                background: var(--tp-theme-action-bg);
+            }
+        }
+    }
+
+    & .offcanvas__support a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 15px 16px;
+        border-radius: 13px;
+        color: var(--tp-common-black);
+        background: rgba($color: $theme-primary, $alpha: .08);
+
+        & > i:first-child {
+            font-size: 21px;
+            color: var(--tp-theme-primary);
+        }
+
+        & > i:last-child {
+            margin-left: auto;
+            color: #858a91;
+            font-size: 13px;
+        }
+
+        & span {
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        & small {
+            display: block;
+            margin-bottom: 1px;
+            color: #858a91;
+            font-size: 10px;
+            font-weight: 500;
+        }
+    }
+
+    @media #{$xs} {
+        & .offcanvas__wrapper {
+            padding: 20px 16px 26px;
+        }
+
+        & .offcanvas__close {
+            top: 20px;
+            right: 16px;
+        }
+
+        & .offcanvas__quick-actions {
+            gap: 7px;
+        }
+    }
+}

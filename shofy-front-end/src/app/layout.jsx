@@ -1,5 +1,6 @@
 import './globals.scss';
 import 'swiper/css/bundle';
+import 'bootstrap-icons/font/bootstrap-icons.css';
 import { Poppins } from 'next/font/google';
 import Providers from '@/components/provider';
 import { SITE_URL } from '@/config/api';

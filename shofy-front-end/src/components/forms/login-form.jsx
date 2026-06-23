@@ -3,13 +3,14 @@ import React, { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { useRouter,redirect } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 // internal
 import { CloseEye, OpenEye } from '@/svg';
 import ErrorMsg from '../common/error-msg';
 import { useLoginUserMutation } from '@/redux/features/auth/authApi';
 import { notifyError, notifySuccess } from '@/utils/toast';
+import TurnstileWidget from '../common/turnstile-widget';
 
 
 // schema
@@ -19,7 +20,10 @@ const schema = Yup.object().shape({
 });
 const LoginForm = () => {
   const [showPass, setShowPass] = useState(false);
-  const [loginUser, { }] = useLoginUserMutation();
+  const [captchaRequired, setCaptchaRequired] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [loginUser, { isLoading }] = useLoginUserMutation();
   const router = useRouter();
   // react hook form
   const {
@@ -31,21 +35,35 @@ const LoginForm = () => {
     resolver: yupResolver(schema),
   });
   // onSubmit
-  const onSubmit = (data) => {
-    loginUser({
-      email: data.email,
-      password: data.password,
-    })
-      .then((data) => {
-        if (data?.data) {
-          notifySuccess("Login successfully");
-          router.push('/checkout' || "/");
-        }
-        else {
-          notifyError(data?.error?.data?.error)
-        }
-      })
-    reset();
+  const onSubmit = async (data) => {
+    if (captchaRequired && !turnstileToken) {
+      return notifyError("Please complete the security verification.");
+    }
+
+    try {
+      await loginUser({
+        email: data.email?.trim().toLowerCase(),
+        password: data.password,
+        ...(captchaRequired ? { turnstileToken } : {}),
+      }).unwrap();
+
+      notifySuccess("Login successfully");
+      reset();
+      router.push('/checkout');
+    } catch (error) {
+      const shouldRequireCaptcha = Boolean(error?.data?.captchaRequired);
+      setCaptchaRequired((current) => current || shouldRequireCaptcha);
+      notifyError(
+        error?.data?.error ||
+        error?.data?.message ||
+        "Login failed"
+      );
+
+      if (captchaRequired || shouldRequireCaptcha) {
+        setTurnstileToken("");
+        setTurnstileResetKey((key) => key + 1);
+      }
+    }
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -90,8 +108,21 @@ const LoginForm = () => {
           <Link href="/forgot">Forgot Password?</Link>
         </div>
       </div>
+      {captchaRequired && (
+        <TurnstileWidget
+          action="user-login"
+          onVerify={setTurnstileToken}
+          resetKey={turnstileResetKey}
+        />
+      )}
       <div className="tp-login-bottom">
-        <button type='submit' className="tp-login-btn w-100">Login</button>
+        <button
+          type='submit'
+          className="tp-login-btn w-100"
+          disabled={isLoading || (captchaRequired && !turnstileToken)}
+        >
+          {isLoading ? "Signing In..." : "Login"}
+        </button>
       </div>
     </form>
   );

@@ -6,11 +6,12 @@ const {
   getAllUsedCodes,
   checkCodeUsage,
 } = require('../controller/auth.controller');
+const { requireTurnstile } = require("../middleware/verifyTurnstile");
 
 const router = express.Router();
 
 // Public Routes
-router.post('/verify', verifyAuthCode);
+router.post('/verify', requireTurnstile("auth-verify"), verifyAuthCode);
 
 // Check if a code is already used
 router.get('/check-code/:code', checkCodeUsage);

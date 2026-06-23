@@ -1,7 +1,7 @@
 import Wrapper from "@/layout/wrapper";
 import { Suspense } from "react";
 import HeaderTwo from "@/layout/headers/header-2";
-import BlogBreadcrumb from "@/components/breadcrumb/blog-breadcrumb";
+import BlogBanner from "@/components/banner/blog-banner";
 import BlogPostboxArea from "@/components/blog/blog-postox/blog-postbox-area";
 import Footer from "@/layout/footers/footer";
 
@@ -13,7 +13,7 @@ export default function BlogPage() {
   return (
     <Wrapper>
       <HeaderTwo style_2={true} />
-      <BlogBreadcrumb />
+      <BlogBanner />
       <Suspense fallback={<div className="container pt-120 pb-120">Loading blogs...</div>}>
         <BlogPostboxArea />
       </Suspense>

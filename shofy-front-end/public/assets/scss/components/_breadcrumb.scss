@@ -140,36 +140,11 @@
     &__contact{
         position: relative;
         overflow: hidden;
-        background:
-            radial-gradient(circle at 24% 18%, rgba(0, 0, 0, 0.22), transparent 26%),
-            radial-gradient(circle at 78% 58%, rgba(0, 0, 0, 0.12), transparent 28%),
-            linear-gradient(135deg, #020403 0%, #050807 48%, #000000 100%);
+        background: rgba(255, 254, 254, 0);
 
-        &::before{
-            position: absolute;
-            content: '';
-            inset: 0;
-            pointer-events: none;
-            opacity: .45;
-            background-image:
-                radial-gradient(circle at 20% 20%, rgba(0, 0, 0, 0.7) 0 1px, transparent 2px),
-                radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.14) 0 1px, transparent 2px),
-                radial-gradient(circle at 85% 70%, rgba(0, 0, 0, 0.36) 0 1px, transparent 2px);
-            background-size: 180px 180px, 260px 260px, 220px 220px;
-        }
+     
 
-        &::after{
-            position: absolute;
-            content: '';
-            left: 50%;
-            bottom: -120px;
-            width: 520px;
-            height: 220px;
-            border-radius: 50%;
-            pointer-events: none;
-            background: radial-gradient(circle, rgba(0, 0, 0, 0.2), transparent 64%);
-            @include transform(translateX(-50%));
-        }
+   
 
         #{$self}{
             &__content{
@@ -177,9 +152,9 @@
             }
 
             &__title{
-                color: var(--tp-common-white);
+                color: var(--tp-common-black);
                 font-size: 48px;
-                font-weight: 800;
+                font-weight: 500;
                 line-height: 1.08;
                 letter-spacing: -.8px;
                 margin-bottom: 14px;
@@ -218,6 +193,41 @@
 
                         &:hover{
                             color: #d7d700;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    &__shop{
+        @media #{$xs}{
+            padding-top: 22px !important;
+            padding-bottom: 24px !important;
+
+            & #{$self}{
+                &__title{
+                    display: none;
+                }
+
+                &__list{
+                    display: flex;
+                    align-items: center;
+
+                    & span{
+                        color: var(--tp-common-black);
+                        font-size: 20px;
+                        line-height: 1.3;
+
+                        &:not(:last-child){
+                            padding-right: 10px;
+                            margin-right: 6px;
+
+                            &::after{
+                                width: 3px;
+                                height: 3px;
+                                background-color: var(--tp-common-black);
+                            }
                         }
                     }
                 }

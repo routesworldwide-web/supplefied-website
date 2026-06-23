@@ -30,7 +30,7 @@ const ShopListItem = ({ product }) => {
 
   // handle add product
   const handleAddProduct = (prd) => {
-    dispatch(add_cart_product(prd));
+    dispatch(add_cart_product({ product: prd, quantity: 1 }));
   };
   // handle wishlist product
   const handleWishlistProduct = (prd) => {

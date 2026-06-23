@@ -7,6 +7,7 @@ import {useRouter} from 'next/navigation';
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { useLoginAdminMutation } from "@/redux/auth/authApi";
 import ErrorMsg from "@/app/components/common/error-msg";
+import TurnstileWidget from "@/components/turnstile-widget";
 
 // schema
 const schema = Yup.object().shape({
@@ -14,8 +15,21 @@ const schema = Yup.object().shape({
   password: Yup.string().required().min(6).label("Password"),
 });
 
+type LoginError = {
+  data?: {
+    message?: string;
+    error?: string;
+    captchaRequired?: boolean;
+  };
+  error?: string;
+  message?: string;
+};
+
 const LoginForm = () => {
-  const [loginAdmin, {data:loginData}] = useLoginAdminMutation();
+  const [captchaRequired, setCaptchaRequired] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [loginAdmin, { isLoading }] = useLoginAdminMutation();
   const router = useRouter();
   // react hook form
   const {register,handleSubmit,formState: { errors },reset} = useForm({
@@ -23,18 +37,41 @@ const LoginForm = () => {
   });
   // onSubmit
   const onSubmit =async (data: { email: string; password: string }) => {
-    const res = await loginAdmin({ email: data.email, password: data.password });
-    if ("error" in res) {
-      if ("data" in res.error) {
-        const errorData = res.error.data as { message?: string };
-        if (typeof errorData.message === "string") {
-          return notifyError(errorData.message);
-        }
-      }
-    } else {
-      notifySuccess("Login successfully");
-      router.push('/dashboard')
+    if (captchaRequired && !turnstileToken) {
+      return notifyError("Please complete the security verification.");
+    }
+
+    try {
+      await loginAdmin({
+        email: data.email.trim().toLowerCase(),
+        password: data.password,
+        ...(captchaRequired ? { turnstileToken } : {}),
+      }).unwrap();
+
+      notifySuccess("Login successful");
       reset();
+
+      // Give the toast a render frame before the route transition replaces the page.
+      window.setTimeout(() => router.replace("/dashboard"), 150);
+    } catch (error) {
+      const loginError = error as LoginError;
+      const errorData = loginError.data;
+      const shouldRequireCaptcha = Boolean(errorData?.captchaRequired);
+
+      setCaptchaRequired((current) => current || shouldRequireCaptcha);
+
+      if (captchaRequired || shouldRequireCaptcha) {
+        setTurnstileToken("");
+        setTurnstileResetKey((key) => key + 1);
+      }
+
+      notifyError(
+        errorData?.message ||
+          errorData?.error ||
+          loginError.error ||
+          loginError.message ||
+          "Login failed. Please try again."
+      );
     }
   };
   return (
@@ -82,8 +119,19 @@ const LoginForm = () => {
           </a>
         </div>
       </div>
-      <button type="submit" className="tp-btn h-[49px] w-full justify-center">
-        Sign In
+      {captchaRequired && (
+        <TurnstileWidget
+          action="admin-login"
+          onVerify={setTurnstileToken}
+          resetKey={turnstileResetKey}
+        />
+      )}
+      <button
+        type="submit"
+        className="tp-btn h-[49px] w-full justify-center disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={isLoading || (captchaRequired && !turnstileToken)}
+      >
+        {isLoading ? "Signing In..." : "Sign In"}
       </button>
     </form>
   );

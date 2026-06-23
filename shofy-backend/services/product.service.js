@@ -15,12 +15,12 @@ exports.createProductService = async (data) => {
   //update Brand
   await Brand.updateOne(
     { _id: brand.id },
-    { $push: { products: productId } }
+    { $addToSet: { products: productId } }
   );
   //Category Brand
   await Category.updateOne(
     { _id: category.id },
-    { $push: { products: productId } }
+    { $addToSet: { products: productId } }
   );
   return product;
 };
@@ -141,7 +141,7 @@ exports.getRelatedProductService = async (productId) => {
   const currentProduct = await Product.findById(productId);
 
   const relatedProducts = await Product.find({
-    "category.name": currentProduct.category.name,
+    "category.id": currentProduct.category.id,
     _id: { $ne: productId }, // Exclude the current product ID
   });
   return relatedProducts;
@@ -151,6 +151,8 @@ exports.getRelatedProductService = async (productId) => {
 exports.updateProductService = async (id, currProduct) => {
   const product = await Product.findById(id);
   if (product) {
+    const previousBrandId = product.brand?.id?.toString();
+    const previousCategoryId = product.category?.id?.toString();
     const directFields = [
       "title",
       "sku",
@@ -180,14 +182,31 @@ exports.updateProductService = async (id, currProduct) => {
       }
     });
 
-    if (currProduct.brand) {
-      if (currProduct.brand.name) product.brand.name = currProduct.brand.name;
-      if (currProduct.brand.id) product.brand.id = currProduct.brand.id;
+    if (currProduct.brand?.id) {
+      const brand = await Brand.findById(currProduct.brand.id);
+      if (!brand) {
+        const error = new Error("Brand not found");
+        error.statusCode = 404;
+        throw error;
+      }
+      product.brand = { id: brand._id, name: brand.name };
+    } else if (currProduct.brand?.name) {
+      product.brand.name = currProduct.brand.name;
     }
 
-    if (currProduct.category) {
-      if (currProduct.category.name) product.category.name = currProduct.category.name;
-      if (currProduct.category.id) product.category.id = currProduct.category.id;
+    if (currProduct.category?.id) {
+      const category = await Category.findById(currProduct.category.id);
+      if (!category) {
+        const error = new Error("Category not found");
+        error.statusCode = 404;
+        throw error;
+      }
+      product.category = { id: category._id, name: category.parent };
+      product.parent = category.parent;
+      product.productType = category.productType;
+    } else if (currProduct.category?.name) {
+      product.category.name = currProduct.category.name;
+      product.parent = currProduct.category.name;
     }
 
     if (currProduct.offerDate) {
@@ -198,6 +217,35 @@ exports.updateProductService = async (id, currProduct) => {
     }
 
     await product.save();
+
+    const currentBrandId = product.brand?.id?.toString();
+    const currentCategoryId = product.category?.id?.toString();
+
+    if (previousBrandId && previousBrandId !== currentBrandId) {
+      await Brand.updateOne(
+        { _id: previousBrandId },
+        { $pull: { products: product._id } }
+      );
+    }
+    if (currentBrandId) {
+      await Brand.updateOne(
+        { _id: currentBrandId },
+        { $addToSet: { products: product._id } }
+      );
+    }
+
+    if (previousCategoryId && previousCategoryId !== currentCategoryId) {
+      await Category.updateOne(
+        { _id: previousCategoryId },
+        { $pull: { products: product._id } }
+      );
+    }
+    if (currentCategoryId) {
+      await Category.updateOne(
+        { _id: currentCategoryId },
+        { $addToSet: { products: product._id } }
+      );
+    }
   }
 
   return product;
@@ -229,5 +277,17 @@ exports.getStockOutProducts = async () => {
 // get Reviews Products
 exports.deleteProduct = async (id) => {
   const result = await Product.findByIdAndDelete(id)
+  if (result) {
+    await Promise.all([
+      Brand.updateOne(
+        { _id: result.brand?.id },
+        { $pull: { products: result._id } }
+      ),
+      Category.updateOne(
+        { _id: result.category?.id },
+        { $pull: { products: result._id } }
+      ),
+    ]);
+  }
   return result;
 };

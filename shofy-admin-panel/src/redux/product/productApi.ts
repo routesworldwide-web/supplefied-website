@@ -31,7 +31,7 @@ export const authApi = apiSlice.injectEndpoints({
           body: data,
         };
       },
-      invalidatesTags: ["AllProducts"],
+      invalidatesTags: ["AllProducts", "AllCategory", "AllBrands"],
     }),
     // edit product
     editProduct: builder.mutation<
@@ -45,7 +45,13 @@ export const authApi = apiSlice.injectEndpoints({
           body: data,
         };
       },
-      invalidatesTags: (_result, _error, { id }) => ["AllProducts", { type: "Product", id }],
+      invalidatesTags: (_result, _error, { id }) => [
+        "AllProducts",
+        "AllCategory",
+        "AllBrands",
+        "DashboardMostSellingCategory",
+        { type: "Product", id },
+      ],
     }),
     // get single product
     getProduct: builder.query<IProduct, string>({
@@ -70,7 +76,12 @@ export const authApi = apiSlice.injectEndpoints({
           method: "DELETE",
         };
       },
-      invalidatesTags: ["AllProducts"],
+      invalidatesTags: [
+        "AllProducts",
+        "AllCategory",
+        "AllBrands",
+        "DashboardMostSellingCategory",
+      ],
     }),
   }),
 });

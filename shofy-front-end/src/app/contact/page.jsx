@@ -13,7 +13,7 @@ export default function ContactPage() {
   return (
     <Wrapper>
       <HeaderTwo style_2={true} />
-      <ContactBreadcrumb />
+      {/* <ContactBreadcrumb /> */}
       <ContactArea/>
       {/* <ContactMap/> */}
       <Footer primary_style={true} />

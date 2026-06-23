@@ -17,6 +17,7 @@ const ADMIN_STATUSES = ["Pending", "Active", "Inactive"];
 const LOGIN_ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
 const LOGIN_ATTEMPT_RETENTION_MS = 24 * 60 * 60 * 1000;
 const LOGIN_ALERT_THRESHOLD = 7;
+const LOGIN_CAPTCHA_THRESHOLD = 3;
 
 const getRequestIp = (req) => {
   const forwarded = req.headers["x-forwarded-for"];
@@ -86,24 +87,27 @@ const recordFailedLogin = async (req, email) => {
         { new: true }
       );
 
-      if (!claimedAlert) return;
-
-      await createAdminNotification({
-        type: "security",
-        category: "general",
-        title: "Repeated failed admin login",
-        message: `${claimedAlert.count} failed login attempts for ${normalizedEmail} from ${maskIpAddress(
-          ipAddress
-        )} within 15 minutes.`,
-        metadata: {
-          email: normalizedEmail,
-          ipAddress,
-          attemptCount: claimedAlert.count,
-        },
-      });
+      if (claimedAlert) {
+        await createAdminNotification({
+          type: "security",
+          category: "general",
+          title: "Repeated failed admin login",
+          message: `${claimedAlert.count} failed login attempts for ${normalizedEmail} from ${maskIpAddress(
+            ipAddress
+          )} within 15 minutes.`,
+          metadata: {
+            email: normalizedEmail,
+            ipAddress,
+            attemptCount: claimedAlert.count,
+          },
+        });
+      }
     }
+
+    return attempt;
   } catch (error) {
     console.error("Failed admin login could not be recorded:", error.message);
+    return null;
   }
 };
 
@@ -200,9 +204,11 @@ const loginAdmin = async (req, res,next) => {
         status: admin.status,
       });
     } else {
-      await recordFailedLogin(req, req.body.email);
+      const attempt = await recordFailedLogin(req, req.body.email);
       res.status(401).send({
         message: "Invalid Email or password!",
+        captchaRequired:
+          Boolean(attempt) && attempt.count >= LOGIN_CAPTCHA_THRESHOLD,
       });
     }
   } catch (err) {

@@ -6,7 +6,7 @@ const BannersPage = () => {
   return (
     <Wrapper>
       <div className="body-content px-8 py-8 bg-slate-100">
-        <Breadcrumb title="Website Banners" subtitle="Manage homepage and product section banners" />
+        <Breadcrumb title="Website Banners" subtitle="Manage banners across the storefront" />
         <BannerArea />
       </div>
     </Wrapper>

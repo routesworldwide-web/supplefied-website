@@ -30,7 +30,7 @@ export const authApi = apiSlice.injectEndpoints({
           body: data,
         };
       },
-      invalidatesTags: ["AllBrands", "getBrand"],
+      invalidatesTags: ["AllBrands", "getBrand", "AllProducts"],
     }),
     // get single product
     getBrand: builder.query<IAddBrand, string>({

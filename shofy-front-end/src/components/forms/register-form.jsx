@@ -10,6 +10,7 @@ import { CloseEye, OpenEye } from "@/svg";
 import ErrorMsg from "../common/error-msg";
 import { notifyError, notifySuccess } from "@/utils/toast";
 import { useRegisterUserMutation } from "@/redux/features/auth/authApi";
+import TurnstileWidget from "../common/turnstile-widget";
 
 // schema
 const schema = Yup.object().shape({
@@ -27,28 +28,37 @@ const schema = Yup.object().shape({
 
 const RegisterForm = () => {
   const [showPass, setShowPass] = useState(false);
-  const [registerUser, {}] = useRegisterUserMutation();
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [registerUser, { isLoading }] = useRegisterUserMutation();
   const router = useRouter();
   // react hook form
   const {register,handleSubmit,formState: { errors },reset} = useForm({
     resolver: yupResolver(schema),
   });
   // on submit
-  const onSubmit = (data) => {
-    registerUser({
-      name: data.name?.trim(),
-      email: data.email?.trim().toLowerCase(),
-      contactNumber: data.contactNumber?.trim(),
-      password: data.password,
-    }).then((result) => {
-      if (result?.error) {
-        notifyError(result?.error?.data?.message || "Register Failed");
-      } else {
-        notifySuccess(result?.data?.message);
-        reset();
-        router.push('/login');
-      }
-    });
+  const onSubmit = async (data) => {
+    if (!turnstileToken) {
+      return notifyError("Please complete the security verification.");
+    }
+
+    try {
+      const result = await registerUser({
+        name: data.name?.trim(),
+        email: data.email?.trim().toLowerCase(),
+        contactNumber: data.contactNumber?.trim(),
+        password: data.password,
+        turnstileToken,
+      }).unwrap();
+
+      notifySuccess(result?.message);
+      reset();
+      router.push('/login');
+    } catch (error) {
+      notifyError(error?.data?.message || "Register Failed");
+      setTurnstileToken("");
+      setTurnstileResetKey((key) => key + 1);
+    }
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -138,9 +148,18 @@ const RegisterForm = () => {
           <ErrorMsg msg={errors.remember?.message} />
         </div>
       </div>
+      <TurnstileWidget
+        action="register"
+        onVerify={setTurnstileToken}
+        resetKey={turnstileResetKey}
+      />
       <div className="tp-login-bottom">
-        <button type="submit" className="tp-login-btn w-100">
-          Sign Up
+        <button
+          type="submit"
+          className="tp-login-btn w-100"
+          disabled={isLoading || !turnstileToken}
+        >
+          {isLoading ? "Signing Up..." : "Sign Up"}
         </button>
       </div>
     </form>

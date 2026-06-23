@@ -45,7 +45,12 @@ export const authApi = apiSlice.injectEndpoints({
           body: data,
         };
       },
-      invalidatesTags: ["AllCategory","getCategory"],
+      invalidatesTags: [
+        "AllCategory",
+        "getCategory",
+        "AllProducts",
+        "DashboardMostSellingCategory",
+      ],
     }),
     // get single product
     getCategory: builder.query<IAddCategory, string>({

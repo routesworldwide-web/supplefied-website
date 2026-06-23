@@ -702,14 +702,20 @@
             &-dot{
                 &.#{$theme-prifix}-swiper-dot{
                     position: absolute;
-                    right: 20px;
-                    left: auto;
-                    bottom: 50%;
-                    @include transform(translateY(50%));
-                    z-index: 1;
-                    width: auto;
+                    right: 20px !important;
+                    left: auto !important;
+                    top: 50% !important;
+                    bottom: auto !important;
+                    @include transform(translateY(-50%) !important);
+                    z-index: 3;
+                    width: max-content !important;
+                    height: auto;
                     display: flex;
                     flex-direction: column;
+
+                    @media #{$xs} {
+                        right: 12px !important;
+                    }
     
                     &.#{$theme-prifix}-swiper-dot{
                        

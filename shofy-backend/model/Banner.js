@@ -7,6 +7,7 @@ const BANNER_PLACEMENTS = [
   "product-gadget-banner",
   "product-gadget-sidebar",
   "product-banner-slider",
+  "blog-page-banner",
 ];
 
 const isSafeRedirectLink = (value = "") => {

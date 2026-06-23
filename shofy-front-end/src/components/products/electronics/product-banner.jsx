@@ -115,7 +115,10 @@ const ProductBanner = () => {
                   </div>
                 </SwiperSlide>
               ))}
-              <div className="tp-product-banner-slider-dot tp-swiper-dot"></div>
+              <div
+                slot="container-end"
+                className="tp-product-banner-slider-dot tp-swiper-dot"
+              ></div>
             </Swiper>
           </div>
         </div>

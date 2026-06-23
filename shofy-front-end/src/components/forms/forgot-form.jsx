@@ -1,5 +1,5 @@
 'use client';
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -7,6 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import ErrorMsg from "../common/error-msg";
 import { useResetPasswordMutation } from "@/redux/features/auth/authApi";
 import { notifyError, notifySuccess } from "@/utils/toast";
+import TurnstileWidget from "../common/turnstile-widget";
 
 // schema
 const schema = Yup.object().shape({
@@ -14,24 +15,32 @@ const schema = Yup.object().shape({
 });
 
 const ForgotForm = () => {
-  const [resetPassword, {}] = useResetPasswordMutation();
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
+  const [resetPassword, { isLoading }] = useResetPasswordMutation();
     // react hook form
     const {register,handleSubmit,formState: { errors },reset} = useForm({
       resolver: yupResolver(schema), 
     });
     // onSubmit
-    const onSubmit = (data) => {
-      resetPassword({
-        verifyEmail: data.email,
-      }).then((result) => {
-        if(result?.error){
-          notifyError(result?.error?.data?.message)
-        }
-        else {
-          notifySuccess(result.data?.message);
-        }
-      });
-      reset();
+    const onSubmit = async (data) => {
+      if (!turnstileToken) {
+        return notifyError("Please complete the security verification.");
+      }
+
+      try {
+        const result = await resetPassword({
+          verifyEmail: data.email,
+          turnstileToken,
+        }).unwrap();
+        notifySuccess(result?.message);
+        reset();
+      } catch (error) {
+        notifyError(error?.data?.message || "Password reset request failed.");
+      } finally {
+        setTurnstileToken("");
+        setTurnstileResetKey((key) => key + 1);
+      }
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -52,9 +61,18 @@ const ForgotForm = () => {
           <ErrorMsg msg={errors.email?.message} />
         </div>
       </div>
+      <TurnstileWidget
+        action="forgot-password"
+        onVerify={setTurnstileToken}
+        resetKey={turnstileResetKey}
+      />
       <div className="tp-login-bottom mb-15">
-        <button type="submit" className="tp-login-btn w-100">
-          Send Mail
+        <button
+          type="submit"
+          className="tp-login-btn w-100"
+          disabled={isLoading || !turnstileToken}
+        >
+          {isLoading ? "Sending..." : "Send Mail"}
         </button>
       </div>
     </form>

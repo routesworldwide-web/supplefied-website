@@ -2,6 +2,48 @@ const ApiError = require('../errors/api-error');
 const Category = require('../model/Category');
 const Products = require('../model/Products');
 
+const normalizeCategoryName = (value = '') => value.trim().toLowerCase();
+
+const attachCurrentProducts = async (categories) => {
+  if (!categories.length) {
+    return [];
+  }
+
+  const categoryIds = categories.map((category) => category._id);
+  const categoryIdSet = new Set(categoryIds.map((id) => id.toString()));
+  const categoryIdByName = categories.reduce((result, category) => {
+    result[normalizeCategoryName(category.parent)] = category._id.toString();
+    return result;
+  }, {});
+  const products = await Products.find({});
+
+  const productsByCategory = products.reduce((result, product) => {
+    const categoryNameId =
+      categoryIdByName[normalizeCategoryName(product.category?.name)];
+    const parentNameId =
+      categoryIdByName[normalizeCategoryName(product.parent)];
+    const storedCategoryId = product.category?.id?.toString();
+    const categoryId =
+      categoryNameId ||
+      parentNameId ||
+      (categoryIdSet.has(storedCategoryId) ? storedCategoryId : null);
+
+    if (categoryId) {
+      if (!result[categoryId]) {
+        result[categoryId] = [];
+      }
+      result[categoryId].push(product);
+    }
+
+    return result;
+  }, {});
+
+  return categories.map((category) => ({
+    ...category.toObject(),
+    products: productsByCategory[category._id.toString()] || [],
+  }));
+};
+
 const getFeaturedFilter = (query = {}) => {
   if (query.featured === true || query.featured === 'true') {
     return { featured: true };
@@ -25,17 +67,17 @@ exports.addAllCategoryService = async (data) => {
 
 // get all show category service
 exports.getShowCategoryServices = async (query) => {
-  const category = await Category.find({
+  const categories = await Category.find({
     status: 'Show',
     ...getFeaturedFilter(query),
-  }).populate('products');
-  return category;
+  });
+  return attachCurrentProducts(categories);
 }
 
 // get all category 
 exports.getAllCategoryServices = async () => {
-  const category = await Category.find({})
-  return category;
+  const categories = await Category.find({});
+  return attachCurrentProducts(categories);
 }
 
 // get type of category service
@@ -44,8 +86,8 @@ exports.getCategoryTypeService = async (param, query) => {
     productType: param,
     status: 'Show',
     ...getFeaturedFilter(query),
-  }).populate('products');
-  return categories;
+  });
+  return attachCurrentProducts(categories);
 }
 
 // get type of category service
@@ -83,6 +125,32 @@ exports.updateCategoryService = async (id,payload) => {
   const result = await Category.findOneAndUpdate({ _id:id }, updatePayload, {
     new: true,
   })
+
+  // Products store category details for fast reads. Keep those live references
+  // synchronized when an administrator renames or reclassifies a category.
+  const productUpdate = {};
+  if (Object.prototype.hasOwnProperty.call(updatePayload, 'parent')) {
+    productUpdate['category.name'] = result.parent;
+    productUpdate.parent = result.parent;
+    productUpdate['category.id'] = result._id;
+  }
+  if (Object.prototype.hasOwnProperty.call(updatePayload, 'productType')) {
+    productUpdate.productType = result.productType;
+  }
+
+  if (Object.keys(productUpdate).length > 0) {
+    await Products.updateMany(
+      {
+        $or: [
+          { 'category.id': result._id },
+          { 'category.name': isExist.parent },
+          { parent: isExist.parent },
+        ],
+      },
+      { $set: productUpdate }
+    );
+  }
+
   return result
 }
 

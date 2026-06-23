@@ -99,9 +99,15 @@ export const get_cart_products = createAsyncThunk("cart/get", async () => {
 
 export const add_cart_product = createAsyncThunk(
   "cart/add",
-  async (payload, { getState }) => {
+  async (payload) => {
     const product = payload?.product || payload;
-    const quantity = payload?.quantity || getState().cart.orderQuantity || 1;
+    // Product.quantity is available stock, not the amount to add to the cart.
+    // Only the explicit wrapper quantity is treated as a cart quantity.
+    const requestedQuantity = Number(payload?.product ? payload.quantity : 1);
+    const quantity =
+      Number.isFinite(requestedQuantity) && requestedQuantity > 0
+        ? Math.floor(requestedQuantity)
+        : 1;
     const productId = product?.productId || product?._id;
 
     if (!productId) {

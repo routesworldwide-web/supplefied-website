@@ -10,6 +10,7 @@ export interface IAdminRegisterAdd {
 export interface IAdminLoginAdd {
   email: string,
   password: string,
+  turnstileToken?: string,
 }
 
 export interface IAdminLoginRes {

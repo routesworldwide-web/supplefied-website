@@ -18,7 +18,7 @@ const WishlistItem = ({ product }) => {
   const dispatch = useDispatch();
   // handle add product
   const handleAddProduct = (prd) => {
-    dispatch(add_cart_product(prd));
+    dispatch(add_cart_product({ product: prd, quantity: 1 }));
   };
   // handle decrement product
   const handleDecrement = (prd) => {

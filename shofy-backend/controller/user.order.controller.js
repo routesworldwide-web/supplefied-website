@@ -387,13 +387,80 @@ exports.mostSellingCategory = async (req, res,next) => {
       },
       {
         $set: {
+          currentProductId: {
+            $convert: {
+              input: { $ifNull: ["$cart.productId", "$cart._id"] },
+              to: "objectId",
+              onError: null,
+              onNull: null,
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "currentProductId",
+          foreignField: "_id",
+          as: "currentProduct",
+        },
+      },
+      {
+        $unwind: {
+          path: "$currentProduct",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $set: {
+          currentCategoryId: {
+            $convert: {
+              input: {
+                $ifNull: [
+                  "$currentProduct.category.id",
+                  "$cart.category.id",
+                ],
+              },
+              to: "objectId",
+              onError: null,
+              onNull: null,
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "currentCategoryId",
+          foreignField: "_id",
+          as: "currentCategory",
+        },
+      },
+      {
+        $unwind: {
+          path: "$currentCategory",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $set: {
           categoryName: {
             $ifNull: [
-              "$cart.category.name",
+              "$currentCategory.parent",
               {
                 $ifNull: [
-                  "$cart.parent",
-                  { $ifNull: ["$cart.children", "Uncategorized"] },
+                  "$currentProduct.category.name",
+                  {
+                    $ifNull: [
+                      "$cart.category.name",
+                      {
+                        $ifNull: [
+                          "$cart.parent",
+                          { $ifNull: ["$cart.children", "Uncategorized"] },
+                        ],
+                      },
+                    ],
+                  },
                 ],
               },
             ],

@@ -60,7 +60,7 @@ app.use(
       callback(error);
     },
     methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-guest-cart-id"],
   })
 );
 app.use(express.json({ limit: "1mb" }));

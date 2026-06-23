@@ -26,23 +26,19 @@ const ShopContent = ({all_products,products,otherProps}) => {
             <div className="col-xl-12 col-lg-12">
               <div className="tp-shop-main-wrapper">
                 <div className="tp-shop-top mb-45">
-                  <div className="row">
-                    <div className="col-xl-6">
-                      <ShopTopLeft
-                        showing={
-                          products.length === 0
-                            ? 0
-                            : filteredRows.slice(
-                                pageStart,
-                                pageStart + countOfPage
-                              ).length
-                        }
-                        total={all_products.length}
-                      />
-                    </div>
-                    <div className="col-xl-6">
-                      <ShopTopRight selectHandleFilter={selectHandleFilter} />
-                    </div>
+                  <div className="tp-shop-top-controls">
+                    <ShopTopLeft
+                      showing={
+                        products.length === 0
+                          ? 0
+                          : filteredRows.slice(
+                              pageStart,
+                              pageStart + countOfPage
+                            ).length
+                      }
+                      total={all_products.length}
+                    />
+                    <ShopTopRight selectHandleFilter={selectHandleFilter} />
                   </div>
                 </div>
                 {products.length === 0 && <h2>No products found</h2>}

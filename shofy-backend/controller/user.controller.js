@@ -2,9 +2,16 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const validator = require("validator");
 const User = require("../model/User");
+const UserLoginAttempt = require("../model/UserLoginAttempt");
 const { sendEmail } = require("../config/email");
 const { generateToken, tokenForVerify } = require("../utils/token");
 const { secret } = require("../config/secret");
+const { OAuth2Client } = require("google-auth-library");
+
+const googleClient = new OAuth2Client(secret.google_client_id);
+const LOGIN_ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_ATTEMPT_RETENTION_MS = 24 * 60 * 60 * 1000;
+const LOGIN_CAPTCHA_THRESHOLD = 3;
 
 const CHECKOUT_ADDRESS_FIELDS = [
   "firstName",
@@ -38,6 +45,55 @@ const normalizeMobileNumber = (value = "") => {
   const digits = trimmedValue.replace(/[^\d]/g, "");
 
   return `${hasCountryPrefix ? "+" : ""}${digits}`;
+};
+
+const getRequestIp = (req) => req.ip || req.socket?.remoteAddress || "unknown";
+
+const recordFailedLogin = async (req, email) => {
+  const now = new Date();
+  const normalizedEmail = normalizeEmail(email || "unknown");
+  const ipAddress = getRequestIp(req);
+  let attempt = await UserLoginAttempt.findOne({
+    email: normalizedEmail,
+    ipAddress,
+  });
+
+  if (
+    !attempt ||
+    now.getTime() - attempt.firstAttemptAt.getTime() >
+      LOGIN_ATTEMPT_WINDOW_MS
+  ) {
+    attempt = await UserLoginAttempt.findOneAndUpdate(
+      { email: normalizedEmail, ipAddress },
+      {
+        $set: {
+          count: 1,
+          firstAttemptAt: now,
+          lastAttemptAt: now,
+          expiresAt: new Date(now.getTime() + LOGIN_ATTEMPT_RETENTION_MS),
+        },
+      },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+  } else {
+    attempt.count += 1;
+    attempt.lastAttemptAt = now;
+    attempt.expiresAt = new Date(
+      now.getTime() + LOGIN_ATTEMPT_RETENTION_MS
+    );
+    await attempt.save();
+  }
+
+  return attempt;
+};
+
+const clearFailedLogins = async (email) => {
+  try {
+    await UserLoginAttempt.deleteMany({ email: normalizeEmail(email) });
+  } catch (error) {
+    // Login should still succeed if attempt-history cleanup temporarily fails.
+    console.error("User login attempts could not be cleared:", error.message);
+  }
 };
 
 const addAuthProvider = (user, provider) => {
@@ -147,9 +203,11 @@ module.exports.login = async (req, res, next) => {
     const user = await User.findOne({ email });
 
     if (!user) {
+      const attempt = await recordFailedLogin(req, email);
       return res.status(401).json({
         status: "fail",
         error: "No user found. Please create an account",
+        captchaRequired: attempt.count >= LOGIN_CAPTCHA_THRESHOLD,
       });
     }
 
@@ -163,9 +221,11 @@ module.exports.login = async (req, res, next) => {
     const isPasswordValid = user.comparePassword(password, user.password);
 
     if (!isPasswordValid) {
+      const attempt = await recordFailedLogin(req, email);
       return res.status(403).json({
         status: "fail",
         error: "Password is not correct",
+        captchaRequired: attempt.count >= LOGIN_CAPTCHA_THRESHOLD,
       });
     }
 
@@ -177,6 +237,7 @@ module.exports.login = async (req, res, next) => {
     }
 
     const token = generateToken(user);
+    await clearFailedLogins(email);
 
     res.status(200).json({
       status: "success",
@@ -538,7 +599,33 @@ exports.deleteShippingAddress = async (req, res, next) => {
 // signUpWithProvider
 exports.signUpWithProvider = async (req, res, next) => {
   try {
-    const googleUser = jwt.decode(req.params.token);
+    if (!secret.google_client_id) {
+      return res.status(503).json({
+        status: "fail",
+        error: "Google authentication is not configured",
+      });
+    }
+
+    if (!req.body.credential) {
+      return res.status(400).json({
+        status: "fail",
+        error: "Google credential is required",
+      });
+    }
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: req.body.credential,
+      audience: secret.google_client_id,
+    });
+    const googleUser = ticket.getPayload();
+
+    if (!googleUser?.email || !googleUser.email_verified) {
+      return res.status(401).json({
+        status: "fail",
+        error: "Google account email is not verified",
+      });
+    }
+
     const email = normalizeEmail(googleUser.email);
     const existingUser = await User.findOne({ email });
 

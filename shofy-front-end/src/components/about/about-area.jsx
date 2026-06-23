@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import Partners from "@/components/about/partners";
 import CtaArea from "@/components/cta/cta-area";
 import aboutImageOne from "@assets/img/about/about-1.png";
 import aboutImageTwo from "@assets/img/about/about-2.png";
@@ -22,12 +23,8 @@ const values = [
   },
 ];
 
-// const promises = [
-//   "A focused selection of sports nutrition and everyday wellness products.",
-//   "Clear pricing, product details, order updates, and account tools.",
-//   "Responsive support before and after your purchase.",
-//   "A secure shopping experience built around customer trust.",
-// ];
+
+
 
 const AboutArea = () => {
   return (
@@ -137,31 +134,7 @@ const AboutArea = () => {
           </div>
         </div>
       </section>
-{/* 
-      <section className="tp-about-page-promise pb-100">
-        <div className="container">
-          <div className="tp-about-page-promise-inner">
-            <div className="row align-items-center">
-              <div className="col-xl-5 col-lg-5">
-                <div className="tp-about-page-promise-heading">
-                  <span className="tp-about-page-eyebrow">Our promise</span>
-                  <h2>A professional store that still feels personal.</h2>
-                </div>
-              </div>
-              <div className="col-xl-7 col-lg-7">
-                <ul className="tp-about-page-promise-list">
-                  {promises.map((promise) => (
-                    <li key={promise}>
-                      <span aria-hidden="true">O</span>
-                      {promise}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section> */}
+      <Partners />
 
       <CtaArea />
     </main>

@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Rating } from 'react-simple-star-rating';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 // internal
 import { AskQuestion, CompareTwo, WishlistTwo } from '@/svg';
@@ -22,6 +22,7 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
   const [productUrl, setProductUrl] = useState("");
   const [isBuyingNow, setIsBuyingNow] = useState(false);
   const dispatch = useDispatch()
+  const orderQuantity = useSelector((state) => state.cart.orderQuantity);
   const router = useRouter();
   const whatsappQuery = encodeURIComponent(
     `Hi, I have a question about ${title || "this product"}. ${productUrl}`
@@ -47,7 +48,7 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
 
   // handle add product
   const handleAddProduct = (prd) => {
-    dispatch(add_cart_product(prd));
+    dispatch(add_cart_product({ product: prd, quantity: orderQuantity }));
   };
 
   // handle buy now product
@@ -57,7 +58,9 @@ const DetailsWrapper = ({ productItem, handleImageActive, activeImg, detailsBott
     setIsBuyingNow(true);
 
     try {
-      await dispatch(add_cart_product(prd)).unwrap();
+      await dispatch(
+        add_cart_product({ product: prd, quantity: orderQuantity })
+      ).unwrap();
       dispatch(handleModalClose());
       router.push('/checkout');
     } finally {

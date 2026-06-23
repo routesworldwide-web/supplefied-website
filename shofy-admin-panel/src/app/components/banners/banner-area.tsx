@@ -26,6 +26,7 @@ const PLACEMENT_OPTIONS: { value: BannerPlacement; label: string; size: string }
   { value: "product-gadget-banner", label: "Product Section Slider Banner", size: "Homepage product section carousel banner." },
   { value: "product-gadget-sidebar", label: "Product Section Sidebar Image", size: "Homepage product section left sidebar image." },
   { value: "product-banner-slider", label: "Home Featured Product Slider", size: "Full-width featured product slider near the bottom of the homepage." },
+  { value: "blog-page-banner", label: "Blog Page Banner", size: "Container-width banner above the blog posts. Recommended: 1296 × 320 px." },
 ];
 
 const getPlacementLabel = (value: BannerPlacement) => {

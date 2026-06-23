@@ -147,12 +147,14 @@
         &-dot{
             &.#{$theme-prifix}-swiper-dot{
                 position: absolute;
-                right: 50px;
-                left: auto;
-                bottom: 50%;
-                @include transform(translateY(50%));
+                right: 50px !important;
+                left: auto !important;
+                top: 50% !important;
+                bottom: auto !important;
+                @include transform(translateY(-50%) !important);
                 z-index: 3;
-                width: auto;
+                width: max-content !important;
+                height: auto;
                 display: flex;
                 flex-direction: column;
                 gap: 7px;
@@ -160,6 +162,11 @@
                 background-color: var(--tp-common-white);
                 border-radius: 999px;
                 box-shadow: 0 8px 24px rgba($color: #010F1C, $alpha: .14);
+
+                @media #{$xs}{
+                    right: 12px !important;
+                    padding: 8px 6px;
+                }
 
                 &.#{$theme-prifix}-swiper-dot{
                    

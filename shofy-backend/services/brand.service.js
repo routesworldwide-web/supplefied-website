@@ -1,5 +1,6 @@
 const ApiError = require('../errors/api-error');
 const Brand = require('../model/Brand');
+const Products = require('../model/Products');
 
 // addBrandService
 module.exports.addBrandService = async (data) => {
@@ -38,6 +39,29 @@ exports.updateBrandService = async (id,payload) => {
   const result = await Brand.findOneAndUpdate({ _id:id }, payload, {
     new: true,
   })
+
+  // Product documents embed the brand name; update it whenever the source
+  // brand is renamed so storefront and admin labels remain current.
+  if (
+    Object.prototype.hasOwnProperty.call(payload, 'name') &&
+    result.name !== isExist.name
+  ) {
+    await Products.updateMany(
+      {
+        $or: [
+          { 'brand.id': result._id },
+          { 'brand.name': isExist.name },
+        ],
+      },
+      {
+        $set: {
+          'brand.id': result._id,
+          'brand.name': result.name,
+        },
+      }
+    );
+  }
+
   return result
 }
 

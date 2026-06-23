@@ -1,13 +1,16 @@
 'use client';
 import React, { useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import DetailsThumbWrapper from "./details-thumb-wrapper";
 import DetailsWrapper from "./details-wrapper";
 import DetailsTabNav from "./details-tab-nav";
 import RelatedProducts from "./related-products";
+import { initialOrderQuantity } from "@/redux/features/cartSlice";
 
 const ProductDetailsContent = ({ productItem }) => {
   const { _id, img, imageURLs, videoId,status } = productItem || {};
   const [activeImg, setActiveImg] = useState(img);
+  const dispatch = useDispatch();
   const galleryImages = [
     { img },
     ...(imageURLs?.filter((item) => item?.img && item.img !== img) || []),
@@ -15,7 +18,8 @@ const ProductDetailsContent = ({ productItem }) => {
   // active image change when img change
   useEffect(() => {
     setActiveImg(img);
-  }, [img]);
+    dispatch(initialOrderQuantity());
+  }, [_id, img, dispatch]);
 
   // handle image active
   const handleImageActive = (item) => {

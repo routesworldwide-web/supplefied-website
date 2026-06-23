@@ -54,7 +54,7 @@ const CompareArea = () => {
 
   // handle add product
   const handleAddProduct = (prd) => {
-    dispatch(add_cart_product(prd));
+    dispatch(add_cart_product({ product: prd, quantity: 1 }));
   };
   // handle add product
   const handleRemoveComparePrd = (prd) => {

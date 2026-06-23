@@ -75,12 +75,15 @@ const ContactArea = () => {
                           Find on social media
                         </h4>
 
-                        <div className="tp-contact-social-icon">
+                        <div className="tp-contact-social-icon ">
 
                           <a href="https://www.instagram.com/supplefied360?igsh=MTh2ajlmNThwbXo4Mg%3D%3D" target="_blank">
                             <i className="fa-brands fa-instagram"></i>
                           </a>
-                         
+                          {/* whatsapp */}
+                          <a href="https://wa.me/919891238727" target="_blank">
+                            <i className="fa-brands fa-whatsapp"></i>
+                          </a>
 
                         </div>
                       </div>

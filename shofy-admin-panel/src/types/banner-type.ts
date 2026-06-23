@@ -4,7 +4,8 @@ export type BannerPlacement =
   | "home-banner-section-2"
   | "product-gadget-banner"
   | "product-gadget-sidebar"
-  | "product-banner-slider";
+  | "product-banner-slider"
+  | "blog-page-banner";
 
 export type BannerStatus = "active" | "inactive";
 

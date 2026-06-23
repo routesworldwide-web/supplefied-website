@@ -90,7 +90,10 @@ const ProductGadgetArea = () => {
               />
             </SwiperSlide>
           ))}
-          <div className="tp-product-gadget-banner-slider-dot tp-swiper-dot"></div>
+          <div
+            slot="container-end"
+            className="tp-product-gadget-banner-slider-dot tp-swiper-dot"
+          ></div>
         </Swiper>
       )
     }
@@ -108,7 +111,10 @@ const ProductGadgetArea = () => {
             </div>
           </SwiperSlide>
         ))}
-        <div className="tp-product-gadget-banner-slider-dot tp-swiper-dot"></div>
+        <div
+          slot="container-end"
+          className="tp-product-gadget-banner-slider-dot tp-swiper-dot"
+        ></div>
       </Swiper>
     )
   }

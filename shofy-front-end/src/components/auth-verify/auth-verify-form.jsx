@@ -7,6 +7,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { toast } from "react-toastify";
 import { isValidEmail } from "@/utils/emailValidation";
+import TurnstileWidget from "@/components/common/turnstile-widget";
 
 // Validation schema
 const schema = yup.object().shape({
@@ -34,6 +35,8 @@ const schema = yup.object().shape({
 const AuthVerifyForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
 
   const {
     register,
@@ -46,6 +49,11 @@ const AuthVerifyForm = () => {
   });
 
   const onSubmit = async (data) => {
+    if (!turnstileToken) {
+      toast.error("Please complete the security verification.");
+      return;
+    }
+
     try {
       setIsLoading(true);
 
@@ -61,6 +69,7 @@ const AuthVerifyForm = () => {
             mobile: data.mobile,
             email: data.email,
             code: data.code.toUpperCase(),
+            turnstileToken,
           }),
         }
       );
@@ -109,6 +118,8 @@ const AuthVerifyForm = () => {
       });
     } finally {
       setIsLoading(false);
+      setTurnstileToken("");
+      setTurnstileResetKey((key) => key + 1);
     }
   };
 
@@ -206,11 +217,17 @@ const AuthVerifyForm = () => {
           </div>
         )}
 
+        <TurnstileWidget
+          action="auth-verify"
+          onVerify={setTurnstileToken}
+          resetKey={turnstileResetKey}
+        />
+
         {/* Submit Button */}
         <button
           type="submit"
           className="auth-submit-btn"
-          disabled={isLoading}
+          disabled={isLoading || !turnstileToken}
         >
           {isLoading ? (
             <span className="auth-loading-text">

@@ -393,6 +393,36 @@
     }
 }
 
+.tp-blog-page-banner{
+    &-inner{
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        height: 320px;
+        border-radius: 12px;
+        background-color: #eef1ed;
+
+        & a{
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        & img{
+            object-fit: cover;
+        }
+
+        @media #{$md, $sm}{
+            height: 250px;
+        }
+
+        @media #{$xs}{
+            height: 150px;
+            border-radius: 8px;
+        }
+    }
+}
+
 .tp-blog-managed-details{
     .tp-postbox-details-content{
         & > p{

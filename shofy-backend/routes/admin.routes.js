@@ -15,12 +15,28 @@ const {
   updatedStatus,
 } = require("../controller/admin.controller");
 const verifyAdmin = require("../middleware/verifyAdmin");
+const AdminLoginAttempt = require("../model/AdminLoginAttempt");
+const {
+  requireTurnstileAfterFailures,
+} = require("../middleware/verifyTurnstile");
+
+const LOGIN_ATTEMPT_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_CAPTCHA_THRESHOLD = 3;
 
 //register a staff
 router.post("/register", registerAdmin);
 
 //login a admin
-router.post("/login", loginAdmin);
+router.post(
+  "/login",
+  requireTurnstileAfterFailures({
+    AttemptModel: AdminLoginAttempt,
+    threshold: LOGIN_CAPTCHA_THRESHOLD,
+    windowMs: LOGIN_ATTEMPT_WINDOW_MS,
+    expectedAction: "admin-login",
+  }),
+  loginAdmin
+);
 
 //login a admin
 router.patch("/change-password", verifyAdmin, changePassword);
