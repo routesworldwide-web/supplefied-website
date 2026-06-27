@@ -1,5 +1,5 @@
 import LoginForm from '@/forms/login-form';
-import login_bg from '@assets/img/bg/login-bg.jpg';
+import login_bg from '@assets/img/bg/login-bg.png';
 import Link from 'next/link';
 
 const LoginPage = () => {

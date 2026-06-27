@@ -108,9 +108,16 @@ const blogSchema = new mongoose.Schema(
     contentBlocks: {
       type: [blogContentBlockSchema],
       validate: {
-        validator: (blocks) => Array.isArray(blocks) && blocks.length > 0,
-        message: "At least one content block is required",
+        validator: function validateBlogContent(blocks) {
+          return Boolean(this.contentHtml) || (Array.isArray(blocks) && blocks.length > 0);
+        },
+        message: "Blog content is required",
       },
+    },
+    contentHtml: {
+      type: String,
+      trim: true,
+      maxlength: 200000,
     },
     tags: [
       {

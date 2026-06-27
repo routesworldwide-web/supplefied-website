@@ -1,6 +1,7 @@
 import "./globals.css";
 import { Metadata } from "next";
 import "/public/assets/css/custom.css";
+import "/public/assets/css/quill.css";
 import 'react-toastify/dist/ReactToastify.css';
 import { Poppins } from "next/font/google";
 import { Providers } from "@/redux/provider";

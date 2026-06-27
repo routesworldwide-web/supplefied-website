@@ -7,6 +7,7 @@ import Pagination from "../../ui/Pagination";
 import { Search } from "@/svg";
 import Link from "next/link";
 import usePagination from "@/hooks/use-pagination";
+import { SUPPLEMENT_PRODUCT_TYPE } from "../add-product/product-type";
 
 const ProductGridArea = () => {
   const { data: products, isError, isLoading } = useGetAllProductsQuery();
@@ -99,10 +100,9 @@ const ProductGridArea = () => {
             </span>
             <select onChange={handleSelectField}>
                 <option value="">Categories</option>
-                <option value="electronics">Supplements</option>
-                <option value="fashion">Fashion</option>
-                <option value="beauty">beauty</option>
-                <option value="jewelry">jewelry</option>
+                <option value={SUPPLEMENT_PRODUCT_TYPE.value}>
+                  {SUPPLEMENT_PRODUCT_TYPE.label}
+                </option>
               </select>
           </div>
           <div className="product-add-btn flex ">

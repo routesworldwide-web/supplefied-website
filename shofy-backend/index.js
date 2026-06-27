@@ -113,6 +113,6 @@ app.use((req, res, next) => {
 // global error handler
 app.use(globalErrorHandler);
 
-app.listen(PORT, () => console.log(`server running on port ${PORT}`));
+app.listen(PORT);
 
 module.exports = app;

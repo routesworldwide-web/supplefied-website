@@ -6,29 +6,27 @@ import ErrorMsg from "@/components/common/error-msg";
 import { useGetUserOrderByIdQuery } from "@/redux/features/order/orderApi";
 import PrdDetailsLoader from "@/components/loader/prd-details-loader";
 import { getProductTypeLabel } from "@/utils/product-type-label";
+import {
+  formatDiscountPercent,
+  formatPrice,
+  getLineDiscount,
+  getLineTotal,
+  getProductPricing,
+} from "@/utils/pricing";
 import CancelOrder from "./cancel-order";
-
-const formatPrice = (value) => `₹${Number(value || 0).toFixed(2)}`;
-
-const formatDiscountPercent = (value) => {
-  const discount = Number(value || 0);
-  return `${Number.isInteger(discount) ? discount : discount.toFixed(2)}%`;
-};
 
 const getOrderQuantity = (item) => Number(item?.orderQuantity || item?.quantity || 0);
 
 const getLinePricing = (item) => {
-  const price = Number(item?.price || 0);
-  const discountPercent = Number(item?.discount || 0);
+  const pricing = getProductPricing(item);
   const quantity = getOrderQuantity(item);
-  const unitDiscount = discountPercent > 0 ? (price * discountPercent) / 100 : 0;
 
   return {
     quantity,
-    discountPercent,
-    unitPrice: price,
-    lineDiscount: unitDiscount * quantity,
-    lineTotal: (price - unitDiscount) * quantity,
+    discountPercent: pricing.discountPercent,
+    unitPrice: pricing.originalPrice,
+    lineDiscount: getLineDiscount(item),
+    lineTotal: getLineTotal(item),
   };
 };
 
@@ -51,6 +49,7 @@ const invoiceCss = `
   .supp-bill { padding: 7mm 0 8mm; font-size: 12px; line-height: 2.05; }
   .supp-bill p { margin: 0; }
   .supp-label { color: #000; font-weight: 900; }
+  .supp-table-wrap { width: 100%; }
   .supp-table { width: 100%; border-collapse: collapse; font-size: 9.4px; margin-bottom: 7mm; color: #001b35; }
   .supp-table th, .supp-table td { border: 1.2px solid #111; padding: 3.2mm 2.7mm; vertical-align: middle; }
   .supp-table th { color: #001b35; font-weight: 900; text-transform: uppercase; background: #fff; }
@@ -66,6 +65,37 @@ const invoiceCss = `
   .supp-total p { font-size: 24px; }
   .supp-coupon { min-height: 10mm; text-align: center; color: #00712d; font-weight: 900; font-size: 10.5px; line-height: 1.7; }
   .supp-thanks { border-top: 1.2px solid #111; border-bottom: 1px solid #00712d; padding: 5mm 0; text-align: center; font-size: 10.5px; line-height: 1.55; color: #111; }
+  @media (max-width: 767.98px) {
+    .supp-invoice { overflow: hidden; border-width: 1px; }
+    .supp-inner { padding: 18px 14px 16px; }
+    .supp-top { flex-direction: column; gap: 18px; padding-bottom: 20px; }
+    .supp-brand { font-size: 26px; letter-spacing: 0.5px; }
+    .supp-tagline { margin-bottom: 14px; font-size: 11px; }
+    .supp-address { font-size: 9px; line-height: 1.55; }
+    .supp-title { margin-bottom: 8px; font-size: 22px; letter-spacing: 3px; text-align: left; }
+    .supp-meta { font-size: 11px; line-height: 1.65; text-align: left; }
+    .supp-meta p { margin: 0; }
+    .supp-bill { padding: 18px 0; font-size: 11px; line-height: 1.65; overflow-wrap: anywhere; }
+    .supp-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0 -14px 20px; padding: 0 14px 4px; }
+    .supp-table { min-width: 660px; margin-bottom: 0; font-size: 9px; }
+    .supp-table th, .supp-table td { padding: 10px 8px; }
+    .supp-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-bottom: 16px; }
+    .supp-summary-cell { min-height: 78px; padding: 14px 8px; border-right: 1.2px solid #111; border-bottom: 1.2px solid #111; }
+    .supp-summary-cell:nth-child(2n) { border-right: 0; }
+    .supp-summary-cell:nth-last-child(-n + 2) { border-bottom: 0; }
+    .supp-summary-cell h5 { margin-bottom: 8px; font-size: 9px; line-height: 1.3; }
+    .supp-summary-cell p { font-size: 13px; overflow-wrap: anywhere; }
+    .supp-total p { font-size: 18px; }
+    .supp-coupon { min-height: 0; margin-bottom: 12px; font-size: 9.5px; }
+    .supp-thanks { padding: 14px 8px; font-size: 10px; }
+  }
+  @media (max-width: 420px) {
+    .supp-summary { grid-template-columns: 1fr; }
+    .supp-summary-cell,
+    .supp-summary-cell:nth-child(2n) { border-right: 0; }
+    .supp-summary-cell:nth-last-child(-n + 2) { border-bottom: 1.2px solid #111; }
+    .supp-summary-cell:last-child { border-bottom: 0; }
+  }
 `;
 
 const getPrintableStyles = () => {
@@ -198,37 +228,39 @@ const OrderArea = ({ orderId }) => {
                 <p><span className="supp-label">Mobile Number :</span> {contact}</p>
               </div>
 
-              <table className="supp-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Product Name</th>
-                    <th>Qty</th>
-                    <th>Unit Price</th>
-                    <th>Discount</th>
-                    <th>Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {cart.map((item, index) => {
-                    const pricing = getLinePricing(item);
-                    return (
-                      <tr key={item._id || item.productId || index}>
-                        <td>{index + 1}</td>
-                        <td>{item.title}</td>
-                        <td>{pricing.quantity}</td>
-                        <td>{formatPrice(pricing.unitPrice)}</td>
-                        <td>
-                          {pricing.discountPercent > 0
-                            ? `${formatDiscountPercent(pricing.discountPercent)} (${formatPrice(pricing.lineDiscount)})`
-                            : formatPrice(0)}
-                        </td>
-                        <td>{formatPrice(pricing.lineTotal)}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div className="supp-table-wrap">
+                <table className="supp-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Product Name</th>
+                      <th>Qty</th>
+                      <th>Unit Price</th>
+                      <th>Discount</th>
+                      <th>Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {cart.map((item, index) => {
+                      const pricing = getLinePricing(item);
+                      return (
+                        <tr key={item._id || item.productId || index}>
+                          <td>{index + 1}</td>
+                          <td>{item.title}</td>
+                          <td>{pricing.quantity}</td>
+                          <td>{formatPrice(pricing.unitPrice)}</td>
+                          <td>
+                            {pricing.discountPercent > 0
+                              ? `${formatDiscountPercent(pricing.discountPercent)} (${formatPrice(pricing.lineDiscount)})`
+                              : formatPrice(0)}
+                          </td>
+                          <td>{formatPrice(pricing.lineTotal)}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
 
               <div className="supp-summary">
                 <div className="supp-summary-cell">

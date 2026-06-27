@@ -12,6 +12,7 @@ import ProductImages from "../add-product/product-variants";
 import ProductImgUpload from "../add-product/product-img-upload";
 import Tags from "../add-product/tags";
 import ProductCategory from "../../category/product-category";
+import { SUPPLEMENT_PRODUCT_TYPE } from "../add-product/product-type";
 
 const EditProductSubmit = ({ id }: { id: string }) => {
   const { data: product, isError, isLoading } = useGetProductQuery(id);
@@ -51,7 +52,7 @@ const EditProductSubmit = ({ id }: { id: string }) => {
     setCategory(product.category || { name: "", id: "" });
     setParent(product.category?.name || product.parent || "");
     setChildren(product.children || "");
-    setProductType(product.productType || "");
+    setProductType(SUPPLEMENT_PRODUCT_TYPE.value);
     setStatus(product.status || "in-stock");
     setOfferDate({
       startDate: product.offerDate?.startDate || null,

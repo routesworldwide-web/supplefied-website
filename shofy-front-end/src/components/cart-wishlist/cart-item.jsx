@@ -9,9 +9,14 @@ import { add_cart_product, quantityDecrement, remove_product } from "@/redux/fea
 import { getProductDetailsUrl } from "@/utils/product-url";
 import { formatPrice, getLineTotal } from "@/utils/pricing";
 
+const getShortTitle = (title = "") => (
+  title.length > 40 ? `${title.slice(0, 40).trim()}...` : title
+);
+
 const CartItem = ({product}) => {
   const {_id, img,title, orderQuantity = 0 } = product || {};
   const productUrl = getProductDetailsUrl(product);
+  const displayTitle = getShortTitle(title);
 
   const dispatch = useDispatch();
 
@@ -39,7 +44,7 @@ const CartItem = ({product}) => {
       </td>
       {/* title */}
       <td className="tp-cart-title">
-        <Link href={productUrl}>{title}</Link>
+        <Link href={productUrl} title={title}>{displayTitle}</Link>
       </td>
       {/* price */}
       <td className="tp-cart-price">

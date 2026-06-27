@@ -3,6 +3,11 @@ import ReactSelect from "react-select";
 import { FieldErrors, Controller, Control } from "react-hook-form";
 import ErrorMsg from "../../common/error-msg";
 
+export const SUPPLEMENT_PRODUCT_TYPE = {
+  value: "electronics",
+  label: "Supplements",
+};
+
 // prop type
 type IPropType = {
   errors: FieldErrors<any>;
@@ -14,55 +19,38 @@ type IPropType = {
 const ProductType = ({
   errors,
   control,
-  default_value,
   setSelectProductType,
 }: IPropType) => {
   // handleSelectProduct
   const handleSelectProduct = (value: string) => {
     setSelectProductType(value);
   };
+
   // set default product
   useEffect(() => {
-    if(default_value){
-      setSelectProductType(default_value)
-    }
-  }, [default_value, setSelectProductType])
+    setSelectProductType(SUPPLEMENT_PRODUCT_TYPE.value);
+  }, [setSelectProductType])
   
   return (
     <>
       <Controller
         name="productType"
         control={control}
+        defaultValue={SUPPLEMENT_PRODUCT_TYPE}
         rules={{
-          required: default_value
-            ? false
-            : "productType is required!",
+          required: "productType is required!",
         }}
         render={({ field }) => (
           <ReactSelect
             {...field}
-            value={field.value}
-            defaultValue={
-              default_value
-                ? {
-                    label: default_value,
-                    value: default_value,
-                  }
-                : {
-                    label: "Select..",
-                    value: 0,
-                  }
-            }
+            value={SUPPLEMENT_PRODUCT_TYPE}
+            defaultValue={SUPPLEMENT_PRODUCT_TYPE}
             onChange={(selectedOption) => {
-              field.onChange(selectedOption);
-              handleSelectProduct(selectedOption?.value);
+              const option = selectedOption || SUPPLEMENT_PRODUCT_TYPE;
+              field.onChange(option);
+              handleSelectProduct(option.value);
             }}
-            options={[
-              { value: "electronics", label: "Supplements" },
-              { value: "fashion", label: "Fashion" },
-              { value: "beauty", label: "Beauty" },
-              { value: "jewelry", label: "Jewelry" },
-            ]}
+            options={[SUPPLEMENT_PRODUCT_TYPE]}
           />
         )}
       />

@@ -28,7 +28,6 @@ dayjs.extend(isSameOrAfter);
 
 // get all orders user
 module.exports.getOrderByUser = async (req, res,next) => {
-  // console.log(req.user)
   try {
     const { page, limit } = req.query;
 

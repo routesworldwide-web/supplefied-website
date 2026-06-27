@@ -8,7 +8,14 @@ import DetailsWrapper from "@/components/product-details/details-wrapper";
 import { initialOrderQuantity } from "@/redux/features/cartSlice";
 
 const customStyles = {
+  overlay: {
+    position: "fixed",
+    inset: 0,
+    backgroundColor: "rgba(1, 15, 28, 0.6)",
+    zIndex: 99999,
+  },
   content: {
+    position: "absolute",
     top: "50%",
     left: "50%",
     right: "auto",
@@ -18,6 +25,12 @@ const customStyles = {
     width: "min(1120px, calc(100vw - 48px))",
     maxHeight: "calc(100vh - 48px)",
     overflow: "hidden",
+    border: "1px solid #ccc",
+    background: "#fff",
+    WebkitOverflowScrolling: "touch",
+    borderRadius: "4px",
+    outline: "none",
+    padding: "20px",
   },
 };
 
@@ -28,6 +41,7 @@ const ProductModal = () => {
   const { img, imageURLs,status } = productItem || {};
   const [activeImg, setActiveImg] = useState(img);
   const [loading,setLoading] = useState(false);
+  const [appElement, setAppElement] = useState(null);
   const dispatch = useDispatch();
   const galleryImages = [
     { img },
@@ -39,6 +53,10 @@ const ProductModal = () => {
     dispatch(initialOrderQuantity())
     setLoading(false)
   }, [img,dispatch]);
+
+  useEffect(() => {
+    setAppElement(document.getElementById("wrapper"));
+  }, []);
 
   // handle image active
   const handleImageActive = (item) => {
@@ -52,8 +70,11 @@ const ProductModal = () => {
         isOpen={isModalOpen}
         onRequestClose={() => dispatch(handleModalClose())}
         style={customStyles}
-        appElement={typeof document !== "undefined" ? document.getElementById("wrapper") : undefined}
+        appElement={appElement}
+        ariaHideApp={Boolean(appElement)}
         contentLabel="Product Modal"
+        className="ReactModal__Content tp-product-quick-view-modal"
+        overlayClassName="ReactModal__Overlay tp-product-quick-view-overlay"
       >
         <div className="tp-product-modal">
           <div className="tp-product-modal-content d-lg-flex">

@@ -20,6 +20,17 @@ const RelatedBlog = ({ blog }) => (
   </div>
 );
 
+const BlogRichContent = ({ html }) => {
+  if (!html) return null;
+
+  return (
+    <div
+      className="tp-blog-rich-content"
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+};
+
 const BlogDetailsArea = ({ blog, relatedBlogs = [] }) => {
   const { data } = useGetBlogsQuery({ limit: 30 });
   const categories = data?.meta?.categories || [];
@@ -62,7 +73,11 @@ const BlogDetailsArea = ({ blog, relatedBlogs = [] }) => {
 
               <div className="tp-postbox-details-content">
                 {blog.excerpt && <p>{getBlogExcerpt(blog)}</p>}
-                <BlogContentBlocks blocks={blog.contentBlocks} />
+                {blog.contentHtml ? (
+                  <BlogRichContent html={blog.contentHtml} />
+                ) : (
+                  <BlogContentBlocks blocks={blog.contentBlocks} />
+                )}
 
                 {blog.secondaryImage && (
                   <div className="tp-postbox-details-desc-thumb text-center">

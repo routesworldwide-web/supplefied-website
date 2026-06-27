@@ -115,7 +115,6 @@ const updateCoupon = async (req, res,next) => {
     await coupon.save();
     res.send({ message: 'Coupon Updated Successfully!' });
   } catch (error) {
-    // console.log('coupon error',error)
     next(error)
   }
 };

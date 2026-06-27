@@ -8,11 +8,17 @@ import { Close, Minus, Plus } from "@/svg";
 import {add_cart_product,quantityDecrement} from "@/redux/features/cartSlice";
 import { remove_wishlist_product } from "@/redux/features/wishlist-slice";
 import { getProductDetailsUrl } from "@/utils/product-url";
-import ProductPrice from "@/components/common/product-price";
+import { formatPrice, getProductPricing } from "@/utils/pricing";
+
+const getShortTitle = (title = "") => (
+  title.length > 50 ? `${title.slice(0, 50).trim()}...` : title
+);
 
 const WishlistItem = ({ product }) => {
   const { _id, img, title } = product || {};
   const productUrl = getProductDetailsUrl(product);
+  const pricing = getProductPricing(product);
+  const displayTitle = getShortTitle(title);
   const { cart_products } = useSelector((state) => state.cart);
   const isAddToCart = cart_products.find((item) => item._id === _id);
   const dispatch = useDispatch();
@@ -37,10 +43,10 @@ const WishlistItem = ({ product }) => {
         </Link>
       </td>
       <td className="tp-cart-title">
-        <Link href={productUrl}>{title}</Link>
+        <Link href={productUrl} title={title}>{displayTitle}</Link>
       </td>
       <td className="tp-cart-price">
-        <ProductPrice product={product} priceClassName="tp-cart-price" />
+        <span>{formatPrice(pricing.discountedPrice)}</span>
       </td>
       <td className="tp-cart-quantity">
         <div className="tp-product-quantity mt-10 mb-10">

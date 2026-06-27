@@ -10,7 +10,7 @@ import { useGetAllBrandsQuery } from "@/redux/brand/brandApi";
 import ReactSelect, { GroupBase } from "react-select";
 import ErrorMsg from "../../common/error-msg";
 import Loading from "../../common/loading";
-import ProductType from "./product-type";
+import ProductType, { SUPPLEMENT_PRODUCT_TYPE } from "./product-type";
 // prop type
 type IPropType = {
   register: UseFormRegister<any>;
@@ -48,7 +48,7 @@ const ProductTypeBrand = ({
       const brand = brands?.result.find((b) => b.name === default_value.brand);
       if (brand) {
         setSelectBrand({ id: brand._id as string, name: default_value.brand });
-        setSelectProductType(default_value.product_type);
+        setSelectProductType(SUPPLEMENT_PRODUCT_TYPE.value);
         setHasDefaultValues(true);
       }
     }

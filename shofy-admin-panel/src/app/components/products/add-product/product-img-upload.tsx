@@ -34,7 +34,6 @@ const ProductImgUpload = ({
     }
   }, [default_img, imgUrl, initialLoad, setImgUrl]);
 
-  // console.log(imgUrl);
   return (
     <div className="bg-white px-8 py-8 rounded-md mb-6 text-center">
       <p className="text-base text-black mb-4">Upload Image</p>

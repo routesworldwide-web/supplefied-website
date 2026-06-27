@@ -47,7 +47,6 @@ const useCouponSubmit = () => {
         productType: selectProductType,
       };
 
-      console.log(coupon_data)
       const res = await addCoupon({ ...coupon_data });
       if ("error" in res) {
         if ("data" in res.error) {
@@ -65,7 +64,6 @@ const useCouponSubmit = () => {
         reset();
       }
     } catch (error) {
-      console.log(error);
       notifyError("Something went wrong");
     }
   };
@@ -97,7 +95,6 @@ const useCouponSubmit = () => {
         reset();
       }
     } catch (error) {
-      console.log(error);
       notifyError("Something went wrong");
     }
   };

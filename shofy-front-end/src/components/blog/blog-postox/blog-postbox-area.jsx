@@ -49,7 +49,7 @@ const BlogPostboxArea = () => {
   };
 
   return (
-    <section className="tp-blog-managed-area pt-100 pb-120">
+    <section className="tp-blog-managed-area pt-50 pb-120 mt-10">
       <div className="container">
         <div className="tp-blog-managed-top">
           <div>
@@ -57,7 +57,7 @@ const BlogPostboxArea = () => {
             <h2>Wellness guides, supplement education, and product stories</h2>
           </div>
           <div className="tp-blog-managed-filter">
-            <label htmlFor="blog-category">Category</label>
+            {/* <label htmlFor="blog-category">Category</label> */}
             <select id="blog-category" value={category} onChange={(event) => handleCategoryChange(event.target.value)}>
               <option value="">All Categories</option>
               {categories.map((item) => (

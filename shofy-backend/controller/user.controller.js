@@ -664,7 +664,6 @@ exports.signUpWithProvider = async (req, res, next) => {
       });
 
       const signUpUser = await newUser.save();
-      // console.log(signUpUser)
       const token = generateToken(signUpUser);
       res.status(200).send({
         status: "success",

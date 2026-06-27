@@ -320,7 +320,6 @@ const OrderDetailsArea = ({ id }: { id: string }) => {
     try {
       handlePrint();
     } catch (err) {
-      console.log("order by user id error", err);
       notifyError("Failed to print");
     }
   };

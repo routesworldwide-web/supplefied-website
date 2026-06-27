@@ -21,10 +21,8 @@ const OrderActions = ({ id,cls }: { id: string,cls?:string }) => {
     try {
       handlePrint();
     } catch (err) {
-      console.log("order by user id error", err);
       notifyError("Failed to print");
     }
-    // console.log('id', id);
   };
 
   return (

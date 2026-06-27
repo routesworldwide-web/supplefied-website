@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import {useRouter} from 'next/navigation';
 import { useAddProductMutation, useEditProductMutation } from "@/redux/product/productApi";
 import { notifyError, notifySuccess } from "@/utils/toast";
+import { SUPPLEMENT_PRODUCT_TYPE } from "@/app/components/products/add-product/product-type";
 
 // ImageURL type
 export interface ImageURL {
@@ -41,7 +42,7 @@ const useProductSubmit = () => {
   const [brand, setBrand] = useState<IBrand>({ name: "", id: "" });
   const [category, setCategory] = useState<ICategory>({ name: "", id: "" });
   const [status, setStatus] = useState<status>("in-stock");
-  const [productType, setProductType] = useState<string>("");
+  const [productType, setProductType] = useState<string>(SUPPLEMENT_PRODUCT_TYPE.value);
   const [description, setDescription] = useState<string>("");
   const [videoId, setVideoId] = useState<string>("");
   const [offerDate, setOfferDate] = useState<{
@@ -95,7 +96,7 @@ const useProductSubmit = () => {
     setBrand({ name: "", id: "" });
     setCategory({ name: "", id: "" });
     setStatus("in-stock");
-    setProductType("");
+    setProductType(SUPPLEMENT_PRODUCT_TYPE.value);
     setDescription("");
     setVideoId("");
     setOfferDate({
@@ -110,7 +111,6 @@ const useProductSubmit = () => {
 
   // handle submit product
   const handleSubmitProduct = async (data: any) => {
-    // console.log("product data--->", data);
     const priceValue = Number(data.price);
     const discountValue =
       data.discount_percentage === "" || data.discount_percentage == null
@@ -147,9 +147,6 @@ const useProductSubmit = () => {
       additionalInformation: additionalInformation,
       tags: tags,
     };
-
-    console.log('productData-------------------..>',productData)
-
 
     if (!img) {
       return notifyError("Product image is required");
@@ -214,7 +211,6 @@ const useProductSubmit = () => {
       additionalInformation: additionalInformation,
       tags: tags,
     };
-    console.log('edit productData---->',productData)
     const res = await editProduct({ id: id, data: productData });
     if ("error" in res) {
       if ("data" in res.error) {

@@ -21,6 +21,7 @@ export interface IBlog {
   primaryImageId: string;
   secondaryImage?: string;
   secondaryImageId?: string;
+  contentHtml?: string;
   contentBlocks: IBlogContentBlock[];
   tags: string[];
   status: BlogStatus;

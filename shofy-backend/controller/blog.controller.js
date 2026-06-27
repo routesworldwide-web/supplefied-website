@@ -38,11 +38,37 @@ const normalizeContentBlocks = (blocks = []) => {
     });
 };
 
+const stripHtml = (html = "") =>
+  String(html)
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const sanitizeContentHtml = (html = "") =>
+  String(html)
+    .replace(/<script[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?<\/style>/gi, "")
+    .replace(/\son[a-z]+\s*=\s*(['"]).*?\1/gi, "")
+    .replace(/\s(href|src)\s*=\s*(['"])\s*javascript:[\s\S]*?\2/gi, "");
+
+const blocksFromHtml = (html = "") => {
+  const text = stripHtml(html);
+  return text ? [{ type: "paragraph", text, level: 2, items: [] }] : [];
+};
+
 const buildBlogPayload = (req, existingBlog) => {
   const tags = parseJsonField(req.body.tags, existingBlog?.tags || []);
-  const contentBlocks = normalizeContentBlocks(
-    parseJsonField(req.body.contentBlocks, existingBlog?.contentBlocks || [])
-  );
+  const contentHtml =
+    typeof req.body.contentHtml === "undefined"
+      ? existingBlog?.contentHtml
+      : sanitizeContentHtml(req.body.contentHtml);
+  const parsedBlocks = parseJsonField(req.body.contentBlocks, existingBlog?.contentBlocks || []);
+  const contentBlocks = normalizeContentBlocks(parsedBlocks).length
+    ? normalizeContentBlocks(parsedBlocks)
+    : blocksFromHtml(contentHtml);
 
   const payload = {
     title: req.body.title,
@@ -57,6 +83,7 @@ const buildBlogPayload = (req, existingBlog) => {
     metaTitle: req.body.metaTitle,
     metaDescription: req.body.metaDescription,
     tags: Array.isArray(tags) ? tags.map((tag) => String(tag).trim()).filter(Boolean) : [],
+    contentHtml,
     contentBlocks,
   };
 

@@ -17,7 +17,6 @@ exports.addProduct = async (req, res,next) => {
       data: result,
     });
   } catch (error) {
-    console.log(error);
     next(error)
   }
 };
@@ -58,7 +57,6 @@ module.exports.getProductsByType = async (req,res,next) => {
       data:result,
     })
   } catch (error) {
-    console.log(error)
     next(error)
   }
 }

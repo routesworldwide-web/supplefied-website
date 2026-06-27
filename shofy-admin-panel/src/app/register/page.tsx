@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import register_bg from '@assets/img/bg/login-bg.jpg';
+import register_bg from '@assets/img/bg/login-bg.png';
 import RegisterForm from '@/forms/register-form';
 
 const RegisterPage = () => {

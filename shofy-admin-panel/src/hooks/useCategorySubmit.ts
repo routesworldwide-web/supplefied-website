@@ -60,7 +60,6 @@ const useCategorySubmit = () => {
         setCategoryImg("");
       }
     } catch (error) {
-      console.log(error);
       notifyError("Something went wrong");
     }
   };
@@ -75,7 +74,6 @@ const useCategorySubmit = () => {
         children: categoryChildren,
       };
       const res = await editCategory({ id, data: category_data });
-      // console.log(res)
       if ("error" in res) {
         if ("data" in res.error) {
           const errorData = res.error.data as { message?: string };
@@ -90,7 +88,6 @@ const useCategorySubmit = () => {
         reset();
       }
     } catch (error) {
-      console.log(error);
       notifyError("Something went wrong");
     }
   };

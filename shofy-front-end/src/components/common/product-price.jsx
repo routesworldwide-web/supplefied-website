@@ -22,7 +22,7 @@ const ProductPrice = ({
       </span>
       {pricing.hasDiscount && (
         <>
-          <span className={`${oldClassName} old-price`}>
+          <span className={`${oldClassName} old-price `}>
             {" "}{formatPrice(pricing.originalPrice)}
           </span>
           {showDiscount && (

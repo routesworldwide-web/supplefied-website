@@ -25,9 +25,6 @@ const useBrandSubmit = () => {
 
   // submit handle
   const handleSubmitBrand = async (data: any) => {
-    console.log('data-->', data);
-    console.log("logo-->", logo);
-
     try {
       const brand_data = {
         name: data?.name,
@@ -53,7 +50,6 @@ const useBrandSubmit = () => {
         setLogo("");
       }
     } catch (error) {
-      console.log(error);
       notifyError("Something went wrong");
     }
   };
@@ -85,7 +81,6 @@ const useBrandSubmit = () => {
         reset();
       }
     } catch (error) {
-      console.log(error);
       notifyError("Something went wrong");
     }
   };

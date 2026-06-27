@@ -112,3 +112,51 @@ input[type=number] {
 .pagination ul.list-wrap li.disabled {
     display: none;
 }
+
+.swal2-actions {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 24px !important;
+}
+
+.swal2-actions .swal2-confirm,
+.swal2-actions .swal2-cancel {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 118px;
+    min-height: 44px;
+    margin: 0 !important;
+    padding: 10px 18px !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.4 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    box-shadow: none !important;
+}
+
+.swal2-actions .swal2-deny {
+    display: none !important;
+}
+
+.swal2-actions .swal2-confirm {
+    background-color: #3085d6 !important;
+}
+
+.swal2-actions .swal2-confirm:hover {
+    background-color: #256db3 !important;
+}
+
+.swal2-actions .swal2-cancel {
+    background-color: #d33 !important;
+}
+
+.swal2-actions .swal2-cancel:hover {
+    background-color: #b82d2d !important;
+}

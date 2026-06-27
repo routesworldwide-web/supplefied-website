@@ -168,10 +168,8 @@ const registerAdmin = async (req, res,next) => {
 };
 // login admin
 const loginAdmin = async (req, res,next) => {
-  // console.log(req.body)
   try {
     const admin = await Admin.findOne({ email: req.body.email });
-    // console.log(admin)
     if (admin && bcrypt.compareSync(req.body.password, admin.password)) {
       if (admin.status === "Pending") {
         return res.status(403).send({
@@ -219,7 +217,6 @@ const loginAdmin = async (req, res,next) => {
 const forgetPassword = async (req, res,next) => {
   try {
     const { email } = req.body;
-    // console.log('email--->',email)
     const admin = await Admin.findOne({ email: email });
     if (!admin) {
       return res.status(404).send({
@@ -385,7 +382,6 @@ const getAllStaff = async (req, res,next) => {
 };
 // getStaffById
 const getStaffById = async (req, res,next) => {
-  // console.log('getStaffById',req.params.id)
   try {
     const admin = await Admin.findById(req.params.id);
     res.send(admin);

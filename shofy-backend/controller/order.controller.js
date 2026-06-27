@@ -91,7 +91,6 @@ exports.createRazorpayOrder = async (req, res, next) => {
       order: razorpayOrder,
     });
   } catch (error) {
-    console.log(error);
     next(error)
   }
 };
@@ -148,7 +147,7 @@ exports.addOrder = async (req, res, next) => {
       await sendOrderConfirmationEmail(orderItems);
     } catch (emailError) {
       // Email delivery should not block a successfully saved order.
-      console.log("Order confirmation email failed:", emailError.message);
+      void emailError;
     }
 
     res.status(200).json({
@@ -158,7 +157,6 @@ exports.addOrder = async (req, res, next) => {
     });
   }
   catch (error) {
-    console.log(error);
     next(error)
   }
 };
@@ -172,7 +170,6 @@ exports.getOrders = async (req, res, next) => {
     });
   }
   catch (error) {
-    console.log(error);
     next(error)
   }
 };
@@ -183,7 +180,6 @@ exports.getSingleOrder = async (req, res, next) => {
     res.status(200).json(orderItem);
   }
   catch (error) {
-    console.log(error);
     next(error)
   }
 };

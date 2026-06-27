@@ -26,6 +26,7 @@ const BlogBanner = () => {
               fill
               priority
               sizes="(max-width: 575px) calc(100vw - 30px), (max-width: 1399px) calc(100vw - 48px), 1296px"
+              style={{ objectFit: "cover" }}
             />
           </Link>
         </div>
